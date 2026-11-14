@@ -4,4 +4,5 @@ import type { SimBridge } from '../SimBridge'
 export const offlineBridge: SimBridge = {
   source: 'offline',
   read: () => undefined,
+  readText: () => undefined,
 }

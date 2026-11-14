@@ -1,6 +1,6 @@
 import { Disclosure, Field, SegmentedControl, Stepper } from '@nobs/ui'
+import { SimValueField } from '~/components'
 import { type DescentSetup, formatInteger } from '~/pages/Descent/domain'
-import { SimValueField } from '../SimValueField'
 
 const PROFILE_KINDS = [
   { value: 'angle', label: 'Path angle' },

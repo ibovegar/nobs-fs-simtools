@@ -10,11 +10,22 @@
   overflow: hidden;
 }
 
+/* Two stacked canvases: committed strokes underneath, the stroke being drawn on top
+   (which also takes the pointer). */
+.base,
 .canvas,
 .canvasErasing {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.base {
+  pointer-events: none;
+}
+
+.canvas,
+.canvasErasing {
   touch-action: none;
   cursor: crosshair;
 }

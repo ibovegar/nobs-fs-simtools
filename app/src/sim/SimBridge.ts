@@ -12,6 +12,11 @@ export type SimSource = 'sim' | 'mock' | 'offline'
  */
 export interface SimBridge {
   readonly source: SimSource
-  /** Read one variable synchronously. `undefined` when it isn't available. */
+  /** Read one numeric variable synchronously. `undefined` when it isn't available. */
   read(spec: SimVarSpec): number | undefined
+  /**
+   * Read one text variable (e.g. `TITLE`, `ATC MODEL`) synchronously. `undefined` when it
+   * isn't available or is empty.
+   */
+  readText(name: string): string | undefined
 }

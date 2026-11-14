@@ -1,6 +1,6 @@
 import { Card, Field, SegmentedControl, Stepper } from '@nobs/ui'
+import { SimValueField } from '~/components'
 import { type DescentSetup, formatAltitude, formatDistance } from '~/pages/Descent/domain'
-import { SimValueField } from '../SimValueField'
 
 const DISTANCE_SOURCES = [
   { value: 'manual', label: 'Manual' },

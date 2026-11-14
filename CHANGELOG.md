@@ -6,6 +6,46 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-14
+
+### Added
+
+- **Takeoff** tab: V1 / VR / V2, the flap setting and the takeoff trim for the aircraft in
+  the sim, from its weight, CG, outside temperature and pressure altitude (read live, or
+  entered by hand when the sim doesn't report them).
+  - Aircraft: Cessna 208B Grand Caravan, King Air 350, Dash 8-100 / -200 / -300,
+    Dash 8-400 (Q400), Boeing 737-400 and 737-600. Recognised automatically from the sim's
+    aircraft title or ICAO model, or picked by hand. Data sources and how to add more
+    aircraft: `docs/takeoff-profiles.md`.
+  - Flaps: the aircraft's usual setting, or more flap when the runway you enter is too
+    short for the weight and conditions. Shows whether the flap lever is at that setting.
+  - Trim: computed from CG for the 737s (approximate; the FMC gives the exact value), and
+    how to set it for the others.
+  - Pictures: the runway from above, with the aircraft lined up at the threshold behind
+    the painted runway number, and lines across the runway where V1, VR and V2 are reached
+    (estimated; red past the runway end). And a side view of the wing with the flap at
+    its angle and the tailplane tilted for the trim, above a trim indicator with its
+    green takeoff band. The runway number follows the magnetic heading, or set it by hand
+    (with L / C / R).
+  - Warnings for overweight, a runway that may be too short, and less flap than
+    recommended. A weight far outside the aircraft's range (wrong aircraft picked) shows
+    no speeds.
+  - Q400: wet-runway V1 correction.
+  - For simulation only: some data is derived or approximate (see the docs).
+
+### Fixed
+
+- Notes drawing was extremely slow in the sim, and got slower as you drew. The line being
+  drawn is now redrawn at most once per frame as a single path on its own layer (the
+  sim's browser replayed every little segment each frame), and erasing is applied once
+  per frame.
+
+### Changed
+
+- For developers: `SimValueField` moved to the shared `src/components/` (Descent and
+  Takeoff both use it), and the sim bridge can read text variables (`readText`,
+  `useSimText`).
+
 ## [0.1.0] - 2026-11-14
 
 First release of **Nobs SimTools**, a toolbar panel for Microsoft Flight Simulator 2024 with

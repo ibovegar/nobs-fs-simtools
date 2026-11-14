@@ -27,6 +27,13 @@ export function useMockFlight() {
     bridge.set('VERTICAL SPEED', on ? state.verticalSpeedFpm : undefined)
     bridge.set('GPS WP DISTANCE', on ? state.gpsDistanceNm : undefined)
     bridge.set('E:SIMULATION TIME', on ? state.simTimeSec : undefined)
+    bridge.set('TOTAL WEIGHT', on ? state.totalWeightLb : undefined)
+    bridge.set('CG PERCENT', on ? state.cgPercentMac : undefined)
+    bridge.set('AMBIENT TEMPERATURE', on ? state.oatC : undefined)
+    bridge.set('PRESSURE ALTITUDE', on ? state.pressureAltitudeFt : undefined)
+    bridge.set('FLAPS HANDLE INDEX', on ? state.flapHandleIndex : undefined)
+    bridge.set('PLANE HEADING DEGREES MAGNETIC', on ? state.headingMagDeg : undefined)
+    bridge.setText('TITLE', on ? state.aircraftTitle : undefined)
   }, [bridge, state])
 
   return { bridge, state, update }

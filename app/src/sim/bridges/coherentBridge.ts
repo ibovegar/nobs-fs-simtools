@@ -13,5 +13,13 @@ export function createCoherentBridge(): SimBridge {
         return undefined
       }
     },
+    readText(name) {
+      try {
+        const value = getSimVar()?.GetSimVarValue(name, 'string')
+        return typeof value === 'string' && value.trim() !== '' ? value : undefined
+      } catch {
+        return undefined
+      }
+    },
   }
 }

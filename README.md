@@ -8,6 +8,11 @@ work in VR and on a monitor.
 - **Notes**: freehand ink (write with the VR controller laser or the mouse), ATC quick entry
   with an on-screen keypad (frequency, squawk, runway, altitude…), and free text typed on an
   on-screen keyboard (shown by default in VR-sized Comfort mode) or a physical keyboard.
+- **Takeoff**: V1 / VR / V2, flaps and takeoff trim for the Caravan 208B, King Air 350,
+  Dash 8-100/200/300/400 and Boeing 737-400/600, from live weight, CG, temperature and
+  pressure altitude (or manual values). The aircraft is recognised from the sim. A runway
+  picture shows where V1, VR and V2 fall, and a side view shows the flap and trim settings.
+  Adding aircraft: [docs/takeoff-profiles.md](docs/takeoff-profiles.md).
 - **Descent**, two tabs:
   - **TOD**: a top-of-descent calculator using live altitude, groundspeed and GPS distance
     from the sim, with manual fallbacks. It shows the distance and time to TOD and the

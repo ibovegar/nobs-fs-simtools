@@ -8,13 +8,23 @@ import type { SimBridge, SimVarSpec } from '~/sim'
 export class MockSimBridge implements SimBridge {
   readonly source = 'mock' as const
   private readonly values = new Map<string, number>()
+  private readonly texts = new Map<string, string>()
 
   read(spec: SimVarSpec): number | undefined {
     return this.values.get(spec.name)
   }
 
+  readText(name: string): string | undefined {
+    return this.texts.get(name)
+  }
+
   set(name: string, value: number | undefined): void {
     if (value === undefined) this.values.delete(name)
     else this.values.set(name, value)
+  }
+
+  setText(name: string, value: string | undefined): void {
+    if (value === undefined || value === '') this.texts.delete(name)
+    else this.texts.set(name, value)
   }
 }

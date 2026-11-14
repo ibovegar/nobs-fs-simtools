@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { App } from '~/App'
 import { AppProviders } from '~/providers'
 import { createBrowserStorage } from '~/storage'
-import { AircraftStateCard, PanelFrame, SimulatorCard } from './components'
+import { AircraftStateCard, PanelFrame, SimulatorCard, TakeoffStateCard } from './components'
 import styles from './DevHarness.module.css'
 import { useMockFlight } from './hooks'
 
@@ -48,6 +48,7 @@ export function DevHarness() {
           </Field>
           <SimulatorCard state={state} onChange={update} />
           <AircraftStateCard state={state} onChange={update} />
+          <TakeoffStateCard state={state} onChange={update} />
         </Stack>
       </Section>
     </div>

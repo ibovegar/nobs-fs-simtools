@@ -10,6 +10,14 @@ export interface MockFlightState {
   verticalSpeedFpm: number
   gpsDistanceNm: number
   simTimeSec: number
+  /** The aircraft TITLE the sim reports ('' = none), for the Takeoff page's detection. */
+  aircraftTitle: string
+  totalWeightLb: number
+  cgPercentMac: number
+  oatC: number
+  pressureAltitudeFt: number
+  flapHandleIndex: number
+  headingMagDeg: number
 }
 
 export const INITIAL_MOCK_FLIGHT: MockFlightState = {
@@ -21,6 +29,13 @@ export const INITIAL_MOCK_FLIGHT: MockFlightState = {
   verticalSpeedFpm: 0,
   gpsDistanceNm: 150,
   simTimeSec: 0,
+  aircraftTitle: 'PMDG 737-600 House livery',
+  totalWeightLb: 120_000,
+  cgPercentMac: 22,
+  oatC: 15,
+  pressureAltitudeFt: 0,
+  flapHandleIndex: 3,
+  headingMagDeg: 268,
 }
 
 /**

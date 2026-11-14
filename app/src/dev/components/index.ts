@@ -2,3 +2,4 @@
 export { AircraftStateCard } from './AircraftStateCard'
 export { PanelFrame } from './PanelFrame'
 export { SimulatorCard } from './SimulatorCard'
+export { TakeoffStateCard } from './TakeoffStateCard'

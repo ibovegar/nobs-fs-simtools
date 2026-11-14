@@ -1,11 +1,11 @@
 import { Card, Field, SegmentedControl, Stepper } from '@nobs/ui'
+import { SimValueField } from '~/components'
 import {
   formatDistance,
   formatInteger,
   GLIDESLOPE_ANGLES,
   type GlideslopeSetup,
 } from '~/pages/Descent/domain'
-import { SimValueField } from '../SimValueField'
 
 const ANGLE_OPTIONS = GLIDESLOPE_ANGLES.map((deg) => ({ value: deg, label: `${deg}°` }))
 

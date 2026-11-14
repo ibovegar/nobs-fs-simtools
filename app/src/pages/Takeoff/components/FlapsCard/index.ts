@@ -1,0 +1,1 @@
+export { FlapsCard } from './FlapsCard'

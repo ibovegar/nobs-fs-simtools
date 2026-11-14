@@ -1,0 +1,68 @@
+.config {
+  min-width: 0;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.title {
+  fill: var(--text-bright);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.caption {
+  fill: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: 11px;
+}
+
+.reference {
+  stroke: var(--border-mid);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.wing,
+.stab {
+  fill: var(--text-mid);
+}
+
+/* The parts that move are in the accent colour. */
+.flap {
+  fill: var(--accent);
+}
+
+.arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.angle {
+  fill: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pivot {
+  fill: var(--bg-card);
+  stroke: var(--text-bright);
+  stroke-width: 1;
+}
+
+.scale {
+  fill: var(--bg-darker);
+}
+
+.band {
+  fill: var(--green);
+}
+
+.pointer {
+  fill: var(--accent);
+}

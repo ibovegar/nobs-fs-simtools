@@ -1,0 +1,108 @@
+.diagram {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+/* Asphalt: the dark header surface in both themes; markings are white on it. */
+.runway {
+  fill: var(--bg-darker);
+}
+
+.fade {
+  fill: var(--bg-card);
+  fill-opacity: 0.7;
+}
+
+.marking {
+  fill: var(--bar-text-bright);
+}
+
+.centreline {
+  stroke: var(--bar-text-bright);
+  stroke-width: 2;
+  stroke-dasharray: 10 8;
+  stroke-opacity: 0.8;
+}
+
+.number {
+  fill: var(--bar-text-bright);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.aircraft {
+  fill: var(--accent);
+  stroke: var(--bar-text-bright);
+  stroke-width: 1;
+}
+
+.speedLine {
+  stroke-width: 3;
+}
+
+.speedLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distance {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--text-dim);
+}
+
+.v1 .speedLine {
+  stroke: var(--warning);
+}
+
+.v1 .speedLabel {
+  fill: var(--warning);
+}
+
+.vr .speedLine {
+  stroke: var(--accent);
+}
+
+.vr .speedLabel {
+  fill: var(--accent);
+}
+
+.v2 .speedLine {
+  stroke: var(--green);
+}
+
+.v2 .speedLabel {
+  fill: var(--green);
+}
+
+/* Reached past the end of the runway. */
+.beyond .speedLine {
+  stroke: var(--danger);
+  stroke-dasharray: 4 3;
+}
+
+.beyond .speedLabel,
+.beyond .distance {
+  fill: var(--danger);
+}
+
+.legend {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: var(--sp-1);
+  font-size: var(--font-size-sm);
+  color: var(--text-dim);
+}
+
+.legend > *:not(:last-child) {
+  margin-right: var(--sp-3);
+}

@@ -66,8 +66,8 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
   `useSimVars` or a provider hook, that logic goes in a hook in `hooks/`, used by the page or
   a container. Pages never import another page's internals. When a second page needs
   something: if it's generic (no SimTools knowledge), move it to `@nobs/ui`; if it's
-  app-specific, create a shared `src/components/` or `src/hooks/` folder for it at that
-  point. There are none today.
+  app-specific, put it in the shared `src/components/` (exists: SimValueField) or create
+  `src/hooks/` at that point.
 
 ## App architecture
 
@@ -97,14 +97,22 @@ pages/
                     (V/S for the angle), RunwayCard. Shared: SimValueField
     domain/         descentMath, glidepath (V/S + path angle), glideslope (position and
                     deviation vs a runway), format, setup, glideslopeSetup
+  Takeoff/          Takeoff.tsx
+    hooks/          useTakeoff, takeoffSimVars (+ TITLE / ATC MODEL text vars)
+    components/     TakeoffSummary, RunwayDiagram (top view: V1/VR/V2 lines), TakeoffConfig
+                    (side view: flaps + trim), AircraftCard, FlapsCard, ConditionsCard
+    domain/         takeoffMath (speeds, flap choice, trim, detection), runway (diagram
+                    geometry), types, setup, format, profiles/ (one file per aircraft;
+                    docs/takeoff-profiles.md)
   Settings/         Settings.tsx
+components/         views shared by 2+ pages: SimValueField (live sim value or manual entry)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / density / active page /
                     drag-scroll direction),
                     SimProvider (useSim: bridge + panel visibility), and AppProviders, which
                     nests them in dependency order: Storage → Settings (+ ThemeProvider) → Sim
 sim/                the only code that talks to MSFS. SimBridge.ts (interface),
-                    bridges/ (coherent, offline), hooks/ (useSimVars polling,
+                    bridges/ (coherent, offline), hooks/ (useSimVars / useSimText polling,
                     useSimKeyboardCapture), panel/ (registerPanelElement, panelVisibility),
                     simGlobals.ts (guarded sim globals)
 storage/            KeyValueStorage.ts (sim DataStorage | localStorage | memory),
@@ -116,10 +124,11 @@ storage/            KeyValueStorage.ts (sim DataStorage | localStorage | memory)
 | Layer | May import |
 |---|---|
 | `App.tsx` | `~/pages`, `~/providers`, `@nobs/ui` |
+| `components/` (shared views) | `@nobs/ui` |
 | `pages/<Page>/<Page>.tsx` | its own `./hooks`, `./containers`, `./components`, `./domain`; `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
 | `pages/<Page>/hooks/` | its page's domain, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
 | `pages/<Page>/containers/` | its page's hooks, components and domain, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
-| `pages/<Page>/components/` | its page's domain, `@nobs/ui` |
+| `pages/<Page>/components/` | its page's domain, `~/components`, `@nobs/ui` |
 | `pages/<Page>/domain/` | nothing app-side (type-only imports from `@nobs/ui` are fine) |
 | `providers/` | types only from `~/sim` / `~/storage` (see Providers below) |
 

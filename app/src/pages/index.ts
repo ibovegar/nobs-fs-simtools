@@ -12,8 +12,9 @@
 //     domain/        pure rules and calculations, unit-tested
 //
 // Pages never import another page's internals. Code needed by two or more pages is
-// either generic (move it to @nobs/ui) or app-specific (add a shared src/ folder for it).
+// either generic (move it to @nobs/ui) or app-specific (src/components/, e.g. SimValueField).
 export { Descent } from './Descent'
 export { Notes } from './Notes'
 export { PAGES, type PageDefinition } from './pageRegistry'
 export { Settings } from './Settings'
+export { Takeoff } from './Takeoff'
