@@ -82,6 +82,7 @@ builds and publishes the installer. You never build release artifacts locally.
 | **Release check:** "Tag … does not match package.json version" | You tagged before bumping. Delete the tag (`git tag -d v0.2.0; git push origin :refs/tags/v0.2.0`), fix `package.json`, commit, tag again. |
 | **Release check:** "CHANGELOG.md has no ## [x.y.z] - YYYY-MM-DD section" | Step 2 was missed, or the heading isn't in exactly that format. Fix, commit, re-tag as above. |
 | **Release check:** "….spb is missing" | Commit `msfs/prebuilt/InGamePanels/nobs-fs-simtools-panel.spb` (see "Panel definition" below). |
+| Lint fails in CI on every file ("Formatter would have printed…") but passes locally | CRLF line endings in the checkout. `.gitattributes` forces LF; make sure it is committed and that no file was committed with CRLF (`git add --renormalize .`). |
 | Lint / typecheck / test fails in CI | Fix on `main`, then move the tag to the fixed commit (delete and re-create it, as above). |
 | The workflow itself was broken (not the code) | Fix the workflow on `main`, then *Actions → Release → Run workflow* with the **existing** tag. It rebuilds that tag's code. |
 | Published something wrong | Delete the release on GitHub (and the tag), then release a new patch version. Prefer a new version over replacing assets people may already have downloaded. |
