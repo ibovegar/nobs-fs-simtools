@@ -1,0 +1,24 @@
+node_modules
+*.log
+*.local
+.DS_Store
+
+# Editor
+.claude
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Vite output (the panel's JS/CSS bundle)
+/app/dist
+
+# Assembled Community-folder package + installer output
+/dist
+
+# MSFS SDK package tool output. The compiled panel definition we ship is copied
+# to msfs/prebuilt/ (committed) — see docs/development.md.
+/msfs/Packages
+/msfs/_PackageInt
+
+# Vitest / coverage
+coverage

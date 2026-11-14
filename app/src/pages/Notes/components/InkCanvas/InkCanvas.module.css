@@ -1,0 +1,24 @@
+/* The canvas is absolutely positioned inside a flexible wrapper, so its measured size
+   never feeds back into the wrapper's size. */
+.canvasWrap {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 280px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.canvas,
+.canvasErasing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.canvasErasing {
+  cursor: cell;
+}

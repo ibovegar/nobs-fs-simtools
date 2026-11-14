@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nobs SimTools — dev harness</title>
+    <!-- Paint the dark theme background before JS loads (mirror of the --bg token). -->
+    <style>
+      html,
+      body {
+        background: #171f24;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dev-root"></div>
+    <script type="module" src="/src/dev/main.tsx"></script>
+  </body>
+</html>

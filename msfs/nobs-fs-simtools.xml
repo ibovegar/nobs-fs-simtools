@@ -1,0 +1,12 @@
+<!--
+  MSFS SDK project, used ONLY to compile the toolbar panel definition (.spb).
+  Everything else in the Community package is assembled by scripts/assemble-package.ts.
+  Run via `pnpm package:spb` (needs the MSFS 2024 SDK installed).
+-->
+<Project Version="2" Name="nobs-fs-simtools" FolderName="Packages">
+  <OutputDirectory>.</OutputDirectory>
+  <TemporaryOutputDirectory>_PackageInt</TemporaryOutputDirectory>
+  <Packages>
+    <Package>PackageDefinitions\nobs-fs-simtools.xml</Package>
+  </Packages>
+</Project>

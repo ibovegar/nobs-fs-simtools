@@ -1,0 +1,36 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.header > *:not(:first-child) {
+  margin-left: var(--sp-3);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.actions > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}

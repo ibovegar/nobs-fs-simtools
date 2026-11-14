@@ -1,0 +1,32 @@
+/* Shared by TextInput and TextArea (TextArea composes these classes). */
+.input {
+  width: 100%;
+  min-height: var(--control-h);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-bright);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 1.4;
+  transition: border-color 0.12s ease;
+}
+
+.input::placeholder {
+  color: var(--text-dim);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}

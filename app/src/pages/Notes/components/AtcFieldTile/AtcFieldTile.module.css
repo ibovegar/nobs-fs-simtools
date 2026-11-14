@@ -1,0 +1,69 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-bright);
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.tile > *:not(:first-child) {
+  margin-top: var(--sp-1);
+}
+
+.tile:hover {
+  border-color: var(--border-mid);
+}
+
+.selected,
+.selected:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hi);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Placeholder for an unset value: a short muted bar, vertically centred in the value line
+   so tiles keep the same height whether set or not. */
+.empty {
+  display: inline-block;
+  width: 1.5em;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-mid);
+  vertical-align: middle;
+}
+
+.invalid {
+  color: var(--warning);
+}
+
+.unit {
+  margin-left: 0.3em;
+  font-size: 0.6em;
+  color: var(--text-mid);
+}

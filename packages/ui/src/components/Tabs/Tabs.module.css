@@ -1,0 +1,98 @@
+.tabs {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 0;
+}
+
+/* The strip uses nobs-fs-app's header surface; tabs are its Sidebar items laid out
+   horizontally. */
+.list {
+  display: flex;
+  padding: var(--sp-2);
+  background: var(--bg-darker);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.list > *:not(:first-child) {
+  margin-left: var(--sp-1);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--bar-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.tab > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.tab:hover {
+  background: var(--bar-hover);
+  color: var(--bar-text-bright);
+}
+
+.selected,
+.selected:hover {
+  background: var(--bar-selected);
+  color: var(--bar-accent);
+}
+
+/* Sizes (on the list, so every tab follows). `lg` is the base style above: the full
+   control height for big VR targets. Relative to the density tokens, so Compact scales
+   down too. */
+.md,
+.sm {
+  padding: var(--sp-1);
+}
+
+.md .tab {
+  min-height: calc(var(--control-h) * 0.75);
+  font-size: var(--font-size-sm);
+}
+
+/* Beats Icon's token size (higher specificity). */
+.md .tab > svg {
+  width: calc(var(--icon-size) * 0.8);
+  height: calc(var(--icon-size) * 0.8);
+}
+
+.sm .tab {
+  min-height: calc(var(--control-h) * 0.6);
+  padding: 0 var(--sp-2);
+  font-size: var(--font-size-sm);
+}
+
+.sm .tab > svg {
+  width: calc(var(--icon-size) * 0.7);
+  height: calc(var(--icon-size) * 0.7);
+}
+
+.tabLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+}

@@ -1,0 +1,61 @@
+.stepper {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.stepper > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.step {
+  flex-direction: column;
+  padding: 0 var(--sp-2);
+}
+
+/* Icon over amount: undo Button's row spacing between its children. */
+.step > *:not(:first-child) {
+  margin-left: 0;
+}
+
+.sign {
+  width: calc(var(--icon-size) * 0.8);
+  height: calc(var(--icon-size) * 0.8);
+}
+
+.amount {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: calc(var(--control-h) - 2 * var(--sp-2) - 2px);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.valueDisabled {
+  color: var(--text-mid);
+}
+
+.unit {
+  margin-left: 0.35em;
+  font-size: 0.6em;
+  font-weight: 600;
+  color: var(--text-mid);
+}

@@ -1,0 +1,26 @@
+/* Minimal document baseline for apps built on @nobs/ui. Import once at the app entry:
+   import '@nobs/ui/base.css' */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Interactive controls aren't text content — stop clicks from selecting their
+   labels or showing a text caret. */
+button,
+a {
+  -webkit-user-select: none;
+  user-select: none;
+}

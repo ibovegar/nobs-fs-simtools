@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container > *:not(:first-child) {
+  margin-top: var(--sp-3);
+}
+
+/* Material UI's breakpoint widths. */
+.sm {
+  max-width: 600px;
+}
+
+.md {
+  max-width: 900px;
+}
+
+.lg {
+  max-width: 1200px;
+}
+
+/* At least the parent's height; children that should take the rest use flex-grow. */
+.fill {
+  min-height: 100%;
+}

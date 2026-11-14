@@ -1,0 +1,23 @@
+/* A read-only twin of the Stepper's value box, without buttons. */
+.live {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  min-height: var(--control-h);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--radius);
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: calc(var(--control-h) - 2 * var(--sp-2) - 2px);
+  white-space: nowrap;
+}
+
+.unit {
+  margin-left: 0.35em;
+  font-size: 0.6em;
+  font-weight: 600;
+  color: var(--text-mid);
+}

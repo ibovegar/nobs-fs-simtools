@@ -1,0 +1,74 @@
+/* Re-skins react-simple-keyboard's default theme with Nobs tokens. Selectors are
+   anchored on `.keyboard.hg-theme-default` so they outrank the library stylesheet
+   regardless of load order. Keys match the Keypad component. */
+
+.wrap {
+  min-width: 0;
+}
+
+.keyboard:global(.hg-theme-default) {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-row:not(:last-child)) {
+  margin-bottom: var(--sp-1);
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-row .hg-button:not(:last-child)) {
+  margin-right: var(--sp-1);
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-button) {
+  height: calc(var(--control-h) * 0.8);
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: none;
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: var(--font-size);
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-button:hover) {
+  border-color: var(--accent);
+  background: var(--bg-card-hi);
+}
+
+/* The pressed-key flash. */
+.keyboard:global(.hg-theme-default) :global(.hg-button.hg-activeButton) {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Function keys: quieter, sans-serif labels, sized to their job. */
+.keyboard:global(.hg-theme-default) :global(.hg-functionBtn) {
+  background: var(--bg-card);
+  color: var(--text-mid);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-button-bksp),
+.keyboard:global(.hg-theme-default) :global(.hg-button-enter),
+.keyboard:global(.hg-theme-default) :global(.hg-button-shift),
+.keyboard:global(.hg-theme-default) :global(.hg-button-lock) {
+  flex-grow: 1.6;
+}
+
+.keyboard:global(.hg-theme-default) :global(.hg-button-space) {
+  flex-grow: 1;
+}
+
+/* Shift / Caps engaged — the toolkit's "selected" look. */
+.keyboard:global(.hg-theme-default) :global(.hg-button).active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}

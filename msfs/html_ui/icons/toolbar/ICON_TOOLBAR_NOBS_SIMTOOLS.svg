@@ -1,0 +1,33 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- The Nobs logo in full colour (nobs-fs-app public/favicon.svg).
+
+       Sizing follows the sim's own toolbar icons (e.g. fcr-embedded ICON_TOOLBAR_DIRECTREPLAY,
+       fs-base-ui icons/controls): a 64x64 box with the artwork small in the middle. The
+       toolbar (fs-base-ui Templates/ToolBarButton) draws the icon box 164/2160 of the screen
+       height square with -10 margins, i.e. LARGER than the 144 button, so anything near the
+       edge of the viewBox is cut off. The sim's glyphs use about 24 of the 64 units; our
+       26x26 logo is scaled to 32 units (x 32/26) and centred, keeping it well inside.
+
+       The MSFS toolbar recolours icons with a stylesheet rule (fs-base-ui SCSS/common.css):
+         icon-element:not(.original-color) svg.icon path|polygon|rect|circle
+           { fill: var(--iconColor, white) }
+       A stylesheet rule beats SVG presentation attributes (fill="...") but NOT an inline
+       style="..." -- so every colour here is set with style="..." to survive that rule.
+       Gradient id is unique because the toolbar inlines all icons into one document. -->
+  <defs>
+    <linearGradient id="nobsSimToolsToolbarGradient" x1="-2.5" y1="1" x2="26" y2="26"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2040E0" />
+      <stop offset="1" stop-color="#75117A" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(16 16) scale(1.230769)">
+    <rect width="26" height="26" rx="10" style="fill: url(#nobsSimToolsToolbarGradient)" />
+    <path d="M13.2439 5L6 9.02439V17.0732L13.2439 21.5L20.4878 17.0732V9.02439L13.2439 5Z"
+      style="fill: none; stroke: #ffffff; stroke-width: 1.5; stroke-linejoin: round" />
+    <path d="M13.2439 21.5L9.62195 11.0366M9.62195 11.0366L13.2439 5M9.62195 11.0366L6 17.0732"
+      style="fill: none; stroke: #ffffff; stroke-width: 1.5" />
+    <path d="M6 9.02441L16.4634 14.2561M16.4634 14.2561L20.4878 17.0732M16.4634 14.2561L20.4878 9.02441M16.4634 14.2561L13.2439 21.5"
+      style="fill: none; stroke: #ffffff; stroke-width: 1.5" />
+  </g>
+</svg>

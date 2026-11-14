@@ -1,0 +1,10 @@
+/* Drag the corner to resize, like the sim's panel window. */
+.frame {
+  flex-shrink: 0;
+  display: flex;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  overflow: hidden;
+  resize: both;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}

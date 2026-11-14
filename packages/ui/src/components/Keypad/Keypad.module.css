@@ -1,0 +1,41 @@
+.keypad {
+  display: flex;
+  flex-direction: column;
+}
+
+.keypad > *:not(:first-child) {
+  margin-top: var(--sp-2);
+}
+
+.row {
+  display: flex;
+}
+
+.row > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+/* Keys are quieter than regular buttons — a block of accent outlines would be loud. */
+.key {
+  flex: 1 1 0;
+  min-width: 0;
+  border-color: var(--border-mid);
+  background: var(--bg);
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+}
+
+.key:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hi);
+}
+
+.alpha .key {
+  font-size: var(--font-size);
+  padding: 0;
+}
+
+.action {
+  flex: 1 1 0;
+}

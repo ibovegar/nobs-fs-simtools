@@ -1,0 +1,58 @@
+/* Same surface as Card. Spacing uses child margins, not flexbox gap (see Stack). */
+.disclosure {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--control-h);
+  padding: var(--sp-2) var(--sp-4);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-bright);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  text-align: left;
+  cursor: pointer;
+}
+
+.header:hover {
+  background: var(--bg-card-hi);
+}
+
+.title {
+  flex: 1 1 auto;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.summary {
+  margin-left: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+
+.chevron {
+  margin-left: var(--sp-3);
+  color: var(--text-mid);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+
+.body > *:not(:first-child) {
+  margin-top: var(--sp-4);
+}

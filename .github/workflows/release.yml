@@ -1,0 +1,112 @@
+name: Release
+
+# Builds the Community-folder package and the Windows installer, and publishes both as a
+# GitHub Release. Step-by-step guide: docs/releasing.md.
+#
+# Triggers:
+#   - push a tag like `v0.1.0`              → release for that tag
+#   - run manually (Actions → Release)      → rebuild an EXISTING tag (e.g. after a CI fix)
+#
+# The first step (`pnpm release:check`) stops the run unless the tag matches the version in
+# the root package.json, CHANGELOG.md has a dated section for it, and the compiled panel
+# definition (msfs/prebuilt/InGamePanels/*.spb) is committed — CI has no MSFS SDK.
+# Tags with a suffix (v0.2.0-beta.1) are published as prereleases.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)build, e.g. v0.1.0'
+        required: true
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+# One run per tag at a time; a re-run waits for the previous one.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write # create the release and upload its assets
+
+    steps:
+      # A manual run builds the tag's code, not whatever is on the default branch.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      # Version comes from "packageManager" in package.json.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fails fast on a version/tag mismatch, a missing changelog section or a missing .spb.
+      # Also writes dist/release-notes.md (the release body).
+      - name: Release check
+        run: pnpm release:check ${{ env.TAG }}
+
+      # One step per check: in a multi-line pwsh `run`, only the LAST command's exit code
+      # fails the step, so a lint or typecheck failure would otherwise be ignored.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      # NSIS ships on the Windows runner images; install it if that ever changes.
+      - name: Ensure NSIS
+        shell: pwsh
+        run: |
+          if (-not (Get-Command makensis -ErrorAction SilentlyContinue) -and
+              -not (Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) {
+            choco install nsis -y --no-progress
+          }
+
+      - name: Build package + installer
+        run: pnpm installer
+
+      - name: Collect assets
+        id: assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = $env:TAG
+          $setup = Get-ChildItem dist/installer/*_setup.exe | Select-Object -First 1
+          if (-not $setup) { throw 'No installer found in dist/installer' }
+          $setupOut = "dist/nobs-fs-simtools_${tag}_setup.exe"
+          Move-Item $setup.FullName $setupOut -Force
+          # The zip's root is the nobs-fs-simtools folder, ready to drop into Community.
+          $zipOut = "dist/nobs-fs-simtools_${tag}_community.zip"
+          Compress-Archive -Path dist/nobs-fs-simtools -DestinationPath $zipOut -Force
+          "setup=$setupOut" >> $env:GITHUB_OUTPUT
+          "zip=$zipOut" >> $env:GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: Nobs SimTools ${{ env.TAG }}
+          body_path: dist/release-notes.md
+          prerelease: ${{ contains(env.TAG, '-') }}
+          files: |
+            ${{ steps.assets.outputs.setup }}
+            ${{ steps.assets.outputs.zip }}

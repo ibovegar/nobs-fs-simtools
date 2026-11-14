@@ -1,0 +1,40 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+
+/* Target and current V/S side by side, each taking half. */
+.row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cell {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.cell + .cell {
+  margin-left: var(--sp-4);
+}
+
+/* Reference table: three per row (no CSS grid in Coherent). */
+.table {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: calc(-1 * var(--sp-3));
+}
+
+.tableCell {
+  width: 33.333%;
+  margin-bottom: var(--sp-3);
+}
+
+.hint {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border-mid);
+  font-size: var(--font-size-sm);
+  color: var(--text-dim);
+}

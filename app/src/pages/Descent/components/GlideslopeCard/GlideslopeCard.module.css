@@ -1,0 +1,34 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+
+/* Side view and dot scale side by side. */
+.chart {
+  display: flex;
+  align-items: stretch;
+}
+
+.readouts {
+  display: flex;
+  align-items: flex-start;
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border-mid);
+}
+
+.cell {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.cell + .cell {
+  margin-left: var(--sp-4);
+}
+
+.hint {
+  margin-top: var(--sp-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-dim);
+}

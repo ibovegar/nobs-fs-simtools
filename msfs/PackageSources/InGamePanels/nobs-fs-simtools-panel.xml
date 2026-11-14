@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Toolbar panel definition. The MSFS SDK package tool compiles this into
+  InGamePanels/nobs-fs-simtools-panel.spb (run `pnpm package:spb`).
+
+  - id      must match panel-id in html_ui/InGamePanels/NobsSimTools/NobsSimTools.html
+  - url     is the panel's HTML shell inside the package
+  - icon    names html_ui/icons/toolbar/<icon>.svg
+  - sizes / positions are in the sim's screen-relative units
+-->
+<SimBase.Document Type="InGamePanels" version="1.0">
+  <Filename>nobs-fs-simtools-panel.spb</Filename>
+  <InGamePanels.InGamePanelDefinition
+    id="PANEL_NOBS_SIMTOOLS"
+    Name="Nobs SimTools"
+    url="html_ui/InGamePanels/NobsSimTools/NobsSimTools.html"
+    resizeDirections="Both"
+    minWidth="12"
+    minHeight="20"
+    defaultWidth="26"
+    defaultHeight="60"
+    defaultTop="15"
+    defaultRight="2"
+    icon="ICON_TOOLBAR_NOBS_SIMTOOLS"
+    buttonVisible="true"
+  >
+  </InGamePanels.InGamePanelDefinition>
+</SimBase.Document>

@@ -1,0 +1,36 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.field > *:not(:first-child) {
+  margin-top: var(--sp-2);
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 20px;
+}
+
+.labelRow > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  color: var(--text-dim);
+}

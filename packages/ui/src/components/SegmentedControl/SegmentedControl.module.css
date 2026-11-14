@@ -1,0 +1,96 @@
+.group {
+  display: flex;
+}
+
+.group > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--control-h);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-mid);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.segment > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.segment:hover {
+  border-color: var(--accent);
+  color: var(--text-bright);
+}
+
+.active,
+.active:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hi);
+  color: var(--text-bright);
+}
+
+.segment:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Sizes (on the group, so every segment follows). `lg` is the base style above.
+   Relative to the density tokens, so Compact scales down too. */
+.md .segment {
+  min-height: calc(var(--control-h) * 0.75);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--font-size-sm);
+}
+
+.sm .segment {
+  min-height: calc(var(--control-h) * 0.6);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--font-size-sm);
+}
+
+/* Beats Icon's token size (higher specificity). */
+.md .segment > svg {
+  width: calc(var(--icon-size) * 0.8);
+  height: calc(var(--icon-size) * 0.8);
+}
+
+.sm .segment > svg {
+  width: calc(var(--icon-size) * 0.7);
+  height: calc(var(--icon-size) * 0.7);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.text > *:not(:first-child) {
+  margin-top: 2px;
+}
+
+.label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-dim);
+  white-space: nowrap;
+}

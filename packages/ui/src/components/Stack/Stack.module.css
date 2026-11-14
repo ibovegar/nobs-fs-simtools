@@ -1,0 +1,263 @@
+/* Flexbox gap emulated with margins. Some hosts (e.g. the MSFS Coherent browser) have no
+   flexbox 'gap', so spacing goes on the children instead — the same pattern the sim's own UI
+   uses: '> *:not(:first-child)'. One class per spacing step (not a CSS variable), so nested
+   Stacks don't read each other's gap.
+
+   Wrapping rows can't use first-child rules (any item may start a line): every child gets a
+   right/bottom margin and the stack pulls itself back by the same amount. */
+
+.stack {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.row {
+  flex-direction: row;
+}
+
+.column {
+  flex-direction: column;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1 1 0;
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+.align-stretch {
+  align-items: stretch;
+}
+
+.align-baseline {
+  align-items: baseline;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-1.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-1);
+}
+
+.gap-1.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-1);
+}
+
+.gap-1.wrap {
+  margin-right: calc(-1 * var(--sp-1));
+  margin-bottom: calc(-1 * var(--sp-1));
+}
+
+.gap-1.wrap > * {
+  margin-right: var(--sp-1);
+  margin-bottom: var(--sp-1);
+}
+
+.gap-2.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-2);
+}
+
+.gap-2.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.gap-2.wrap {
+  margin-right: calc(-1 * var(--sp-2));
+  margin-bottom: calc(-1 * var(--sp-2));
+}
+
+.gap-2.wrap > * {
+  margin-right: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.gap-3.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-3);
+}
+
+.gap-3.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-3);
+}
+
+.gap-3.wrap {
+  margin-right: calc(-1 * var(--sp-3));
+  margin-bottom: calc(-1 * var(--sp-3));
+}
+
+.gap-3.wrap > * {
+  margin-right: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.gap-4.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-4);
+}
+
+.gap-4.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-4);
+}
+
+.gap-4.wrap {
+  margin-right: calc(-1 * var(--sp-4));
+  margin-bottom: calc(-1 * var(--sp-4));
+}
+
+.gap-4.wrap > * {
+  margin-right: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.gap-5.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-5);
+}
+
+.gap-5.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-5);
+}
+
+.gap-5.wrap {
+  margin-right: calc(-1 * var(--sp-5));
+  margin-bottom: calc(-1 * var(--sp-5));
+}
+
+.gap-5.wrap > * {
+  margin-right: var(--sp-5);
+  margin-bottom: var(--sp-5);
+}
+
+.gap-6.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-6);
+}
+
+.gap-6.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-6);
+}
+
+.gap-6.wrap {
+  margin-right: calc(-1 * var(--sp-6));
+  margin-bottom: calc(-1 * var(--sp-6));
+}
+
+.gap-6.wrap > * {
+  margin-right: var(--sp-6);
+  margin-bottom: var(--sp-6);
+}
+
+.gap-7.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-7);
+}
+
+.gap-7.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-7);
+}
+
+.gap-7.wrap {
+  margin-right: calc(-1 * var(--sp-7));
+  margin-bottom: calc(-1 * var(--sp-7));
+}
+
+.gap-7.wrap > * {
+  margin-right: var(--sp-7);
+  margin-bottom: var(--sp-7);
+}
+
+.gap-8.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-8);
+}
+
+.gap-8.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-8);
+}
+
+.gap-8.wrap {
+  margin-right: calc(-1 * var(--sp-8));
+  margin-bottom: calc(-1 * var(--sp-8));
+}
+
+.gap-8.wrap > * {
+  margin-right: var(--sp-8);
+  margin-bottom: var(--sp-8);
+}
+
+.gap-10.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-10);
+}
+
+.gap-10.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-10);
+}
+
+.gap-10.wrap {
+  margin-right: calc(-1 * var(--sp-10));
+  margin-bottom: calc(-1 * var(--sp-10));
+}
+
+.gap-10.wrap > * {
+  margin-right: var(--sp-10);
+  margin-bottom: var(--sp-10);
+}
+
+.gap-12.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-12);
+}
+
+.gap-12.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-12);
+}
+
+.gap-12.wrap {
+  margin-right: calc(-1 * var(--sp-12));
+  margin-bottom: calc(-1 * var(--sp-12));
+}
+
+.gap-12.wrap > * {
+  margin-right: var(--sp-12);
+  margin-bottom: var(--sp-12);
+}
+
+.gap-16.column:not(.wrap) > *:not(:first-child) {
+  margin-top: var(--sp-16);
+}
+
+.gap-16.row:not(.wrap) > *:not(:first-child) {
+  margin-left: var(--sp-16);
+}
+
+.gap-16.wrap {
+  margin-right: calc(-1 * var(--sp-16));
+  margin-bottom: calc(-1 * var(--sp-16));
+}
+
+.gap-16.wrap > * {
+  margin-right: var(--sp-16);
+  margin-bottom: var(--sp-16);
+}

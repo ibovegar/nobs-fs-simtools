@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <!-- Sim UI base styles, then our panel-frame overrides, then the app bundle's CSS. -->
+    <link rel="stylesheet" href="/SCSS/common.css" />
+    <link rel="stylesheet" href="NobsSimTools.css" />
+    <link rel="stylesheet" href="simtools.css" />
+
+    <!-- Sim scripts the toolbar panel framework needs (order matters). -->
+    <script type="text/javascript" src="/JS/coherent.js"></script>
+    <script type="text/javascript" src="/JS/common.js"></script>
+    <script type="text/javascript" src="/JS/dataStorage.js"></script>
+    <script type="text/javascript" src="/JS/buttons.js"></script>
+    <script type="text/javascript" src="/JS/Services/ToolBarPanels.js"></script>
+    <script type="text/javascript" src="/JS/simvar.js"></script>
+
+    <!-- Templates for the <ingame-ui> panel frame (header, close button, resizing). -->
+    <link rel="import" href="/templates/NewPushButton/NewPushButton.html" />
+    <link rel="import" href="/templates/ToggleButton/toggleButton.html" />
+    <link rel="import" href="/templates/tabMenu/tabMenu.html" />
+    <link rel="import" href="/templates/ingameUi/ingameUi.html" />
+    <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
+    <link rel="import" href="/templates/NewListButton/NewListButton.html" />
+
+    <!-- Startup diagnostics (plain ES5): if the app fails to start, shows the error and the
+         startup steps reached inside the panel, which otherwise has no visible console. -->
+    <script type="text/javascript" src="boot.js"></script>
+
+    <!-- The React app (built by Vite). Defines <nobs-simtools-panel> and mounts into
+         #nobs-simtools-root when the element connects. -->
+    <script type="text/javascript" src="simtools.js"></script>
+</head>
+
+<body class="border-box">
+    <nobs-simtools-panel>
+        <ingame-ui id="NobsSimToolsPanel" panel-id="PANEL_NOBS_SIMTOOLS" title="Nobs SimTools"
+            class="ingameUiFrame panelInvisible" content-fit="false" min-width="40" min-height="40">
+            <div id="nobs-simtools-root"></div>
+        </ingame-ui>
+    </nobs-simtools-panel>
+</body>
+</html>

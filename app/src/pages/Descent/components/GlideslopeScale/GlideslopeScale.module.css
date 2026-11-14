@@ -1,0 +1,74 @@
+.scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+  height: 190px;
+  margin-left: var(--sp-3);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+}
+
+.track {
+  position: relative;
+  flex: 1 1 0;
+  width: 100%;
+  margin-top: var(--sp-2);
+  border-radius: var(--radius);
+  background: var(--bg-darker);
+}
+
+.centre {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--text-mid);
+}
+
+.dot {
+  position: absolute;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border: 2px solid var(--text-mid);
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+/* The glideslope diamond: a rotated square. */
+.diamond {
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  transition: top 0.3s ease;
+}
+
+.on-slope {
+  background: var(--green);
+}
+
+.high,
+.low {
+  background: var(--warning);
+}
+
+.well-high,
+.well-low {
+  background: var(--danger);
+}

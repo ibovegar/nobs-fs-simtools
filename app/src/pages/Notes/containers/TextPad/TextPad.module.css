@@ -1,0 +1,4 @@
+/* Keep a few lines of text visible above the on-screen keyboard. */
+.textArea {
+  min-height: calc(var(--control-h) * 2.5);
+}

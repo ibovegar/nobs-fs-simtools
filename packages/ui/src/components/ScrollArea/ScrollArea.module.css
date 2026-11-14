@@ -1,0 +1,96 @@
+/* Takes the space its parent gives it. Positioned so the viewport and track can be laid
+   out absolutely, which gives the viewport a definite height in any browser. */
+.root {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The gutter on the right (scrollbar + a small gap) is always reserved, so content never
+   reflows when the scrollbar appears. */
+.viewport {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: calc(var(--scrollbar-w) + var(--sp-2));
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Hide the browser's own scrollbar where it draws one (dev in Chrome/Firefox). */
+  scrollbar-width: none;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+/* Children keep their natural height and the viewport scrolls, rather than being
+   squashed to fit. */
+.viewport > * {
+  flex-shrink: 0;
+}
+
+.track {
+  position: absolute;
+  top: var(--sp-2);
+  bottom: var(--sp-2);
+  right: var(--sp-1);
+  width: var(--scrollbar-w);
+  border-radius: calc(var(--scrollbar-w) / 2);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.thumb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: calc(var(--scrollbar-w) / 2);
+  background: var(--border-mid);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.dragging {
+  background: var(--accent-main);
+  cursor: grabbing;
+}
+
+/* While drag-scrolling the content: grabbing cursor everywhere and no text selection.
+   Two classes, so it outranks a component's single-class `cursor: pointer`. */
+.root.grabbing,
+.root.grabbing * {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* Up/down indicator centred on the pointer while drag-scrolling. Kept subtle (no shadow,
+   semi-transparent) so it doesn't hide the content being scrolled. */
+.grab {
+  opacity: 0.5;
+  position: absolute;
+  width: var(--control-h);
+  height: var(--control-h);
+  margin-left: calc(var(--control-h) / -2);
+  margin-top: calc(var(--control-h) / -2);
+  border-radius: 50%;
+  background: var(--accent-main);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grabIcon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: var(--on-accent);
+}

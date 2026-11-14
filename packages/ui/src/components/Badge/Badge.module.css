@@ -1,0 +1,71 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.neutral {
+  color: var(--text-mid);
+  border-color: var(--border-mid);
+  background: transparent;
+}
+
+.accent {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.success {
+  color: var(--green);
+  border-color: var(--green-dim);
+  background: var(--green-dim);
+}
+
+.warning {
+  color: var(--warning);
+  border-color: var(--warning);
+  background: var(--warning-dim);
+}
+
+.danger {
+  color: var(--danger);
+  border-color: var(--danger-main);
+  background: var(--danger-dim);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  /* the label is a bare text node, so the space goes on the dot (no flexbox gap) */
+  margin-right: var(--sp-2);
+}
+
+.pulse {
+  box-shadow: 0 0 6px currentColor;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}

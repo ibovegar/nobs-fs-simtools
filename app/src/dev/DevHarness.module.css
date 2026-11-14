@@ -1,0 +1,21 @@
+.harness {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: var(--sp-6);
+  background: var(--bg-darker);
+}
+
+.harness > *:not(:first-child) {
+  margin-left: var(--sp-6);
+}
+
+.controls {
+  flex: 1 1 0;
+  min-width: 320px;
+  max-width: 560px;
+}
+
+.controlsBody {
+  padding: 0 var(--sp-4) var(--sp-4);
+}

@@ -1,0 +1,1 @@
+export { DescentOptions } from './DescentOptions'

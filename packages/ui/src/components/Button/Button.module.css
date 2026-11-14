@@ -1,0 +1,117 @@
+/* Mirrors nobs-fs-app's Welcome primary/secondary buttons and Sidebar items, with
+   sizes driven by the density tokens. */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-h);
+  min-width: var(--control-h);
+  padding: 0 var(--sp-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-bright);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.button > *:not(:first-child) {
+  margin-left: var(--sp-2);
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.lg {
+  min-height: var(--control-h-lg);
+  min-width: var(--control-h-lg);
+  font-size: var(--font-size-lg);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.iconOnly {
+  padding: 0;
+}
+
+.primary {
+  border-color: var(--accent-main);
+  background: var(--accent-main);
+  color: var(--on-accent);
+}
+
+.primary:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.secondary {
+  border-color: var(--accent);
+  background: transparent;
+  color: var(--text-bright);
+}
+
+.secondary:hover {
+  border-color: var(--border-mid);
+  color: var(--text-mid);
+}
+
+.ghost {
+  color: var(--text-mid);
+}
+
+.ghost:hover {
+  background: var(--bg-card);
+  color: var(--text-bright);
+}
+
+.danger {
+  border-color: var(--danger-main);
+  background: var(--danger-main);
+  color: var(--on-accent);
+}
+
+.danger:hover {
+  background: transparent;
+  color: var(--danger);
+}
+
+/* Toggle "on" state — the Settings segment / Sidebar active look. */
+.selected,
+.selected:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  background: transparent;
+  color: var(--text-mid);
+}
+
+.primary:disabled:hover {
+  background: var(--accent-main);
+  color: var(--on-accent);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

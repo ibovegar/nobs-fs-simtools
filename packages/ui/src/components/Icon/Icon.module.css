@@ -1,0 +1,11 @@
+.icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* CSS beats the SVG's width/height presentation attributes, so the density token
+   wins unless the caller passed an explicit size. */
+.tokenSized {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
