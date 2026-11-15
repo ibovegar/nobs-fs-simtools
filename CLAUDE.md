@@ -44,6 +44,11 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
 
   Applies to `@nobs/ui` too. Use `rest` (not `props`) for a rest element.
 - **One CSS Module per component**. All colours/sizes via `var(--token)`; never hardcoded hex.
+- **Never hardcode a colour.** Only use the design system's colour tokens (`var(--accent)`,
+  `var(--text-dim)`, `var(--bg-card-hi)`…), in CSS and in TS alike: no hex, `rgb()`/`rgba()`
+  or named colours. If no token fits (e.g. a stronger hover tint), add one to the toolkit
+  theme (`theme/palette.ts` / `theme/tokens.ts` + `cssVars.ts`, alpha variants derived
+  there like `--accent-dim`) and use that. Primary blue is `--accent`.
 - **Composition**: shells own surface + layout (`Card`, `Section`, `Stack`), content
   components don't. Compound components share state through context (`Tabs`/`Tab`/`TabPanel`,
   `Field` → `TextInput`/`Stepper` ids).
@@ -54,9 +59,9 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
     inside a `@nobs/ui` `<Container>` (`maxWidth="sm"` for forms, `maxWidth={false} fill`
     to fill the panel).
   - `hooks/`: the page's stateful hooks (persistence, sim data, derived values):
-    `useDescentPlanner`, `useInkPages`, `useNotesMode`. Logic only, no JSX.
+    `useTopOfDescent`, `useInkPages`, `useNotesMode`. Logic only, no JSX.
   - `containers/`: only when a page has several stateful parts of its own (Notes' InkPad /
-    AtcPad / TextPad, Descent's TodPlanner / GlideslopeMonitor, each with persistence). Same rules as the page: state via a hook from
+    AtcPad / TextPad, Descent's DescentCalculator / FlightPlanTod / GlideslopeMonitor, each with persistence). Same rules as the page: state via a hook from
     `hooks/`, and compose the views.
   - `components/`: views. Props in, callbacks out; they may hold UI-only state (e.g. the
     stroke being drawn) but never persist, read the sim or use providers.
@@ -88,14 +93,17 @@ pages/
     components/     InkCanvas, InkToolbar, AtcFieldTile, AtcKeypad
     domain/         atcFields (ATC input rules), ink (stroke geometry)
   Descent/          Descent.tsx
-    hooks/          useDescentTool (TOD / GS tab), useDescentPlanner, useGlideslope,
-                    useManualDistanceCountdown, descentSimVars
-    containers/     TodPlanner, GlideslopeMonitor: the two tabs
-    components/     TOD: DescentSummary, DescentTargetCard, DescentOptions (collapsed:
+    hooks/          useDescentTool (TOD calculator / Flight plan / GS tab), useTopOfDescent,
+                    useFlightPlanTod, useGlideslope, useManualDistanceCountdown,
+                    descentSimVars
+    containers/     the three tabs: DescentCalculator (+ HelpPopover), FlightPlanTod,
+                    GlideslopeMonitor
+    components/     Flight plan: DescentSummary, DescentTargetCard, DescentOptions (collapsed:
                     profile, buffer, manual aircraft values). GS: GlideslopeCard
                     (GlideslopeProfile side view + GlideslopeScale dots), GlidepathCard
                     (V/S for the angle), RunwayCard. Shared: SimValueField
-    domain/         descentMath, glidepath (V/S + path angle), glideslope (position and
+    domain/         topOfDescent (the calculator, ported from descent.vercel.app),
+                    descentMath, glidepath (V/S + path angle), glideslope (position and
                     deviation vs a runway), format, setup, glideslopeSetup
   Takeoff/          Takeoff.tsx
     hooks/          useTakeoff, takeoffSimVars (+ TITLE / ATC MODEL text vars)
@@ -165,8 +173,23 @@ itself.
 See `docs/coherent-compat.md`. In short: flexbox only (no CSS grid, **no flexbox `gap`**: space
 with child margins or `<Stack gap>`), only the sim's fonts (`SIM_FONTS`), no `color-mix()`, no
 `backdrop-filter`, no `inset` shorthand, derive alpha colours in TS. Build target is es2017,
-and pointer events have a mouse-event fallback. VR is the primary target: big hit targets
-(Comfort density), no hover-only affordances, and minimal typing.
+and pointer events have a mouse-event fallback.
+
+## VR first
+
+Making flying in VR easier is the point of this app. Every screen must be fully usable with
+a VR controller's laser pointer, with no physical keyboard:
+
+- **No typing to enter values.** Numbers use `Stepper` (big −/+ buttons), choices use
+  `SegmentedControl`, codes / frequencies use `Keypad`. Never a `TextInput` for a number.
+  A `TextInput` / `TextArea` is only for genuinely free text (e.g. Notes), and then it also
+  needs an on-screen way in (`VirtualKeyboard`, ink).
+- **Prefer reading the sim over asking.** Fill values from the sim when it has them (live, or
+  a one-tap fill button), with a manual fallback.
+- **Big hit targets** (Comfort density); small controls (24px `size="sm"` buttons) only as
+  secondary actions next to a label, never as the only way to do something important.
+- **No hover-only affordances.** Hover may decorate, but everything works by tap / click
+  (popovers open on tap, nothing hides behind a tooltip).
 
 ## Toolkit rules (`packages/ui`)
 

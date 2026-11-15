@@ -24,8 +24,15 @@ export function useMockFlight() {
     const on = state.connected
     bridge.set('INDICATED ALTITUDE', on ? state.altitudeFt : undefined)
     bridge.set('GROUND VELOCITY', on ? state.groundSpeedKt : undefined)
+    bridge.set('AIRSPEED TRUE', on ? state.groundSpeedKt : undefined)
     bridge.set('VERTICAL SPEED', on ? state.verticalSpeedFpm : undefined)
     bridge.set('GPS WP DISTANCE', on ? state.gpsDistanceNm : undefined)
+    bridge.set(
+      'GPS ETE',
+      on && state.groundSpeedKt > 0
+        ? (state.gpsDistanceNm / state.groundSpeedKt) * 3600
+        : undefined,
+    )
     bridge.set('E:SIMULATION TIME', on ? state.simTimeSec : undefined)
     bridge.set('TOTAL WEIGHT', on ? state.totalWeightLb : undefined)
     bridge.set('CG PERCENT', on ? state.cgPercentMac : undefined)

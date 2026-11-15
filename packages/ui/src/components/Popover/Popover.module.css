@@ -1,0 +1,33 @@
+/* Drawn on document.body; the backdrop catches the tap that closes it. */
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paper {
+  position: absolute;
+  box-sizing: border-box;
+  width: 260px;
+  overflow: auto;
+  padding: var(--sp-3);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  background: var(--bg-card-hi);
+  color: var(--text);
+  font-family: var(--font-sans, inherit);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.4;
+}

@@ -1,4 +1,5 @@
-import { MinusOutlined, PlusOutlined } from '@lineiconshq/free-icons'
+import { MinusSolid, PlusSolid } from '@lineiconshq/free-icons'
+import type { ReactNode } from 'react'
 import { cx } from '../../utils'
 import { Button } from '../Button'
 import { useFieldControl } from '../Field'
@@ -17,6 +18,10 @@ interface StepperProps {
   max?: number
   unit?: string
   format?: (value: number) => string
+  /** Inside the value box, at its left edge, e.g. an icon or a small IconButton. */
+  startAdornment?: ReactNode
+  /** Inside the value box, at its right edge, e.g. a "fill from sim" IconButton. */
+  endAdornment?: ReactNode
   disabled?: boolean
   className?: string
 }
@@ -39,6 +44,8 @@ export function Stepper(props: StepperProps) {
     max = Number.POSITIVE_INFINITY,
     unit,
     format = String,
+    startAdornment,
+    endAdornment,
     disabled = false,
     className,
   } = props
@@ -49,13 +56,13 @@ export function Stepper(props: StepperProps) {
   const stepButton = (delta: number) => (
     <Button
       key={delta}
-      variant="secondary"
+      variant="soft"
       className={styles.step}
       disabled={disabled || (delta < 0 ? value <= min : value >= max)}
       aria-label={`${delta > 0 ? 'Increase' : 'Decrease'} by ${Math.abs(delta)}`}
       onClick={() => bump(delta)}
     >
-      <Icon icon={delta > 0 ? PlusOutlined : MinusOutlined} className={styles.sign} />
+      <Icon icon={delta > 0 ? PlusSolid : MinusSolid} className={styles.sign} />
       {steps.length > 1 && <span className={styles.amount}>{Math.abs(delta)}</span>}
     </Button>
   )
@@ -70,8 +77,12 @@ export function Stepper(props: StepperProps) {
         aria-describedby={field?.hintId}
         className={cx(styles.value, disabled && styles.valueDisabled)}
       >
-        {format(value)}
-        {unit && <span className={styles.unit}>{unit}</span>}
+        {startAdornment && <span className={styles.adornment}>{startAdornment}</span>}
+        <span className={styles.content}>
+          {format(value)}
+          {unit && <span className={styles.unit}>{unit}</span>}
+        </span>
+        {endAdornment && <span className={styles.adornment}>{endAdornment}</span>}
       </output>
       {steps.map((s) => stepButton(s))}
     </div>

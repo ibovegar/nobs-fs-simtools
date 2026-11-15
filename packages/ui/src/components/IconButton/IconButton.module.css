@@ -1,0 +1,69 @@
+/* Variant x colour on top of the ghost Button. The tone is set once per colour through
+   local custom properties; the variants only decide where it is used. Selectors are doubled
+   up so they win over the Button's own :hover and :disabled rules. */
+
+.neutral {
+  --tone: var(--text-mid);
+  --tone-strong: var(--text-bright);
+  --tone-fill: var(--bg-card-hi);
+  --tone-fill-strong: var(--border-mid);
+  --tone-border: var(--border-mid);
+}
+
+.accent {
+  --tone: var(--accent);
+  --tone-strong: var(--accent);
+  --tone-fill: var(--accent-hover);
+  --tone-fill-strong: var(--accent-hover-strong);
+  --tone-border: var(--accent);
+}
+
+.danger {
+  --tone: var(--danger);
+  --tone-strong: var(--danger);
+  --tone-fill: var(--danger-dim);
+  --tone-fill-strong: var(--danger-hover);
+  --tone-border: var(--danger-main);
+}
+
+/* Simple: just the icon; hover fills it. */
+.simple.simple {
+  border-color: transparent;
+  background: transparent;
+  color: var(--tone);
+}
+
+.simple.simple:hover {
+  background: var(--tone-fill);
+  color: var(--tone-strong);
+}
+
+/* Solid: filled all the time (what simple looks like on hover); hover fills it more. */
+.solid.solid,
+.solid.solid:disabled:hover {
+  border-color: transparent;
+  background: var(--tone-fill);
+  color: var(--tone-strong);
+}
+
+.solid.solid:hover {
+  background: var(--tone-fill-strong);
+}
+
+/* Outline: a coloured border; hover fills it. */
+.outline.outline,
+.outline.outline:disabled:hover {
+  border-color: var(--tone-border);
+  background: transparent;
+  color: var(--tone);
+}
+
+.outline.outline:hover {
+  background: var(--tone-fill);
+  color: var(--tone-strong);
+}
+
+.simple.simple:disabled:hover {
+  background: transparent;
+  color: var(--tone);
+}

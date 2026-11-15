@@ -40,11 +40,16 @@ function colorVars(t: ThemeTokens): Record<string, string> {
     '--accent-main': t.accentMain,
     '--accent-dark': t.accentDark,
     '--accent-dim': hexToRgba(t.accentMain, 0.14),
+    // Hover tint for accent-coloured controls; stronger than --accent-dim so it reads.
+    '--accent-hover': hexToRgba(t.accentMain, 0.3),
+    // Hover on a control that is already tinted with --accent-hover.
+    '--accent-hover-strong': hexToRgba(t.accentMain, 0.5),
     '--accent-glow': hexToRgba(t.accent, 0.5),
 
     '--danger': t.danger,
     '--danger-main': t.dangerMain,
     '--danger-dim': hexToRgba(t.dangerMain, 0.14),
+    '--danger-hover': hexToRgba(t.dangerMain, 0.3),
 
     '--green': t.green,
     '--green-dim': hexToRgba(t.green, 0.15),
@@ -64,6 +69,7 @@ function densityVars(d: DensityTokens): Record<string, string> {
     '--font-size-label': d.fontSizeLabel,
     '--font-size-readout': d.fontSizeReadout,
     '--radius': d.radius,
+    '--radius-sm': d.radiusSm,
     '--icon-size': d.iconSize,
     '--scrollbar-w': d.scrollbarWidth,
   }

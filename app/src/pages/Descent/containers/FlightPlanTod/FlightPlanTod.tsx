@@ -1,13 +1,13 @@
 import { DescentOptions, DescentSummary, DescentTargetCard } from '~/pages/Descent/components'
-import { useDescentPlanner } from '~/pages/Descent/hooks'
+import { useFlightPlanTod } from '~/pages/Descent/hooks'
 
 /**
- * The TOD tab: where to start down, and at what rate. Summary first, then the two inputs
- * you change per flight (target), then the rarely touched options folded away.
+ * The Flight plan tab: top of descent worked out automatically from the active flight
+ * plan. Summary first, then the target altitude, then the rarely touched options.
  */
-export function TodPlanner() {
-  const { setup, update, optionsOpen, setOptionsOpen, inputs, plan, status, live } =
-    useDescentPlanner()
+export function FlightPlanTod() {
+  const { setup, update, optionsOpen, setOptionsOpen, inputs, plan, status, live, flightPlanNm } =
+    useFlightPlanTod()
 
   return (
     <>
@@ -18,8 +18,11 @@ export function TodPlanner() {
         groundSpeedKt={inputs.groundSpeedKt}
         verticalSpeedFpm={live.verticalSpeed}
         live={live.altitude !== undefined && live.groundSpeed !== undefined}
+        noDataCaption={
+          flightPlanNm === undefined ? 'No flight plan — load one in the sim' : undefined
+        }
       />
-      <DescentTargetCard setup={setup} gpsDistance={live.gpsDistance} onChange={update} />
+      <DescentTargetCard setup={setup} flightPlanNm={flightPlanNm} onChange={update} />
       <DescentOptions
         setup={setup}
         altitude={live.altitude}

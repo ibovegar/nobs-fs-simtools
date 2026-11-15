@@ -1,3 +1,4 @@
-// Descent's two tools, each with its own state: the TOD planner and the glideslope.
+// Descent's three tools, each with its own state: calculator, flight-plan TOD, glideslope.
+export { DescentCalculator } from './DescentCalculator'
+export { FlightPlanTod } from './FlightPlanTod'
 export { GlideslopeMonitor } from './GlideslopeMonitor'
-export { TodPlanner } from './TodPlanner'

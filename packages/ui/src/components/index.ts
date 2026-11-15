@@ -5,14 +5,21 @@ export { Container, type ContainerMaxWidth } from './Container'
 export { Disclosure } from './Disclosure'
 export { Field, useFieldControl } from './Field'
 export { Icon, type IconData, type IconProps } from './Icon'
-export { IconButton } from './IconButton'
+export { IconButton, type IconButtonColor, type IconButtonVariant } from './IconButton'
 export { Keypad, type KeypadLayout } from './Keypad'
+export {
+  Popover,
+  type PopoverCloseReason,
+  type PopoverOrigin,
+  type PopoverProps,
+} from './Popover'
 export { Readout } from './Readout'
 export { ScrollArea } from './ScrollArea'
 export { Section } from './Section'
 export { SegmentedControl, type SegmentOption } from './SegmentedControl'
 export { Stack } from './Stack'
 export { Stepper } from './Stepper'
+export { Switch } from './Switch'
 export { Tab, TabList, TabPanel, Tabs } from './Tabs'
 export { TextArea, type TextAreaProps } from './TextArea'
 export { TextInput, type TextInputProps } from './TextInput'

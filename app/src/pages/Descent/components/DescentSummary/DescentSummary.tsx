@@ -25,6 +25,8 @@ interface DescentSummaryProps {
   verticalSpeedFpm: number | undefined
   /** True when altitude and groundspeed come from the sim, false when entered manually. */
   live: boolean
+  /** Shown instead of 'Waiting for groundspeed' when there is nothing to plan from. */
+  noDataCaption?: string
 }
 
 /**
@@ -32,7 +34,7 @@ interface DescentSummaryProps {
  * quiet line with the aircraft state it is based on.
  */
 export function DescentSummary(props: DescentSummaryProps) {
-  const { plan, status, altitudeFt, groundSpeedKt, verticalSpeedFpm, live } = props
+  const { plan, status, altitudeFt, groundSpeedKt, verticalSpeedFpm, live, noDataCaption } = props
   const badge = STATUS_BADGE[status]
 
   const aircraft = [
@@ -53,7 +55,7 @@ export function DescentSummary(props: DescentSummaryProps) {
       }
     >
       <div className={styles.body}>
-        <PrimaryReadout plan={plan} status={status} />
+        <PrimaryReadout plan={plan} status={status} noDataCaption={noDataCaption} />
         <div className={styles.aircraft}>
           <span className={styles.aircraftValues}>{aircraft}</span>
           <span className={styles.source}>{live ? 'live' : 'manual · set in Options'}</span>
@@ -66,14 +68,22 @@ export function DescentSummary(props: DescentSummaryProps) {
 interface PrimaryReadoutProps {
   plan: DescentPlan
   status: DescentStatus
+  noDataCaption?: string
 }
 
 function PrimaryReadout(props: PrimaryReadoutProps) {
-  const { plan, status } = props
+  const { plan, status, noDataCaption } = props
 
   switch (status) {
     case 'no-data':
-      return <Readout size="lg" label="To TOD" value="—" caption="Waiting for groundspeed" />
+      return (
+        <Readout
+          size="lg"
+          label="To TOD"
+          value="—"
+          caption={noDataCaption ?? 'Waiting for groundspeed'}
+        />
+      )
     case 'at-target':
       return <Readout size="lg" label="To TOD" value="—" caption="At or below target altitude" />
     case 'descend':

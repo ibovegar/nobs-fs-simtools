@@ -72,6 +72,11 @@ export function planDescent(i: DescentInputs): DescentPlan {
   }
 }
 
+/** Distance left on the flight plan, from the time to destination at the current groundspeed. */
+export function distanceFromEte(eteSec: number, groundSpeedKt: number): number {
+  return (Math.max(0, eteSec) * Math.max(0, groundSpeedKt)) / 3600
+}
+
 /** Ignore sim-time jumps longer than this (slew, flight reload, long pause). */
 export const MAX_COUNTDOWN_STEP_SEC = 10
 

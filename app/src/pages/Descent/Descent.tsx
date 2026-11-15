@@ -1,16 +1,17 @@
 import { Container, SegmentedControl } from '@nobs/ui'
-import { GlideslopeMonitor, TodPlanner } from './containers'
+import { DescentCalculator, FlightPlanTod, GlideslopeMonitor } from './containers'
 import { useDescentTool } from './hooks'
 
 const TOOLS = [
-  { value: 'tod', label: 'TOD' },
+  { value: 'calc', label: 'TOD calculator' },
+  { value: 'plan', label: 'Flight plan' },
   { value: 'gs', label: 'GS' },
 ] as const
 
 /**
- * Descent page, two tools as tabs: TOD (where to start down, and at what rate) and GS
- * (where you are on the approach glideslope). Remembers the open tab; each tool is its own
- * container with its own state.
+ * Descent page, three tools as tabs: Calc (a simple top-of-descent calculator), Flight plan
+ * (TOD worked out from the active flight plan) and GS (where you are on the approach
+ * glideslope). Remembers the open tab; each tool is its own container with its own state.
  */
 export function Descent() {
   const [tool, setTool] = useDescentTool()
@@ -24,7 +25,13 @@ export function Descent() {
         onChange={setTool}
         size="md"
       />
-      {tool === 'gs' ? <GlideslopeMonitor /> : <TodPlanner />}
+      {tool === 'gs' ? (
+        <GlideslopeMonitor />
+      ) : tool === 'plan' ? (
+        <FlightPlanTod />
+      ) : (
+        <DescentCalculator />
+      )}
     </Container>
   )
 }

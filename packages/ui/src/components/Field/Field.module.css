@@ -8,11 +8,13 @@
   margin-top: var(--sp-2);
 }
 
+/* Tall enough for a small (24px) button in `trailing`, so fields side by side line up
+   whether or not they have one. */
 .labelRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 20px;
+  min-height: 24px;
 }
 
 .labelRow > *:not(:first-child) {

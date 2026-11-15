@@ -1,1 +1,1 @@
-export { IconButton } from './IconButton'
+export { IconButton, type IconButtonColor, type IconButtonVariant } from './IconButton'

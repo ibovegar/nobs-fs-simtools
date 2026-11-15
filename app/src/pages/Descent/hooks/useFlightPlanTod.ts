@@ -3,21 +3,21 @@ import {
   type DescentInputs,
   type DescentSetup,
   descentStatus,
+  distanceFromEte,
   planDescent,
   profileFromSetup,
 } from '~/pages/Descent/domain'
 import { useSimVars } from '~/sim'
 import { usePersistentState } from '~/storage'
 import { DESCENT_SIM_VARS } from './descentSimVars'
-import { useManualDistanceCountdown } from './useManualDistanceCountdown'
 
 /**
- * All state behind the TOD calculator: the persisted setup, live sim values (with manual
- * fallbacks) and the computed plan. The maths lives in the page's domain/; the views in
- * the page's components/ only render what this returns.
+ * State behind the flight-plan TOD tab: the persisted setup (target altitude, profile,
+ * buffer), live sim values and the plan. The distance is what is left on the active flight
+ * plan (time to destination × groundspeed); without one there is no plan.
  */
-export function useDescentPlanner() {
-  const [setup, setSetup] = usePersistentState('descent.v1', DEFAULT_DESCENT_SETUP)
+export function useFlightPlanTod() {
+  const [setup, setSetup] = usePersistentState('descent.v2', DEFAULT_DESCENT_SETUP)
   // Whether the Options section is expanded — remembered like the open page.
   const [optionsOpen, setOptionsOpen] = usePersistentState('descent.optionsOpen.v1', false, {
     debounceMs: 0,
@@ -25,22 +25,17 @@ export function useDescentPlanner() {
   const sim = useSimVars(DESCENT_SIM_VARS)
   const update = (patch: Partial<DescentSetup>) => setSetup((prev) => ({ ...prev, ...patch }))
 
-  const gpsAvailable = sim.gpsDistance !== undefined && sim.gpsDistance > 0
-  const useGps = setup.distanceSource === 'gps' && gpsAvailable
-
-  useManualDistanceCountdown({
-    enabled: !useGps,
-    groundSpeedKt: sim.groundSpeed,
-    simTimeSec: sim.simTime,
-    advance: (next) =>
-      setSetup((prev) => ({ ...prev, manualDistanceNm: next(prev.manualDistanceNm) })),
-  })
+  const groundSpeedKt = sim.groundSpeed ?? setup.manualGroundSpeedKt
+  const flightPlanNm =
+    sim.destinationEte !== undefined && sim.destinationEte > 0
+      ? distanceFromEte(sim.destinationEte, groundSpeedKt)
+      : undefined
 
   const inputs: DescentInputs = {
     currentAltitudeFt: sim.altitude ?? setup.manualAltitudeFt,
     targetAltitudeFt: setup.targetAltitudeFt,
-    groundSpeedKt: sim.groundSpeed ?? setup.manualGroundSpeedKt,
-    distanceToTargetNm: useGps ? (sim.gpsDistance ?? 0) : setup.manualDistanceNm,
+    groundSpeedKt,
+    distanceToTargetNm: flightPlanNm ?? 0,
     bufferNm: setup.bufferNm,
     profile: profileFromSetup(setup),
   }
@@ -53,12 +48,12 @@ export function useDescentPlanner() {
     setOptionsOpen,
     inputs,
     plan,
-    status: descentStatus(plan, inputs.groundSpeedKt),
+    flightPlanNm,
+    status: flightPlanNm === undefined ? 'no-data' : descentStatus(plan, inputs.groundSpeedKt),
     live: {
       altitude: sim.altitude,
       groundSpeed: sim.groundSpeed,
       verticalSpeed: sim.verticalSpeed,
-      gpsDistance: gpsAvailable ? sim.gpsDistance : undefined,
     },
   }
 }

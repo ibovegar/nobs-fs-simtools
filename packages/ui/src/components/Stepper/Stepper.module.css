@@ -32,7 +32,7 @@
 
 .value {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   flex: 1 1 0;
   min-width: 0;
@@ -58,4 +58,27 @@
   font-size: 0.6em;
   font-weight: 600;
   color: var(--text-mid);
+}
+
+/* The number and its unit, centred in whatever room the adornments leave. */
+.content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 0;
+  /* Digits sit above the middle of a normal line box (the space below is for descenders):
+     trim the box to the text and nudge it down so the number is centred in the field. */
+  padding-top: 0.12em;
+  line-height: 1;
+}
+
+/* Icons or small buttons inside the box, at its left / right edge. */
+.adornment {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  font-size: var(--font-size);
+  font-weight: 400;
+  line-height: 1;
 }

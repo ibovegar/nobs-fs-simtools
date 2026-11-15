@@ -61,3 +61,20 @@
   font-size: var(--font-size-sm);
   color: var(--text-mid);
 }
+
+.labelRow {
+  display: flex;
+  align-items: center;
+}
+
+/* Capitals sit above the middle of their line box (the space below is for descenders), so
+   trim the box to the text and nudge it down to line up with a centred add-on. */
+.labelRow .label {
+  line-height: 1;
+  padding-top: 1px;
+}
+
+.addon {
+  display: flex;
+  margin-left: 0;
+}

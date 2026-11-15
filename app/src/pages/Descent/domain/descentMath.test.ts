@@ -3,6 +3,7 @@ import {
   advanceDistance,
   type DescentInputs,
   descentStatus,
+  distanceFromEte,
   planDescent,
   rateForAngle,
 } from './descentMath'
@@ -112,5 +113,14 @@ describe('descentStatus', () => {
 
   it('is descend at or past TOD', () => {
     expect(status({ distanceToTargetNm: 90 })).toBe('descend')
+  })
+})
+
+describe('distanceFromEte', () => {
+  it('converts flight-plan time left to distance', () => {
+    expect(distanceFromEte(1800, 400)).toBeCloseTo(200, 6)
+  })
+  it('is zero when not moving', () => {
+    expect(distanceFromEte(1800, 0)).toBe(0)
   })
 })

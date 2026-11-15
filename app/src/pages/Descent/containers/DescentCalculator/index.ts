@@ -1,0 +1,1 @@
+export { DescentCalculator } from './DescentCalculator'

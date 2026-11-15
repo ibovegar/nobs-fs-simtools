@@ -84,6 +84,8 @@ export interface DensityTokens {
   fontSizeLabel: string
   fontSizeReadout: string
   radius: string
+  /** Corner radius for small controls (e.g. 24px icon buttons), where `radius` reads round. */
+  radiusSm: string
   iconSize: string
   /** Width of ScrollArea's scrollbar (track and draggable thumb). */
   scrollbarWidth: string
@@ -99,6 +101,7 @@ export const densityTokens: Record<Density, DensityTokens> = {
     fontSizeLabel: '12px',
     fontSizeReadout: '44px',
     radius: '10px',
+    radiusSm: '5px',
     iconSize: '26px',
     scrollbarWidth: '20px',
   },
@@ -111,6 +114,7 @@ export const densityTokens: Record<Density, DensityTokens> = {
     fontSizeLabel: '9px',
     fontSizeReadout: '30px',
     radius: '8px',
+    radiusSm: '4px',
     iconSize: '18px',
     scrollbarWidth: '12px',
   },

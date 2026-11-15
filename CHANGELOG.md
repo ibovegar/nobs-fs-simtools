@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Descent › TOD calculator**: the rules-of-thumb top-of-descent calculator from
+  descent.vercel.app, with the same inputs and the same maths: start / end altitude, start /
+  end speed, wind, and glideslope or vertical speed (either fills in the other), giving the
+  distance to start down before the end altitude, the vertical speed and the descent time.
+  Adds a mile per 10 kt of slowing down and per 10 kt of tailwind. Every input is a stepper
+  (no typing in VR); start altitude and start speed can be filled from the sim with one tap
+  (indicated altitude, true airspeed).
+- **Descent › Flight plan**: top of descent worked out automatically from the active flight
+  plan (distance left = time to destination × groundspeed; unverified in the sim).
+
+### Changed
+
+- The old TOD tab is now the **Flight plan** tab. Its manual / GPS-waypoint distance
+  switch is gone: the distance comes from the flight plan, and the manual case is covered
+  by Calc. Descent tab and TOD settings are reset once.
+
 ## [0.2.0] - 2026-11-14
 
 ### Added

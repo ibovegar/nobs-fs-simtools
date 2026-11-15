@@ -5,8 +5,6 @@ export type DistanceSource = 'manual' | 'gps'
 /** What the pilot sets up in the descent calculator — persisted between flights. */
 export interface DescentSetup {
   targetAltitudeFt: number
-  distanceSource: DistanceSource
-  manualDistanceNm: number
   bufferNm: number
   profileKind: DescentProfile['kind']
   angleDeg: number
@@ -18,8 +16,6 @@ export interface DescentSetup {
 
 export const DEFAULT_DESCENT_SETUP: DescentSetup = {
   targetAltitudeFt: 3000,
-  distanceSource: 'manual',
-  manualDistanceNm: 100,
   bufferNm: 0,
   profileKind: 'angle',
   angleDeg: 3,

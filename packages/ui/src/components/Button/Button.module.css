@@ -32,6 +32,20 @@
   white-space: nowrap;
 }
 
+.sm {
+  min-height: 24px;
+  min-width: 24px;
+  border-radius: var(--radius-sm);
+  padding: 0 var(--sp-2);
+  font-size: var(--font-size-sm);
+}
+
+/* Beats the icon's density-token size. */
+.sm > svg {
+  width: 16px;
+  height: 16px;
+}
+
 .lg {
   min-height: var(--control-h-lg);
   min-width: var(--control-h-lg);
@@ -68,12 +82,22 @@
   color: var(--text-mid);
 }
 
+.soft {
+  border-color: transparent;
+  background: var(--accent-hover);
+  color: var(--accent);
+}
+
+.soft:hover {
+  background: var(--accent-hover-strong);
+}
+
 .ghost {
   color: var(--text-mid);
 }
 
 .ghost:hover {
-  background: var(--bg-card);
+  background: var(--bg-card-hi);
   color: var(--text-bright);
 }
 
@@ -104,6 +128,11 @@
 .button:disabled:hover {
   background: transparent;
   color: var(--text-mid);
+}
+
+.soft:disabled:hover {
+  background: var(--accent-hover);
+  color: var(--accent);
 }
 
 .primary:disabled:hover {

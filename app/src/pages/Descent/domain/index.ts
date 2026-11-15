@@ -6,6 +6,7 @@ export {
   type DescentProfile,
   type DescentStatus,
   descentStatus,
+  distanceFromEte,
   FEET_PER_NM,
   MIN_GROUNDSPEED_KT,
   planDescent,
@@ -45,3 +46,13 @@ export {
   type DistanceSource,
   profileFromSetup,
 } from './setup'
+export {
+  angleForVerticalSpeed,
+  DEFAULT_TOP_OF_DESCENT_FIELDS,
+  editTopOfDescent,
+  type TopOfDescentField,
+  type TopOfDescentFields,
+  type TopOfDescentResult,
+  topOfDescent,
+  verticalSpeedForAngle,
+} from './topOfDescent'

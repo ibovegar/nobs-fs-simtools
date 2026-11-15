@@ -82,5 +82,5 @@ These assumptions can only be confirmed inside Coherent. Write down the results 
 - [ ] `SetStoredData` persists notes across a sim restart
 - [ ] `panelActive` / `panelInactive` fire (polling pauses while closed)
 - [ ] Sim variables read correctly: `INDICATED ALTITUDE`, `GROUND VELOCITY`,
-      `VERTICAL SPEED`, `GPS WP DISTANCE` (nautical miles), `E:SIMULATION TIME`
+      `VERTICAL SPEED`, `GPS WP DISTANCE` (nautical miles), `GPS ETE` (seconds), `E:SIMULATION TIME`
 - [ ] Comfort density is readable at arm's length in the headset

@@ -3,12 +3,16 @@ import { cx } from '../../utils'
 import { Icon, type IconData } from '../Icon'
 import styles from './Button.module.css'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+export type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'danger'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** primary = filled sapphire, secondary = outlined, ghost = borderless, danger = filled red */
+  /**
+   * primary = filled sapphire, secondary = outlined, soft = tinted sapphire (as a solid
+   * accent IconButton), ghost = borderless, danger = filled red
+   */
   variant?: ButtonVariant
-  size?: 'md' | 'lg'
+  /** `sm` is a compact 24px button for label rows and inline actions. */
+  size?: 'sm' | 'md' | 'lg'
   /** Toggle-button state: renders the "selected" look and sets aria-pressed. */
   selected?: boolean
   icon?: IconData
@@ -37,6 +41,7 @@ export function Button(props: ButtonProps) {
       className={cx(
         styles.button,
         styles[variant],
+        size === 'sm' && styles.sm,
         size === 'lg' && styles.lg,
         selected && styles.selected,
         fullWidth && styles.fullWidth,
