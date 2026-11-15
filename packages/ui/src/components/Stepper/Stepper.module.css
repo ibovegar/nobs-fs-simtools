@@ -9,13 +9,15 @@
 }
 
 .step {
-  flex-direction: column;
   padding: 0 var(--sp-2);
 }
 
-/* Icon over amount: undo Button's row spacing between its children. */
-.step > *:not(:first-child) {
-  margin-left: 0;
+/* Button wraps its content (the sign and the amount) in one label element: stack the two
+   inside it, centred on each other. */
+.step > * {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sign {

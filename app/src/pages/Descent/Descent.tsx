@@ -1,4 +1,4 @@
-import { Container, SegmentedControl } from '@nobs/ui'
+import { Container, PageHeader, SegmentedControl } from '@nobs/ui'
 import { DescentCalculator, FlightPlanTod, GlideslopeMonitor } from './containers'
 import { useDescentTool } from './hooks'
 
@@ -18,13 +18,15 @@ export function Descent() {
 
   return (
     <Container maxWidth={false}>
-      <SegmentedControl
-        label="Descent tool"
-        options={TOOLS}
-        value={tool}
-        onChange={setTool}
-        size="md"
-      />
+      <PageHeader>
+        <SegmentedControl
+          label="Descent tool"
+          options={TOOLS}
+          value={tool}
+          onChange={setTool}
+          size="sm"
+        />
+      </PageHeader>
       {tool === 'gs' ? (
         <GlideslopeMonitor />
       ) : tool === 'plan' ? (

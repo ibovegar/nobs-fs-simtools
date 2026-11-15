@@ -1,3 +1,4 @@
+import { ArrowUpwardOutlined } from '@lineiconshq/free-icons'
 import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
@@ -7,14 +8,27 @@ import {
   useState,
 } from 'react'
 import { cx } from '../../utils'
+import { Button } from '../Button'
 import styles from './ScrollArea.module.css'
 
 const supportsPointerEvents = typeof window !== 'undefined' && 'PointerEvent' in window
 
 /** Smallest thumb, in px, so it stays a usable target on very long content. */
 const MIN_THUMB = 32
-/** How often to re-measure for content or size changes that fire no scroll event. */
-const POLL_MS = 200
+/**
+ * Fallback only, for browsers without ResizeObserver: how often to re-measure for content
+ * changes that fire no event. Slow on purpose; a tap re-measures straight away anyway.
+ */
+const FALLBACK_POLL_MS = 1000
+/** After a tap, re-measure this much later (ms), once the UI has updated. */
+const AFTER_TAP_MS = 50
+/**
+ * The scroll-to-top button shows once scrolled down this fraction of the visible height:
+ * early, as soon as the top of the page is going out of view.
+ */
+const TO_TOP_AFTER = 0.1
+/** Duration (ms) of the glide back to the top. */
+const TO_TOP_MS = 250
 /** A click on the track scrolls this fraction of the visible height. */
 const PAGE_FRACTION = 0.9
 /**
@@ -89,7 +103,40 @@ interface ScrollAreaProps {
    * screen. `false`: dragging down scrolls down, like moving the scrollbar.
    */
   naturalScroll?: boolean
+  /**
+   * Show a floating "back to top" button in the bottom right corner once the content has
+   * been scrolled down. Defaults to `false`.
+   */
+  scrollToTopButton?: boolean
+  /**
+   * Stop all background work, e.g. while the host panel is hidden. Only the fallback poll
+   * (browsers without ResizeObserver) runs in the background at all.
+   */
+  paused?: boolean
   children: ReactNode
+}
+
+const easeOut = (t: number) => 1 - (1 - t) * (1 - t)
+
+/**
+ * Glide `viewport` to the top. Animated by hand: `scrollTo({ behavior: 'smooth' })` isn't
+ * available in every embedded browser (e.g. the sim's).
+ */
+function glideToTop(viewport: HTMLElement) {
+  const from = viewport.scrollTop
+  if (from <= 0) return
+  const raf = typeof window.requestAnimationFrame === 'function'
+  if (!raf) {
+    viewport.scrollTop = 0
+    return
+  }
+  const start = Date.now()
+  const step = () => {
+    const t = Math.min(1, (Date.now() - start) / TO_TOP_MS)
+    viewport.scrollTop = Math.round(from * (1 - easeOut(t)))
+    if (t < 1) window.requestAnimationFrame(step)
+  }
+  window.requestAnimationFrame(step)
 }
 
 /**
@@ -110,6 +157,8 @@ export function ScrollArea(props: ScrollAreaProps) {
     viewportClassName,
     dragToScroll = false,
     naturalScroll = true,
+    scrollToTopButton = false,
+    paused = false,
     children,
   } = props
 
@@ -118,6 +167,7 @@ export function ScrollArea(props: ScrollAreaProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const thumbDrag = useRef<{ startY: number; startScroll: number; ratio: number } | null>(null)
   const [thumb, setThumb] = useState<Thumb>(NO_THUMB)
+  const [scrolledDown, setScrolledDown] = useState(false)
   const [thumbDragging, setThumbDragging] = useState(false)
   /** Where to draw the drag-scroll indicator (relative to the root), or null when idle. */
   const [grab, setGrab] = useState<{ x: number; y: number } | null>(null)
@@ -129,17 +179,45 @@ export function ScrollArea(props: ScrollAreaProps) {
     const measure = () => {
       const next = thumbFor(viewport, track.clientHeight)
       setThumb((prev) => (sameThumb(prev, next) ? prev : next))
+      setScrolledDown(viewport.scrollTop > viewport.clientHeight * TO_TOP_AFTER)
     }
     measure()
+    // Event-driven, so nothing runs while nothing changes (sim performance): scrolling,
+    // window resizes and, with ResizeObserver, any size change of the viewport or its
+    // content. setThumb / setScrolledDown bail out when nothing changed.
     viewport.addEventListener('scroll', measure)
-    // Polling instead of ResizeObserver: it catches content changes too and works in
-    // browsers without ResizeObserver. setThumb bails out when nothing changed.
-    const timer = window.setInterval(measure, POLL_MS)
-    return () => {
-      viewport.removeEventListener('scroll', measure)
-      window.clearInterval(timer)
+    window.addEventListener('resize', measure)
+    const cleanups: (() => void)[] = [
+      () => viewport.removeEventListener('scroll', measure),
+      () => window.removeEventListener('resize', measure),
+    ]
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(measure)
+      observer.observe(viewport)
+      for (const child of Array.from(viewport.children)) observer.observe(child)
+      cleanups.push(() => observer.disconnect())
+    } else {
+      // Without ResizeObserver, content mostly changes after a tap (a section opens, a
+      // warning appears): re-measure just after each one, plus a slow poll unless paused.
+      let tapTimer = 0
+      const onTap = () => {
+        window.clearTimeout(tapTimer)
+        tapTimer = window.setTimeout(measure, AFTER_TAP_MS)
+      }
+      viewport.addEventListener('click', onTap)
+      cleanups.push(() => {
+        viewport.removeEventListener('click', onTap)
+        window.clearTimeout(tapTimer)
+      })
+      if (!paused) {
+        const timer = window.setInterval(measure, FALLBACK_POLL_MS)
+        cleanups.push(() => window.clearInterval(timer))
+      }
     }
-  }, [])
+    return () => {
+      for (const cleanup of cleanups) cleanup()
+    }
+  }, [paused])
 
   // Drag-to-scroll on the content. Native listeners on the window follow the pointer
   // outside the viewport without pointer capture, which would steal the press from the
@@ -285,6 +363,16 @@ export function ScrollArea(props: ScrollAreaProps) {
           {...thumbHandlers}
         />
       </div>
+      {scrollToTopButton && scrolledDown && (
+        <Button
+          variant="primary"
+          icon={ArrowUpwardOutlined}
+          className={styles.toTop}
+          aria-label="Back to top"
+          title="Back to top"
+          onClick={() => viewportRef.current && glideToTop(viewportRef.current)}
+        />
+      )}
       {grab && (
         // Drawn here as well as via `cursor`, because the sim's VR laser shows no cursor.
         <div aria-hidden="true" className={styles.grab} style={{ left: grab.x, top: grab.y }}>

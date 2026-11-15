@@ -18,3 +18,15 @@
 .page {
   padding: var(--sp-3) var(--sp-1) var(--sp-3) var(--sp-3);
 }
+
+/* A page's fixed header (sub-tabs) above its scrolling content: lined up with the page
+   content, which ends left of the scrollbar gutter, with a gap beneath it that scrolling
+   content never enters. */
+.header {
+  padding: var(--sp-2) calc(var(--scrollbar-w) + var(--sp-2) + var(--sp-1)) var(--sp-2) var(--sp-3);
+}
+
+/* Under a header, the header's gap already spaces the page from the top. */
+.header:not(:empty) + .scroll .page {
+  padding-top: 0;
+}

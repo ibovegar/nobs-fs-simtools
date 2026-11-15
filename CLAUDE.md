@@ -84,7 +84,10 @@ dev/                browser dev harness (`pnpm dev`): same tree with a mock sim 
                     like a page: DevHarness.tsx (+ main.tsx entry), MockSimBridge.ts,
                     hooks/ (useMockFlight), components/ (PanelFrame, SimulatorCard,
                     AircraftStateCard), domain/ (mockFlight: the tested flight model)
-App.tsx             tab shell: renders a tab per page and remembers the active one
+App.tsx             tab shell: renders a tab per page and remembers the active one. Each page
+                    scrolls in a ScrollArea under a fixed PageHeaderArea: a page puts its
+                    sub-tabs in <PageHeader> so they don't scroll. Renders nothing while the
+                    panel is closed
 pages/
   pageRegistry.ts   the list of pages (tabs) in order
   Notes/            Notes.tsx
@@ -153,8 +156,8 @@ itself.
   `useSimVars(MAP)`. Every value can be `undefined` (no sim / not available), so always
   provide a manual fallback.
 - **Persistence**: `usePersistentState('<area>.v<N>', default)`. Bump `vN` on incompatible
-  shape changes instead of writing migrations. Writes are debounced and flushed when the panel
-  hides or unloads; pass `{ debounceMs: 0 }` for navigation state (active page, mode, open
+  shape changes instead of writing migrations. Writes are debounced and flushed on unmount
+  (which closing the panel causes) and when the page unloads; pass `{ debounceMs: 0 }` for navigation state (active page, mode, open
   sections) so reopening SimTools always shows the same screen.
 - **New page (tab)**: create `pages/MyPage/` with `MyPage.tsx` + `index.ts`. The page holds
   its state through a `useMyThing` hook in `pages/MyPage/hooks/` and renders a `<Container>`.
@@ -175,10 +178,36 @@ with child margins or `<Stack gap>`), only the sim's fonts (`SIM_FONTS`), no `co
 `backdrop-filter`, no `inset` shorthand, derive alpha colours in TS. Build target is es2017,
 and pointer events have a mouse-event fallback.
 
+## Sim performance first
+
+SimTools runs inside the sim, often during VR sessions that need every frame. **It must never
+noticeably cost the sim performance.** Consider this in every change, and say so when a
+change has a cost:
+
+- **Nothing alive while the panel is closed.** `App` renders nothing then: every page,
+  poll, timer and listener is unmounted, and only the providers (saved settings, the sim
+  connection, the panel open/close events) remain. Reopening remounts the pages, which
+  restore their saved state and read the sim afresh. So anything the user expects back
+  after closing and reopening (open tab, mode, inputs, open sections) must be persisted
+  with `usePersistentState`; transient UI state (scroll position, an open popover) resets.
+- **No work while nothing changes.** No timers, intervals or animation loops running idle,
+  and inactive pages are unmounted.
+- **Poll the sim only for what is shown live**, at the lowest rate that works (default 4 Hz,
+  lower when you can). A value only needed on a tap (e.g. "fill from sim") is read once on
+  tap with `bridge.read`, never polled.
+- **Re-render only on change.** Polled values bail out when equal; don't put fast-changing
+  sim values in state a whole page depends on unless that page shows them.
+- **Hot paths do no layout reads.** Scroll / pointer-move handlers read cached measurements
+  and `scrollTop`, write transforms, and skip writes when nothing changed; no
+  `getBoundingClientRect` / `offsetHeight` per event. Animate with `transform` / `opacity`.
+- **Cheap visuals.** No shadows, filters or blur, no large or continuous CSS animations.
+- **Keep the bundle lean.** Think twice before adding a dependency.
+
 ## VR first
 
-Making flying in VR easier is the point of this app. Every screen must be fully usable with
-a VR controller's laser pointer, with no physical keyboard:
+Making flying in VR easier is the point of this app. In VR the panel is used with a mouse
+(wheel available) or a controller's laser pointer (no wheel, no hover cursor). Every screen
+must be fully usable with either, and without a physical keyboard:
 
 - **No typing to enter values.** Numbers use `Stepper` (big −/+ buttons), choices use
   `SegmentedControl`, codes / frequencies use `Keypad`. Never a `TextInput` for a number.

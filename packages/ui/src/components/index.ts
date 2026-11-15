@@ -7,6 +7,7 @@ export { Field, useFieldControl } from './Field'
 export { Icon, type IconData, type IconProps } from './Icon'
 export { IconButton, type IconButtonColor, type IconButtonVariant } from './IconButton'
 export { Keypad, type KeypadLayout } from './Keypad'
+export { PageHeader, PageHeaderArea } from './PageHeader'
 export {
   Popover,
   type PopoverCloseReason,
@@ -19,6 +20,7 @@ export { Section } from './Section'
 export { SegmentedControl, type SegmentOption } from './SegmentedControl'
 export { Stack } from './Stack'
 export { Stepper } from './Stepper'
+export { Sticky } from './Sticky'
 export { Switch } from './Switch'
 export { Tab, TabList, TabPanel, Tabs } from './Tabs'
 export { TextArea, type TextAreaProps } from './TextArea'

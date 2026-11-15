@@ -5,13 +5,15 @@ import { type ReactNode, useState } from 'react'
 interface HelpPopoverProps {
   /** Accessible name of the "?" button, e.g. "What is distance?". */
   label: string
-  /** The explanation. Keep it to a sentence. */
+  /** The explanation, in plain words. */
   children: ReactNode
+  /** Popover width: `md` (default) fits a sentence, `lg` a short paragraph. */
+  size?: 'sm' | 'md' | 'lg'
 }
 
 /** A small "?" next to a label; tapping it explains what the value means. */
 export function HelpPopover(props: HelpPopoverProps) {
-  const { label, children } = props
+  const { label, children, size } = props
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
   return (
@@ -29,6 +31,7 @@ export function HelpPopover(props: HelpPopoverProps) {
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        size={size}
       >
         {children}
       </Popover>

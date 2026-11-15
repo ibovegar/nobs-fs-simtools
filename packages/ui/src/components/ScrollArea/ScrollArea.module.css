@@ -94,3 +94,21 @@
   height: var(--icon-size);
   fill: var(--on-accent);
 }
+
+/* Floating "back to top" button: bottom right, just left of the scrollbar gutter. Round,
+   and a full control size so it is an easy target in VR. */
+.toTop {
+  position: absolute;
+  right: calc(var(--scrollbar-w) + var(--sp-2) + var(--sp-3));
+  bottom: var(--sp-3);
+  z-index: 10;
+  width: var(--control-h);
+  height: var(--control-h);
+  border-radius: 50%;
+  /* See-through, so it doesn't hide the content it floats over; solid while pointed at. */
+  opacity: 0.7;
+}
+
+.toTop:hover {
+  opacity: 1;
+}

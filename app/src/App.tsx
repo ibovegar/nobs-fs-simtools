@@ -1,20 +1,27 @@
-import { ScrollArea, Tab, TabList, TabPanel, Tabs } from '@nobs/ui'
+import { PageHeaderArea, ScrollArea, Tab, TabList, TabPanel, Tabs } from '@nobs/ui'
 import { PAGES } from '~/pages'
-import { useSettings } from '~/providers'
+import { useSettings, useSim } from '~/providers'
 import styles from './App.module.css'
 
 /**
  * The SimTools shell: a tab per page, remembering the active one. Pages are listed in
  * ~/pages/pageRegistry.ts. Rendered by both entry points inside <AppProviders>.
  *
+ * While the toolbar panel is closed it renders nothing, so no page, poll, timer or listener
+ * is alive (sim performance first). Unmounting flushes pending writes; reopening remounts
+ * the pages, which restore their saved state and read the sim afresh.
+ *
  * It sits above the pages, so it lives at the root of src/ rather than in a page module.
  */
 export function App() {
   const { settings, updateSettings } = useSettings()
+  const { panelVisible } = useSim()
   // Fall back to the first page if a stored id no longer exists.
   const active = PAGES.some((p) => p.id === settings.activePage)
     ? settings.activePage
     : (PAGES[0]?.id ?? '')
+
+  if (!panelVisible) return null
 
   return (
     <div className={styles.app}>
@@ -28,13 +35,18 @@ export function App() {
         </TabList>
         {PAGES.map(({ id, Component }) => (
           <TabPanel key={id} value={id}>
-            <ScrollArea
-              viewportClassName={styles.page}
-              dragToScroll
-              naturalScroll={settings.naturalScroll}
-            >
-              <Component />
-            </ScrollArea>
+            {/* A page's <PageHeader> (e.g. its sub-tabs) is drawn here and doesn't scroll. */}
+            <PageHeaderArea className={styles.header}>
+              <ScrollArea
+                className={styles.scroll}
+                viewportClassName={styles.page}
+                dragToScroll
+                naturalScroll={settings.naturalScroll}
+                scrollToTopButton
+              >
+                <Component />
+              </ScrollArea>
+            </PageHeaderArea>
           </TabPanel>
         ))}
       </Tabs>

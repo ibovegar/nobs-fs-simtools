@@ -1,0 +1,8 @@
+/* Collapses to nothing while no page header is drawn into it. */
+.slot {
+  flex: 0 0 auto;
+}
+
+.slot:empty {
+  display: none;
+}

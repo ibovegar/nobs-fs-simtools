@@ -19,7 +19,6 @@
 .paper {
   position: absolute;
   box-sizing: border-box;
-  width: 260px;
   overflow: auto;
   padding: var(--sp-3);
   border: 1px solid var(--border-mid);
@@ -30,4 +29,17 @@
   font-size: var(--font-size-sm);
   font-weight: 400;
   line-height: 1.4;
+}
+
+/* Widths (the screen's width minus the margins caps them, see Popover.tsx). */
+.sm {
+  width: 200px;
+}
+
+.md {
+  width: 260px;
+}
+
+.lg {
+  width: 340px;
 }

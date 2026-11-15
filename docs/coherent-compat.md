@@ -50,5 +50,10 @@ community panels boot (for example PMS50 GTN750 and TheFlightSimKit).
 | `FOCUS_INPUT_FIELD` argument list | unverified | Try the no-argument form |
 | `GPS WP DISTANCE` in `nautical miles` | unverified | Read in meters and convert |
 | `PointerEvent` support | unverified | Mouse fallback already in place |
+| `ResizeObserver` (ScrollArea re-measures on content size changes) | unverified | Re-measure after each tap plus a 1 s poll (paused while the panel is hidden) |
+| `Popover` drawn on `document.body` with `position: fixed` lands next to its button | unverified | Render it inside the panel root (`container` prop) |
+| `:empty` / `:not(:empty)` (the page header strip collapses on pages without one) | unverified | Extra top space on those pages; give `PageHeaderArea` a `hasHeader` flag instead |
+| `Sticky` (transform on scroll) keeps the pinned TOD results at the top | unverified | — |
+| `GPS ETE` (seconds) is the time to the end of the flight plan | unverified | Sum leg distances from the flight plan |
 | On-screen keyboard keys with a VR controller | unverified | Set `useMouseEvents` on the keyboard |
 | Text box keeps focus and caret while pressing on-screen keys (`preventMouseDownDefault`) | unverified | Restore focus to the textarea after each key |

@@ -3,7 +3,7 @@ import {
   Message3TextOutlined,
   TextParagraphOutlined,
 } from '@lineiconshq/free-icons'
-import { Container, SegmentedControl } from '@nobs/ui'
+import { Container, PageHeader, SegmentedControl } from '@nobs/ui'
 import type { ComponentType } from 'react'
 import { AtcPad, InkPad, TextPad } from './containers'
 import { type NotesMode, useNotesMode } from './hooks'
@@ -31,13 +31,15 @@ export function Notes() {
 
   return (
     <Container maxWidth={false} fill>
-      <SegmentedControl
-        label="Note type"
-        options={MODES}
-        value={mode}
-        onChange={setMode}
-        size="md"
-      />
+      <PageHeader>
+        <SegmentedControl
+          label="Note type"
+          options={MODES}
+          value={mode}
+          onChange={setMode}
+          size="sm"
+        />
+      </PageHeader>
       <Pad />
     </Container>
   )

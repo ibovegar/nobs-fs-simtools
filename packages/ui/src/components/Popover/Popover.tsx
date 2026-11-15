@@ -32,6 +32,11 @@ export interface PopoverProps {
   marginThreshold?: number
   /** Where to render it. Default: `document.body`. */
   container?: HTMLElement
+  /**
+   * Width: `sm` for a word or two, `md` (default) for a sentence, `lg` for a short
+   * paragraph. Never wider than the screen allows (`marginThreshold` on each side).
+   */
+  size?: 'sm' | 'md' | 'lg'
   className?: string
   children: ReactNode
 }
@@ -62,6 +67,7 @@ export function Popover(props: PopoverProps) {
     transformOrigin = { vertical: 'top', horizontal: 'left' },
     marginThreshold = 16,
     container,
+    size = 'md',
     className,
     children,
   } = props
@@ -127,7 +133,7 @@ export function Popover(props: PopoverProps) {
       <div
         ref={paperRef}
         role="dialog"
-        className={cx(styles.paper, className)}
+        className={cx(styles.paper, styles[size], className)}
         // Invisible for the one frame before it is measured and placed.
         style={position ?? { visibility: 'hidden', top: 0, left: 0 }}
       >

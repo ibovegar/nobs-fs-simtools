@@ -1,0 +1,8 @@
+.sticky {
+  position: relative;
+}
+
+/* Above the content it slides over while stuck. */
+.enabled {
+  z-index: 5;
+}

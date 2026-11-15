@@ -1,5 +1,9 @@
-import { RefreshCircle1ClockwiseOutlined } from '@lineiconshq/free-icons'
-import { Card, Field, IconButton, Readout, Section, Stack, Stepper } from '@nobs/ui'
+import {
+  MapPin5Outlined,
+  MapPin5Solid,
+  RefreshCircle1ClockwiseOutlined,
+} from '@lineiconshq/free-icons'
+import { Card, Field, IconButton, Readout, Section, Stack, Stepper, Sticky } from '@nobs/ui'
 import { formatInteger, type TopOfDescentResult } from '~/pages/Descent/domain'
 import { type SimFillField, useTopOfDescent } from '~/pages/Descent/hooks'
 import styles from './DescentCalculator.module.css'
@@ -18,7 +22,7 @@ const formatVerticalSpeed = (fpm: number) => String(Math.round(fpm))
  * stepper: no typing in VR.
  */
 export function DescentCalculator() {
-  const { fields, edit, result, canFill, fillFromSim } = useTopOfDescent()
+  const { fields, edit, result, canFill, fillFromSim, pinned, setPinned } = useTopOfDescent()
   const problem = problemText(result.errors)
 
   const fillButton = (field: SimFillField, what: string) => (
@@ -29,54 +33,67 @@ export function DescentCalculator() {
       variant="solid"
       color="accent"
       className={styles.fillButton}
-      disabled={!canFill(field)}
+      disabled={!canFill}
       onClick={() => fillFromSim(field)}
     />
   )
 
   return (
     <Stack>
-      <Section>
-        <div className={styles.results}>
-          <Readout
-            size="lg"
-            label="Distance"
-            labelAddon={
-              <HelpPopover label="What is distance?">
-                Start descending this far before the point where you want to reach the end altitude.
-              </HelpPopover>
-            }
-            tone={problem ? 'danger' : 'neutral'}
-            value={result.distanceNm ?? '—'}
-            unit={result.distanceNm !== null ? 'nm' : undefined}
-          />
-          <div className={styles.secondary}>
-            <Readout
-              className={styles.secondaryItem}
-              label="Vertical speed"
-              labelAddon={
-                <HelpPopover label="What is vertical speed?">
-                  The rate to descend at to hold the glideslope, at your average speed.
-                </HelpPopover>
-              }
-              value={formatVerticalSpeed(fields.verticalSpeed)}
-              unit="fpm"
+      <Sticky enabled={pinned} className={pinned ? styles.pinnedBand : undefined}>
+        <Section>
+          <div className={styles.results}>
+            <IconButton
+              icon={pinned ? MapPin5Solid : MapPin5Outlined}
+              label={pinned ? 'Unpin results' : 'Pin results to the top'}
+              size="sm"
+              variant={pinned ? 'solid' : 'simple'}
+              color="accent"
+              aria-pressed={pinned}
+              className={styles.pin}
+              onClick={() => setPinned(!pinned)}
             />
             <Readout
-              className={styles.secondaryItem}
-              label="Time"
+              size="lg"
+              label="Distance"
               labelAddon={
-                <HelpPopover label="What is time?">
-                  How long the descent takes to fly, at your average speed.
+                <HelpPopover label="What is distance?">
+                  Start descending this far before the point where you want to reach the end
+                  altitude.
                 </HelpPopover>
               }
-              value={result.minutes ?? '—'}
-              unit={result.minutes !== null ? 'min' : undefined}
+              tone={problem ? 'danger' : 'neutral'}
+              value={result.distanceNm ?? '—'}
+              unit={result.distanceNm !== null ? 'nm' : undefined}
             />
+            <div className={styles.secondary}>
+              <Readout
+                className={styles.secondaryItem}
+                label="Vertical speed"
+                labelAddon={
+                  <HelpPopover label="What is vertical speed?">
+                    The rate to descend at to hold the glideslope, at your average speed.
+                  </HelpPopover>
+                }
+                value={formatVerticalSpeed(fields.verticalSpeed)}
+                unit="fpm"
+              />
+              <Readout
+                className={styles.secondaryItem}
+                label="Time"
+                labelAddon={
+                  <HelpPopover label="What is time?">
+                    How long the descent takes to fly, at your average speed.
+                  </HelpPopover>
+                }
+                value={result.minutes ?? '—'}
+                unit={result.minutes !== null ? 'min' : undefined}
+              />
+            </div>
+            {problem && <p className={styles.problem}>{problem}</p>}
           </div>
-          {problem && <p className={styles.problem}>{problem}</p>}
-        </div>
-      </Section>
+        </Section>
+      </Sticky>
 
       <Card title="Altitude">
         <Field label="Start">
@@ -104,7 +121,18 @@ export function DescentCalculator() {
         </Field>
       </Card>
 
-      <Card title="Speed">
+      <Card
+        title={
+          <span className={styles.titleWithHelp}>
+            Speed
+            <HelpPopover label="How should I slow down?" size="lg">
+              An aircraft can't slow down much while it descends. It needs about 1 nm of level or
+              gentle flight for every 10 kt it slows, so the calculator adds that to the distance.
+              Tip: many airports want 250 kt or less below 10,000 ft.
+            </HelpPopover>
+          </span>
+        }
+      >
         <Field label="Start">
           <Stepper
             value={fields.startSpeed}
