@@ -55,9 +55,11 @@
   margin-right: var(--sp-2);
 }
 
+/* Draws the eye when the badge appears, then stops: a few opacity pulses (cheap to draw)
+   and no glow. Never an infinite animation, which would repaint the panel every frame
+   for as long as the badge is on screen (sim performance). */
 .pulse {
-  box-shadow: 0 0 6px currentColor;
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse 1.2s ease-in-out 3;
 }
 
 @keyframes pulse {

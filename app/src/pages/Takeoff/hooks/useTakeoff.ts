@@ -27,7 +27,9 @@ export function useTakeoff() {
   const update = (patch: Partial<TakeoffSetup>) =>
     setSetup((prev) => ({ ...DEFAULT_TAKEOFF_SETUP, ...prev, ...patch }))
 
-  const sim = useSimVars(TAKEOFF_SIM_VARS)
+  // 1 Hz: these are planning values (weight, CG, temperature…), not live needles, so a
+  // slower poll saves a full recompute of the page on every small drift.
+  const sim = useSimVars(TAKEOFF_SIM_VARS, 1)
   const text = useSimText(TAKEOFF_SIM_TEXT)
 
   const detected = detectProfile(AIRCRAFT_PROFILES, text.title, text.atcModel)

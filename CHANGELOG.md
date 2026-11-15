@@ -31,6 +31,12 @@ All notable changes to this project are documented here. The format is based on
   switch is gone: the distance comes from the flight plan, and the manual case is covered
   by Calc. Descent tab and TOD settings are reset once.
 
+### Fixed
+
+- Lighter on the sim: status badges pulse a few times instead of forever, the GS diamond
+  no longer animates, and Takeoff / Flight plan read the sim less often (1 / 2 times a
+  second).
+
 ## [0.2.0] - 2026-11-14
 
 ### Added

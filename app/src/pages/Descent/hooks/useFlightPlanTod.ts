@@ -22,7 +22,8 @@ export function useFlightPlanTod() {
   const [optionsOpen, setOptionsOpen] = usePersistentState('descent.optionsOpen.v1', false, {
     debounceMs: 0,
   })
-  const sim = useSimVars(DESCENT_SIM_VARS)
+  // 2 Hz is plenty for a distance / time to TOD (GS keeps 4 Hz for a smooth needle).
+  const sim = useSimVars(DESCENT_SIM_VARS, 2)
   const update = (patch: Partial<DescentSetup>) => setSetup((prev) => ({ ...prev, ...patch }))
 
   const groundSpeedKt = sim.groundSpeed ?? setup.manualGroundSpeedKt

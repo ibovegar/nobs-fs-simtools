@@ -8,7 +8,7 @@ interface BadgeProps {
   tone?: BadgeTone
   /** Leading status dot (nobs-fs-app's ConnectionIndicator). */
   dot?: boolean
-  /** Pulse the dot to signal a live / active state. */
+  /** Pulse the dot a few times when it appears, to signal a live / active state. */
   pulse?: boolean
   className?: string
   children: ReactNode

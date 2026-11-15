@@ -56,7 +56,8 @@
   margin-top: -8px;
   background: var(--accent);
   transform: rotate(45deg);
-  transition: top 0.3s ease;
+  /* No transition on `top`: the position updates 4×/s, so an animated `top` would mean
+     almost continuous layout work while the GS tab is open. */
 }
 
 .on-slope {
