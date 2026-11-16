@@ -6,13 +6,11 @@ import type {
   FlapSetting,
   GridModel,
   SpeedAdjustments,
-  SpeedModel,
   SpeedPoint,
   TakeoffConditions,
   TakeoffResult,
   TakeoffSpeeds,
   TakeoffWarning,
-  WeightTableModel,
 } from './types'
 
 export const LB_PER_KG = 2.204_622_6
@@ -129,15 +127,6 @@ function fromGrid(model: GridModel, c: TakeoffConditions): TakeoffSpeeds {
   return { v1: vr, vr, v2: pick(1) * k }
 }
 
-/** True when the weight is outside the weights the model has data for. */
-export function isOutsideTable(model: SpeedModel, weightKg: number): boolean {
-  const weights =
-    model.kind === 'grid'
-      ? model.weightsKg
-      : (model as WeightTableModel).points.map((p) => p.weightKg)
-  return weightKg < Math.min(...weights) - 1 || weightKg > Math.max(...weights) + 1
-}
-
 /**
  * V1 / VR / V2 for a flap setting, rounded to whole knots. Applies, in order: the table,
  * OAT / pressure-altitude adjustments, minimum speeds, the wet-runway V1 reduction, then
@@ -221,31 +210,21 @@ export function isPlausibleWeight(profile: AircraftProfile, weightKg: number): b
 }
 
 /**
- * The full answer for a chosen flap setting (`flapId`), or for the recommended one when
- * `flapId` is 'auto' or not a setting of this aircraft.
+ * The full answer, always for the recommended flap setting: SimTools recommends, the pilot
+ * sets (the flap lever badge shows whether the lever matches).
  */
-export function planTakeoff(
-  profile: AircraftProfile,
-  flapId: string,
-  c: TakeoffConditions,
-): TakeoffResult {
-  const recommendation = recommendFlap(profile, c)
-  const chosen = profile.flaps.find((f) => f.id === flapId) ?? recommendation.flap
+export function planTakeoff(profile: AircraftProfile, c: TakeoffConditions): TakeoffResult {
+  const chosen = recommendFlap(profile, c).flap
   const required = requiredRunwayM(profile, chosen, c)
 
   const warnings: TakeoffWarning[] = []
   if (!isPlausibleWeight(profile, c.weightKg)) warnings.push('weight-implausible')
   if (c.weightKg > profile.maxTakeoffWeightKg + 1) warnings.push('over-mtow')
-  if (isOutsideTable(chosen.speeds, c.weightKg)) warnings.push('outside-table')
   if (c.runwayLengthM > 0 && required > c.runwayLengthM) warnings.push('runway-short')
-  if (profile.flaps.indexOf(chosen) < profile.flaps.indexOf(recommendation.flap)) {
-    warnings.push('flaps-below-recommended')
-  }
 
   return {
     speeds: takeoffSpeeds(profile, chosen, c),
     flap: chosen,
-    recommendedFlap: recommendation.flap,
     requiredRunwayM: required,
     trim: takeoffTrim(profile, chosen, c),
     warnings,
@@ -257,18 +236,6 @@ export function flapAngleDeg(flap: FlapSetting): number {
   if (flap.angleDeg !== undefined) return flap.angleDeg
   const n = Number.parseFloat(flap.label)
   return Number.isFinite(n) ? n : 0
-}
-
-/** The profile whose `match` fits the sim's aircraft TITLE or ATC MODEL, if any. */
-export function detectProfile(
-  profiles: readonly AircraftProfile[],
-  ...names: (string | undefined)[]
-): AircraftProfile | undefined {
-  // The sim often reports ATC MODEL as a localisation key, "TT:ATCCOM.AC_MODEL_B736.0.text":
-  // turn its separators into spaces so word-boundary patterns (\bB736\b) match.
-  const text = names.filter(Boolean).join(' ').replace(/[_.:]/g, ' ')
-  if (!text.trim()) return undefined
-  return profiles.find((p) => p.match.test(text))
 }
 
 /** Speed points from a table written in pounds (as in US handbooks). */

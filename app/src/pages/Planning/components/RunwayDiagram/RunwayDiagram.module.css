@@ -93,16 +93,3 @@
 .beyond .distance {
   fill: var(--danger);
 }
-
-.legend {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-top: var(--sp-1);
-  font-size: var(--font-size-sm);
-  color: var(--text-dim);
-}
-
-.legend > *:not(:last-child) {
-  margin-right: var(--sp-3);
-}

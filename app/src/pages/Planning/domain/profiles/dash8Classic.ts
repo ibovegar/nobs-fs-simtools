@@ -103,9 +103,6 @@ const DASH8_300: Variant = {
 
 export const dash8_100: AircraftProfile = {
   id: 'dash8-100',
-  name: 'Dash 8-100',
-  shortName: 'Dash 8-100',
-  match: /\bQ100\b|dash[\s-]?8[\s-]?(q)?1\d\d|\bDH8A\b|DHC-?8-?1\d\d/i,
   engines: 'multi',
   maxTakeoffWeightKg: DASH8_100.mtowKg,
   weightUnit: 'kg',
@@ -118,9 +115,6 @@ export const dash8_100: AircraftProfile = {
 
 export const dash8_200: AircraftProfile = {
   id: 'dash8-200',
-  name: 'Dash 8-200',
-  shortName: 'Dash 8-200',
-  match: /\bQ200\b|dash[\s-]?8[\s-]?(q)?2\d\d|\bDH8B\b|DHC-?8-?2\d\d/i,
   engines: 'multi',
   maxTakeoffWeightKg: DASH8_200.mtowKg,
   weightUnit: 'kg',
@@ -133,9 +127,6 @@ export const dash8_200: AircraftProfile = {
 
 export const dash8_300: AircraftProfile = {
   id: 'dash8-300',
-  name: 'Dash 8-300',
-  shortName: 'Dash 8-300',
-  match: /\bQ300\b|dash[\s-]?8[\s-]?(q)?3\d\d|\bDH8C\b|DHC-?8-?3\d\d/i,
   engines: 'multi',
   maxTakeoffWeightKg: DASH8_300.mtowKg,
   weightUnit: 'kg',

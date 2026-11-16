@@ -62,9 +62,6 @@ const CLASSIC_TRIM_BAND = [1, 6.5] as const
 
 export const boeing737_600: AircraftProfile = {
   id: 'b737-600',
-  name: 'Boeing 737-600',
-  shortName: '737-600',
-  match: /737[\s-]?6\d\d|\bB736\b/i,
   engines: 'multi',
   maxTakeoffWeightKg: 65_544,
   weightUnit: 'kg',
@@ -171,9 +168,6 @@ export const boeing737_600: AircraftProfile = {
 
 export const boeing737_400: AircraftProfile = {
   id: 'b737-400',
-  name: 'Boeing 737-400',
-  shortName: '737-400',
-  match: /737[\s-]?4\d\d|\bB734\b/i,
   engines: 'multi',
   maxTakeoffWeightKg: 68_040,
   weightUnit: 'kg',

@@ -3,6 +3,7 @@ import {
   advanceFlight,
   INITIAL_MOCK_FLIGHT,
   type MockFlightState,
+  mockAircraft,
   mockRoute,
   mockRoutePath,
   pointAlong,
@@ -60,7 +61,9 @@ export function useMockFlight() {
     bridge.set('PRESSURE ALTITUDE', on ? state.pressureAltitudeFt : undefined)
     bridge.set('FLAPS HANDLE INDEX', on ? state.flapHandleIndex : undefined)
     bridge.set('PLANE HEADING DEGREES MAGNETIC', on ? state.headingMagDeg : undefined)
-    bridge.setText('TITLE', on ? state.aircraftTitle : undefined)
+    const aircraft = mockAircraft(state.aircraftId)
+    bridge.setText('TITLE', on ? aircraft.title : undefined)
+    bridge.setText('ATC MODEL', on ? aircraft.atcModel : undefined)
   }, [bridge, state, path])
 
   return { bridge, state, update, path }

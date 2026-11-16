@@ -1,6 +1,7 @@
 import {
   Button,
   Divider,
+  HelpPopover,
   Readout,
   ReadoutGroup,
   Section,
@@ -10,7 +11,6 @@ import {
   Typography,
 } from '@nobs/ui'
 import { type CalculatorProfile, formatAltitude } from '~/pages/InFlight/domain'
-import { HelpPopover } from '../HelpPopover'
 import { RouteProfile } from '../RouteProfile'
 
 interface CalculatorTodCardProps {

@@ -9,9 +9,6 @@ import type { AircraftProfile } from '../types'
 
 export const caravan208B: AircraftProfile = {
   id: 'c208b',
-  name: 'Cessna 208B Grand Caravan',
-  shortName: 'Caravan 208B',
-  match: /grand\s?caravan|\b208\s?B\b|\bC208\b|caravan/i,
   engines: 'single',
   maxTakeoffWeightKg: 8750 / 2.204_622_6,
   weightUnit: 'lb',

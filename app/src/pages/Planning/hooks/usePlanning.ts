@@ -1,8 +1,6 @@
 import {
-  AIRCRAFT_PROFILES,
   type AircraftProfile,
   DEFAULT_TAKEOFF_SETUP,
-  detectProfile,
   LB_PER_KG,
   planTakeoff,
   runwayMarks,
@@ -10,19 +8,21 @@ import {
   type TakeoffConditions,
   type TakeoffSetup,
 } from '~/pages/Planning/domain'
-import { useSimText, useSimVars } from '~/sim'
+import { useSimVars } from '~/sim'
 import { usePersistentState } from '~/storage'
-import { PLANNING_SIM_VARS, TAKEOFF_SIM_TEXT } from './planningSimVars'
-
-const FALLBACK_PROFILE = AIRCRAFT_PROFILES[0] as AircraftProfile
+import { PLANNING_SIM_VARS } from './planningSimVars'
 
 /**
- * All state behind the Planning page: the persisted setup, the aircraft (picked, or
- * recognised from the sim), live sim values with manual fallbacks, and the computed plan.
- * The maths and aircraft data live in the page's domain/.
+ * All state behind the takeoff plan for `profile` (the aircraft recognised in the sim, see
+ * ~/aircraft): the persisted setup, live sim values with manual fallbacks, and the
+ * computed plan. The maths and aircraft data live in the page's domain/.
  */
-export function usePlanning() {
+export function usePlanning(profile: AircraftProfile) {
   const [stored, setSetup] = usePersistentState('takeoff.v1', DEFAULT_TAKEOFF_SETUP)
+  // Navigation state: saved at once, so reopening SimTools shows the notes as left.
+  const [notesOpen, setNotesOpen] = usePersistentState('planning.notesOpen.v1', false, {
+    debounceMs: 0,
+  })
   const setup: TakeoffSetup = { ...DEFAULT_TAKEOFF_SETUP, ...stored }
   const update = (patch: Partial<TakeoffSetup>) =>
     setSetup((prev) => ({ ...DEFAULT_TAKEOFF_SETUP, ...prev, ...patch }))
@@ -30,11 +30,6 @@ export function usePlanning() {
   // 1 Hz: these are planning values (weight, CG, temperature…), not live needles, so a
   // slower poll saves a full recompute of the page on every small drift.
   const sim = useSimVars(PLANNING_SIM_VARS, 1)
-  const text = useSimText(TAKEOFF_SIM_TEXT)
-
-  const detected = detectProfile(AIRCRAFT_PROFILES, text.title, text.atcModel)
-  const chosen = AIRCRAFT_PROFILES.find((p) => p.id === setup.aircraftId)
-  const profile = chosen ?? detected ?? FALLBACK_PROFILE
 
   const live = {
     weightKg: sim.weightLb === undefined ? undefined : sim.weightLb / LB_PER_KG,
@@ -53,32 +48,25 @@ export function usePlanning() {
     wetRunway: setup.wetRunway && profile.wetV1ReductionKt !== undefined,
   }
 
-  const plan = planTakeoff(profile, setup.flapId, conditions)
+  const plan = planTakeoff(profile, conditions)
   // The flap detent the lever is in, when the sim reports it and the profile maps it.
   const leverFlap = profile.flaps.find(
     (f) => f.handleIndex !== undefined && f.handleIndex === sim.flapHandleIndex,
   )
 
-  // The runway number: set by hand, or from the magnetic heading (exact once lined up).
-  const headingRunway =
-    sim.headingMagDeg === undefined ? undefined : runwayNumberFromHeading(sim.headingMagDeg)
+  // The runway number for the picture, from the magnetic heading (exact once lined up).
   const runway = {
-    number: setup.runwayNumber > 0 ? setup.runwayNumber : headingRunway,
-    side: setup.runwaySide,
-    fromHeading: setup.runwayNumber === 0 && headingRunway !== undefined,
-    headingNumber: headingRunway,
+    number:
+      sim.headingMagDeg === undefined ? undefined : runwayNumberFromHeading(sim.headingMagDeg),
     marks: runwayMarks(plan.speeds, plan, setup.runwayLengthM),
   }
 
   return {
     setup,
     update,
-    profiles: AIRCRAFT_PROFILES,
-    profile,
-    /** The profile recognised from the sim's aircraft, if any. */
-    detected,
-    /** The sim's aircraft title, to show what was (not) recognised. */
-    simAircraftTitle: text.title,
+    /** The Notes section is open (collapsed by default). */
+    notesOpen,
+    setNotesOpen,
     weightUnit: setup.weightUnit === 'auto' ? profile.weightUnit : setup.weightUnit,
     conditions,
     live,

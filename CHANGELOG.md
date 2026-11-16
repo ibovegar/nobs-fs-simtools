@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format is based on
 
 ### Added
 
+- **Planning**: Socata TBM 850 takeoff profile (Black Square's TBM 850: VR 85, 50 ft
+  speed 95 KIAS, flaps TO). Black Square's Caravan Professional is recognised as the 208B.
+- The aircraft list (`app/src/aircraft`) is shared by every page: pages key their own
+  per-aircraft data (Planning's takeoff profiles) by its id.
 - **Info** tab (first): your callsign, shown large, entered on an on-screen keypad (letters
   and digits, up to 7). It is saved straight away and kept when you close the sim.
 - A floating "back to top" button in the bottom right corner of every page, once you have
@@ -58,6 +62,46 @@ All notable changes to this project are documented here. The format is based on
 
 ### Changed
 
+- **Planning** follows the aircraft loaded in the sim, recognised from its TITLE and ATC
+  MODEL: the aircraft picker is gone. The **Info** tab shows which aircraft that is (or
+  the sim's title when it isn't recognised). An aircraft SimTools has no data for gets an
+  "Aircraft not supported" card listing the supported ones, instead of another
+  aircraft's numbers.
+- Dev harness: *Takeoff state* picks the aircraft "loaded" in the mock sim (Black Square
+  Caravan and TBM 850, King Air 350, Q400, 737-600, an unsupported A320, none). It sets
+  TITLE and ATC MODEL and a plausible weight, CG and flap lever.
+- Every section title looks the same: the large, semibold card title is now also the
+  title of every section ("Takeoff run", "Flaps and trim", the In flight results…) and
+  fold-out section, through a new `SectionTitle` in `@nobs/ui`.
+- **Planning › Weight and conditions**: the hint under the title is gone.
+- **Planning**: warnings get their own panels under the speeds (below *Notes*): red when the
+  takeoff doesn't work as planned (weight doesn't fit the aircraft, over max takeoff
+  weight, runway too short), yellow when it's allowed but worth a look.
+- **Planning**: no runway number to set (nor L / C / R): the picture takes it from the
+  magnetic heading, exact once lined up. The runway length (and wet / dry, where the
+  aircraft has data) is entered right under the runway picture in *Takeoff run*, without
+  a label or hint; the *Runway* card is gone.
+- **Planning › Takeoff run**: the runway picture spans the same width as the controls and
+  only reserves room for the label rows it uses, so there is no gap above the stepper.
+- **Planning**: the aircraft's notes (trim, procedures) moved out of the answer into a
+  *Notes* section below it, folded by default (body-size text); it stays as you left it.
+- **Planning**: no "Weight outside the speed table" warning: nothing for the pilot to act
+  on, and it showed at every normal TBM 850 weight. Outside its data, speeds are still
+  scaled with weight.
+- **Planning**: a "?" next to V1, VR, V2 and the 50 ft speed explains each.
+- `HelpPopover` (the "?" next to a readout label) moved into `@nobs/ui`, now that two pages
+  use it.
+- **Planning**: the takeoff answer has no title ("Takeoff · Caravan 208B"); the Info tab
+  names the aircraft.
+- **Planning**: the line under the takeoff answer (weight · OAT · pressure altitude, and
+  "live" / "manual · set below") is gone.
+- **Planning** only recommends, it doesn't set: the flaps are always the recommended
+  setting (the usual one, or more flap when the runway is short), and the Flaps card
+  (Auto / a fixed setting) is gone. The lever badge shows whether the sim's flap lever
+  matches. The "Less flap than recommended" warning went with it.
+- **Planning › Takeoff run**: no caption under the runway picture ("Runway length not
+  set: drawn to fit", "Distances from brake release, estimated", "Runway 350 m"): the
+  length is in the stepper right below it.
 - The Takeoff tab is now called **Planning**.
 - The tabs are in flight order: Info, Planning, In flight, Notes, then Settings as an icon.
 - The GS tool is hidden for now (still in the code, to come back later).

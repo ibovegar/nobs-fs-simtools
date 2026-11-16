@@ -1,6 +1,7 @@
 import { QuestionMarkCircleOutlined } from '@lineiconshq/free-icons'
-import { IconButton, Popover } from '@nobs/ui'
 import { type ReactNode, useState } from 'react'
+import { IconButton } from '../IconButton'
+import { Popover } from '../Popover'
 
 interface HelpPopoverProps {
   /** Accessible name of the "?" button, e.g. "What is distance?". */
@@ -11,7 +12,10 @@ interface HelpPopoverProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-/** A small "?" next to a label; tapping it explains what the value means. */
+/**
+ * A small "?" next to a label (e.g. a Readout's `labelAddon`); tapping it explains what the
+ * value means. Opens on tap, never on hover.
+ */
 export function HelpPopover(props: HelpPopoverProps) {
   const { label, children, size } = props
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)

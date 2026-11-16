@@ -9,9 +9,3 @@ export const PLANNING_SIM_VARS = {
   /** Lined up on the runway, this gives the runway number. */
   headingMagDeg: { name: 'PLANE HEADING DEGREES MAGNETIC', unit: 'degrees' },
 }
-
-/** Text sim values used to recognise the aircraft. */
-export const TAKEOFF_SIM_TEXT = {
-  title: 'TITLE',
-  atcModel: 'ATC MODEL',
-}

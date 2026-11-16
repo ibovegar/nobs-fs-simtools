@@ -1,0 +1,6 @@
+.list {
+  margin: 0;
+  /* The Disclosure body starts right under its header: give the text room. */
+  padding: var(--sp-3) 0 0;
+  list-style: none;
+}

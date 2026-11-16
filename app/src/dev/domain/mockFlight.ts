@@ -1,5 +1,6 @@
 // The dev harness's tiny flight model. Pure and unit-tested.
 
+import type { MockAircraftId } from './mockAircraft'
 import type { MockRouteId } from './mockRoutes'
 
 export interface MockFlightState {
@@ -23,8 +24,8 @@ export interface MockFlightState {
   /** Leave one fix out of the mock navigation database, to test missing fixes. */
   missingFix: boolean
   simTimeSec: number
-  /** The aircraft TITLE the sim reports ('' = none), for the Planning page's detection. */
-  aircraftTitle: string
+  /** The aircraft loaded in the mock sim: sets TITLE and ATC MODEL (see mockAircraft). */
+  aircraftId: MockAircraftId
   totalWeightLb: number
   cgPercentMac: number
   oatC: number
@@ -46,12 +47,12 @@ export const INITIAL_MOCK_FLIGHT: MockFlightState = {
   routeProgressNm: 0,
   missingFix: false,
   simTimeSec: 0,
-  aircraftTitle: 'PMDG 737-600 House livery',
-  totalWeightLb: 120_000,
-  cgPercentMac: 22,
+  aircraftId: 'bksq-caravan',
+  totalWeightLb: 8300,
+  cgPercentMac: 25,
   oatC: 15,
   pressureAltitudeFt: 0,
-  flapHandleIndex: 3,
+  flapHandleIndex: 2,
   headingMagDeg: 268,
 }
 

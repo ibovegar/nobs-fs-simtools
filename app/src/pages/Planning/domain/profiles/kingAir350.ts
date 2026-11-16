@@ -13,9 +13,6 @@ import type { AircraftProfile } from '../types'
 
 export const kingAir350: AircraftProfile = {
   id: 'kingair-350',
-  name: 'King Air 350',
-  shortName: 'King Air 350',
-  match: /king\s?air[\s-]*350|\bB350\b|\b350i\b|king\s?air\s?B300|\bB300\b/i,
   engines: 'multi',
   maxTakeoffWeightKg: 15_000 / 2.204_622_6,
   weightUnit: 'lb',

@@ -2,6 +2,7 @@ import {
   Badge,
   type BadgeTone,
   Divider,
+  HelpPopover,
   Readout,
   ReadoutGroup,
   Section,
@@ -25,7 +26,6 @@ import {
   type RouteWaypoint,
   type VerticalProfile,
 } from '~/pages/InFlight/domain'
-import { HelpPopover } from '../HelpPopover'
 import { RouteProfile } from '../RouteProfile'
 
 const A = PROFILE_ASSUMPTIONS

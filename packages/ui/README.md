@@ -62,6 +62,8 @@ import {
 | `Typography` | Text in the type scale: `variant` `body` / `caption` / `label` (uppercase mono) / `inherit` (the surrounding size), `color` (`dim`, `mid`, `danger`, …), `mono`, `noWrap`, `component` |
 | `ScrollArea` | Vertical scroll box with its own visible scrollbar (draggable thumb, click the track to page), for hosts that draw none (MSFS) and VR controllers without a wheel. Width from `--scrollbar-w`; the gutter is always reserved. `viewportClassName` styles the scrolling content box. `dragToScroll` lets the user drag the content itself (starts after 10px, swallows the click after a drag; inputs, canvases and `[data-no-drag-scroll]` opt out), `naturalScroll` (default `true`) sets its direction. `scrollbarGutter="auto"` reserves the gutter only while there is something to scroll (content takes the full width otherwise); `onScrollbarChange` reports when the scrollbar comes or goes |
 | `Section`, `Card` | Surfaces: labelled panel, and bordered group with title/hint/actions |
+| `HelpPopover` | A small "?" button (e.g. a `Readout`'s `labelAddon`) that opens a short explanation on tap; `size` `sm` / `md` / `lg` |
+| `SectionTitle` | The one title style (large, semibold): `Section`, `Card` and `Disclosure` titles use it, so every section title looks the same |
 | `SectionContent`, `SectionMedia` | A `Section`'s body: padded content with a `gap`, and edge-to-edge media (a chart) between contents. Padding never doubles where they meet |
 | `Button`, `IconButton` | primary / secondary / ghost / danger, toggle via `selected` |
 | `SegmentedControl` | Pick one of a few options (label + hint + icon); `size`: `sm` / `md` / `lg` (default, full control height), `md` suits sub-tabs |

@@ -7,6 +7,7 @@ import {
   Card,
   Divider,
   Field,
+  HelpPopover,
   IconButton,
   Readout,
   ReadoutGroup,
@@ -17,7 +18,6 @@ import {
   Sticky,
   Typography,
 } from '@nobs/ui'
-import { HelpPopover } from '~/pages/InFlight/components'
 import { formatInteger, type TopOfDescentResult } from '~/pages/InFlight/domain'
 import { type SimFillField, useTopOfDescent } from '~/pages/InFlight/hooks'
 import styles from './DescentCalculator.module.css'

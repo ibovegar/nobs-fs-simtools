@@ -1,12 +1,12 @@
 import {
   Badge,
   Divider,
+  HelpPopover,
   Readout,
   ReadoutGroup,
   Section,
   SectionContent,
   Stack,
-  Typography,
 } from '@nobs/ui'
 import {
   type AircraftProfile,
@@ -14,65 +14,76 @@ import {
   FT_PER_M,
   formatInteger,
   formatTrim,
-  formatWeight,
   type TakeoffConditions,
   type TakeoffResult,
-  type TakeoffWarning,
 } from '~/pages/Planning/domain'
-import styles from './TakeoffSummary.module.css'
-
-const WARNING_TEXT: Record<TakeoffWarning, string> = {
-  'weight-implausible': 'This weight doesn’t fit this aircraft: check the aircraft and weight',
-  'over-mtow': 'Above maximum takeoff weight',
-  'outside-table': 'Weight outside the speed table: speeds are extrapolated',
-  'runway-short': 'Runway may be too short for this weight and flap setting',
-  'flaps-below-recommended': 'Less flap than recommended for this runway',
-}
 
 interface TakeoffSummaryProps {
   profile: AircraftProfile
   result: TakeoffResult
   conditions: TakeoffConditions
-  weightUnit: 'kg' | 'lb'
-  /** True when weight, OAT and pressure altitude all come from the sim. */
-  live: boolean
   /** The flap detent the sim's lever is in; undefined when unknown or not a takeoff detent. */
   leverFlap: FlapSetting | undefined
   leverKnown: boolean
 }
 
-/**
- * The answer: V-speeds, flaps and trim for the aircraft, then warnings and a quiet line
- * with the weight and conditions it's based on.
- */
+/** The answer: V-speeds, flaps and trim (or runway needed) for the aircraft, for the aircraft. Warnings: TakeoffWarnings; notes: TakeoffNotes. */
 export function TakeoffSummary(props: TakeoffSummaryProps) {
-  const { profile, result, conditions, weightUnit, live, leverFlap, leverKnown } = props
+  const { profile, result, conditions, leverFlap, leverKnown } = props
   const { speeds, flap, trim } = result
   const single = profile.engines === 'single'
   const leverSet = leverFlap?.id === flap.id
   const implausible = result.warnings.includes('weight-implausible')
-  // A wrong aircraft or weight makes every other warning noise.
-  const warnings: readonly TakeoffWarning[] = implausible ? ['weight-implausible'] : result.warnings
   const kt = (v: number | undefined) => (implausible || v === undefined ? '—' : v)
 
-  const basis = [
-    formatWeight(conditions.weightKg, weightUnit),
-    `${Math.round(conditions.oatC)} °C`,
-    `PA ${Math.round(conditions.pressureAltitudeFt)} ft`,
-  ].join('  ·  ')
-  const notes = [
-    profile.trim.kind === 'advice' ? profile.trim.text : undefined,
-    profile.trim.kind === 'computed' ? profile.trim.note : undefined,
-    ...profile.notes,
-  ].filter((note): note is string => Boolean(note))
-
   return (
-    <Section label={`Takeoff · ${profile.shortName}`}>
+    <Section>
       <SectionContent>
         <ReadoutGroup>
-          {!single && <Readout size="lg" label="V1" value={kt(speeds.v1)} unit="kt" />}
-          <Readout size="lg" label="VR" value={kt(speeds.vr)} unit="kt" />
-          <Readout size="lg" label={single ? '50 ft' : 'V2'} value={kt(speeds.v2)} unit="kt" />
+          {!single && (
+            <Readout
+              size="lg"
+              label="V1"
+              labelAddon={
+                <HelpPopover label="What is V1?">
+                  Decision speed: before it, stop if something goes wrong; from it on, the takeoff
+                  continues, even with an engine failure.
+                </HelpPopover>
+              }
+              value={kt(speeds.v1)}
+              unit="kt"
+            />
+          )}
+          <Readout
+            size="lg"
+            label="VR"
+            labelAddon={
+              <HelpPopover label="What is VR?">
+                Rotation speed: at this speed, raise the nose to lift off.
+              </HelpPopover>
+            }
+            value={kt(speeds.vr)}
+            unit="kt"
+          />
+          <Readout
+            size="lg"
+            label={single ? '50 ft' : 'V2'}
+            labelAddon={
+              single ? (
+                <HelpPopover label="What is the 50 ft speed?">
+                  The speed to have as you pass 50 ft above the runway. Hold it in the first part of
+                  the climb, until you are clear of obstacles.
+                </HelpPopover>
+              ) : (
+                <HelpPopover label="What is V2?">
+                  Takeoff safety speed: the speed to climb at, by 35 ft above the runway, if an
+                  engine fails. Hold at least V2 until clear of obstacles.
+                </HelpPopover>
+              )
+            }
+            value={kt(speeds.v2)}
+            unit="kt"
+          />
         </ReadoutGroup>
 
         <Stack gap={3}>
@@ -113,41 +124,6 @@ export function TakeoffSummary(props: TakeoffSummaryProps) {
               />
             )}
           </ReadoutGroup>
-
-          {warnings.length > 0 && (
-            <Stack component="ul" gap={2} className={styles.list}>
-              {warnings.map((w) => (
-                <Typography
-                  key={w}
-                  component="li"
-                  color={w === 'outside-table' ? 'warning' : 'danger'}
-                  className={styles.warning}
-                >
-                  {WARNING_TEXT[w]}
-                </Typography>
-              ))}
-            </Stack>
-          )}
-
-          <Stack component="ul" gap={1} className={styles.list}>
-            {notes.map((note) => (
-              <Typography key={note} component="li" variant="caption" color="mid">
-                {note}
-              </Typography>
-            ))}
-          </Stack>
-        </Stack>
-
-        <Stack gap={3}>
-          <Divider />
-          <Stack direction="row" wrap gap={3} align="baseline" justify="between">
-            <Typography variant="caption" mono noWrap color="default">
-              {basis}
-            </Typography>
-            <Typography variant="caption" color="dim">
-              {live ? 'live' : 'manual · set below'}
-            </Typography>
-          </Stack>
         </Stack>
       </SectionContent>
     </Section>

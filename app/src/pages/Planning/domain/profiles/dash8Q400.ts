@@ -376,9 +376,6 @@ const FLAPS_15 = [
 /** Q400 flap lever detents: 0 5 10 15 35. */
 export const dash8Q400: AircraftProfile = {
   id: 'dash8-q400',
-  name: 'Dash 8-400 (Q400)',
-  shortName: 'Q400',
-  match: /\bQ400\b|dash[\s-]?8[\s-]?(q)?4\d\d|\bDH8D\b|DHC-?8-?4\d\d/i,
   engines: 'multi',
   maxTakeoffWeightKg: 29_257,
   weightUnit: 'kg',

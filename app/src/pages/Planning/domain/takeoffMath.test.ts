@@ -11,7 +11,6 @@ import {
 } from './profiles'
 import {
   densityRatio,
-  detectProfile,
   LB_PER_KG,
   lookup2d,
   planTakeoff,
@@ -220,8 +219,8 @@ describe('flap recommendation', () => {
 })
 
 describe('planTakeoff', () => {
-  it('follows the recommendation for "auto" and warns about weight and runway', () => {
-    const plan = planTakeoff(boeing737_600, 'auto', {
+  it('follows the recommendation and warns about weight and runway', () => {
+    const plan = planTakeoff(boeing737_600, {
       ...STD,
       weightKg: 70_000,
       runwayLengthM: 1200,
@@ -231,61 +230,22 @@ describe('planTakeoff', () => {
     expect(plan.trim).toBeDefined()
   })
 
-  it('warns when the chosen flap is less than recommended', () => {
-    const plan = planTakeoff(dash8Q400, '5', {
-      ...STD,
-      weightKg: 29_000,
-      runwayLengthM: 1350,
-    })
-    expect(plan.recommendedFlap.id).not.toBe('5')
-    expect(plan.warnings).toContain('flaps-below-recommended')
+  it('always plans the recommended flap: more flap for a short runway', () => {
+    const conditions = { ...STD, weightKg: 29_000 }
+    expect(planTakeoff(dash8Q400, conditions).flap.id).toBe('5')
+    expect(planTakeoff(dash8Q400, { ...conditions, runwayLengthM: 1350 }).flap.id).not.toBe('5')
   })
 
   it('flags a weight that cannot be this aircraft (e.g. a 737 weight on the Caravan)', () => {
-    const plan = planTakeoff(caravan208B, 'auto', { ...STD, weightKg: 54_000 })
+    const plan = planTakeoff(caravan208B, { ...STD, weightKg: 54_000 })
     expect(plan.warnings).toContain('weight-implausible')
-    expect(planTakeoff(caravan208B, 'auto', { ...STD, weightKg: 3800 }).warnings).not.toContain(
+    expect(planTakeoff(caravan208B, { ...STD, weightKg: 3800 }).warnings).not.toContain(
       'weight-implausible',
     )
   })
 
   it('has no trim value for advice-only profiles', () => {
-    expect(planTakeoff(kingAir350, 'auto', { ...STD, weightKg: 6000 }).trim).toBeUndefined()
-  })
-})
-
-describe('detectProfile', () => {
-  it.each([
-    ['PMDG 737-600 Asobo livery', 'b737-600'],
-    ['Boeing 737-400 KLM', 'b737-400'],
-    ['Cessna Grand Caravan 208B EX', 'c208b'],
-    ['Beechcraft King Air 350i', 'kingair-350'],
-    ['Dash 8 Q400 Wideroe', 'dash8-q400'],
-    ['DHC-8-311 Dash 8', 'dash8-300'],
-    ['Dash 8-202', 'dash8-200'],
-    ['Dash8-100', 'dash8-100'],
-  ])('%s → %s', (title, id) => {
-    expect(detectProfile(AIRCRAFT_PROFILES, title)?.id).toBe(id)
-  })
-
-  it.each([
-    ['TT:ATCCOM.AC_MODEL_B736.0.text', 'b737-600'],
-    ['TT:ATCCOM.AC_MODEL_B734.0.text', 'b737-400'],
-    ['TT:ATCCOM.AC_MODEL_DH8D.0.text', 'dash8-q400'],
-    ['TT:ATCCOM.AC_MODEL_DH8C.0.text', 'dash8-300'],
-    ['TT:ATCCOM.AC_MODEL_B350.0.text', 'kingair-350'],
-    ['TT:ATCCOM.AC_MODEL_C208.0.text', 'c208b'],
-  ])('recognises the sim ATC MODEL key %s → %s', (atcModel, id) => {
-    expect(detectProfile(AIRCRAFT_PROFILES, 'Unrecognisable livery title', atcModel)?.id).toBe(id)
-  })
-
-  it('uses ATC MODEL too, and returns undefined for unknown aircraft', () => {
-    expect(detectProfile(AIRCRAFT_PROFILES, 'Some livery', 'B736')?.id).toBe('b737-600')
-    expect(
-      detectProfile(AIRCRAFT_PROFILES, 'Airbus', 'TT:ATCCOM.AC_MODEL_A20N.0.text'),
-    ).toBeUndefined()
-    expect(detectProfile(AIRCRAFT_PROFILES, 'Airbus A320neo')).toBeUndefined()
-    expect(detectProfile(AIRCRAFT_PROFILES, undefined)).toBeUndefined()
+    expect(planTakeoff(kingAir350, { ...STD, weightKg: 6000 }).trim).toBeUndefined()
   })
 })
 

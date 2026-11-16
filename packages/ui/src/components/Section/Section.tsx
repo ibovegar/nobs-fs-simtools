@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { cx } from '../../utils'
+import { SectionTitle } from '../SectionTitle'
 import styles from './Section.module.css'
 
 interface SectionProps {
-  /** Small uppercase heading, as on nobs-fs-app's page sections. */
+  /** The section's title (SectionTitle: the same on every surface). */
   label?: string
   /** Right-aligned header content (e.g. a status badge or action buttons). */
   actions?: ReactNode
@@ -22,7 +23,7 @@ export function Section(props: SectionProps) {
     <section className={cx(styles.section, className)}>
       {(label || actions) && (
         <header className={styles.header}>
-          {label && <span className={styles.label}>{label}</span>}
+          {label && <SectionTitle>{label}</SectionTitle>}
           {actions && <div className={styles.actions}>{actions}</div>}
         </header>
       )}

@@ -1,0 +1,23 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A tinted panel per warning, the same radius as a Section. */
+.item {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.danger {
+  border-color: var(--danger-main);
+  background: var(--danger-dim);
+}
+
+.warning {
+  border-color: var(--warning);
+  background: var(--warning-dim);
+}

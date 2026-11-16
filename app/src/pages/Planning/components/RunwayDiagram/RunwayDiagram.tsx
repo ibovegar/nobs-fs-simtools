@@ -4,21 +4,20 @@ import {
   formatInteger,
   formatRunwayDesignator,
   type RunwayMarks,
-  type RunwaySide,
   reciprocalRunwayNumber,
-  reciprocalSide,
   type TakeoffSpeeds,
 } from '~/pages/Planning/domain'
 import styles from './RunwayDiagram.module.css'
 
-/** Layout in px. */
-const PAD_X = 8
+/** Layout in px. No side padding: the runway spans the full width, like the controls. */
+const PAD_X = 0
 const RUNWAY_H = 46
-/** Up to three rows of labels above the runway (speeds) and below it (distances). */
+/**
+ * Up to three rows of labels above the runway (speeds) and below it (distances); only the
+ * rows in use take space.
+ */
 const ROW_H = 14
 const ROWS = 3
-const LABEL_H = ROWS * ROW_H + 8
-const HEIGHT = RUNWAY_H + 2 * LABEL_H
 /** Threshold markings + painted number + aircraft before the brake release point. */
 const THRESHOLD_PX = 64
 /** A label goes in the first row whose last label is at least this far to the left. */
@@ -33,9 +32,8 @@ const OVERRUN_PX = 26
 interface RunwayDiagramProps {
   marks: RunwayMarks
   speeds: TakeoffSpeeds
-  /** Runway number 1–36; undefined when unknown (no number painted). */
+  /** Runway number 1–36, from the heading; undefined when unknown (no number painted). */
   runwayNumber: number | undefined
-  runwaySide: RunwaySide
   /** Single-engine aircraft: VR and the 50 ft speed, no V1. */
   single: boolean
 }
@@ -54,7 +52,7 @@ interface SpeedLine {
  * reached (estimated). A V2 point past the end of the runway shows in red beyond it.
  */
 export function RunwayDiagram(props: RunwayDiagramProps) {
-  const { marks, speeds, runwayNumber, runwaySide, single } = props
+  const { marks, speeds, runwayNumber, single } = props
 
   const ref = useRef<HTMLDivElement>(null)
   const { width } = useElementSize(ref)
@@ -74,9 +72,6 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
   ]
 
   const overrun = marks.v2M > marks.runwayM
-  const top = LABEL_H
-  const bottom = top + RUNWAY_H
-  const mid = top + RUNWAY_H / 2
   const startX = PAD_X
   const releaseX = startX + THRESHOLD_PX
   const endX = width - PAD_X - (overrun ? OVERRUN_PX : 0)
@@ -84,17 +79,24 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
   const pxPerM = Math.max(0, endX - releaseX) / marks.runwayM
   const xAt = (m: number) => Math.min(releaseX + m * pxPerM, width - PAD_X)
 
-  const designator =
-    runwayNumber === undefined ? undefined : formatRunwayDesignator(runwayNumber, runwaySide)
+  const placed = layoutLines(lines, xAt)
+  const rowsUsed = Math.max(1, ...placed.map((l) => l.row + 1))
+  const labelH = rowsUsed * ROW_H + 8
+  const height = RUNWAY_H + 2 * labelH
+  const top = labelH
+  const bottom = top + RUNWAY_H
+  const mid = top + RUNWAY_H / 2
+
+  const designator = runwayNumber === undefined ? undefined : formatRunwayDesignator(runwayNumber)
   const farDesignator =
     runwayNumber === undefined
       ? undefined
-      : formatRunwayDesignator(reciprocalRunwayNumber(runwayNumber), reciprocalSide(runwaySide))
+      : formatRunwayDesignator(reciprocalRunwayNumber(runwayNumber))
 
   return (
     <div ref={ref} className={styles.diagram}>
       {width > 0 && (
-        <svg width={width} height={HEIGHT} className={styles.svg} aria-hidden="true">
+        <svg width={width} height={height} className={styles.svg} aria-hidden="true">
           <rect
             className={styles.runway}
             x={startX}
@@ -146,7 +148,7 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
             </text>
           )}
 
-          {layoutLines(lines, xAt).map((l) => {
+          {placed.map((l) => {
             const beyond = l.distanceM > marks.runwayM
             return (
               <g key={l.key} className={beyond ? styles.beyond : styles[l.tone]}>
@@ -181,14 +183,6 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
           <Aircraft x={releaseX - 15} y={mid} />
         </svg>
       )}
-      <div className={styles.legend}>
-        <span>
-          {marks.lengthKnown
-            ? `Runway ${formatInteger(marks.runwayM)} m`
-            : 'Runway length not set: drawn to fit'}
-        </span>
-        <span>Distances from brake release, estimated</span>
-      </div>
     </div>
   )
 }

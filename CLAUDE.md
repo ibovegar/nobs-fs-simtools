@@ -91,8 +91,10 @@ dev/                browser dev harness (`pnpm dev`): same tree with a mock sim 
                     like a page: DevHarness.tsx (+ main.tsx entry), MockSimBridge.ts,
                     MockNavData.ts (mock flight plan + nav database), hooks/
                     (useMockFlight), components/ (PanelFrame, SimulatorCard,
-                    AircraftStateCard, FlightPlanCard), domain/ (mockFlight: the tested
-                    flight model; mockRoutes: sample flight plans in the sim's shapes;
+                    AircraftStateCard, FlightPlanCard, TakeoffStateCard: the aircraft
+                    loaded in the mock sim), domain/ (mockFlight: the tested
+                    flight model; mockAircraft: sim TITLE / ATC MODEL presets;
+                    mockRoutes: sample flight plans in the sim's shapes;
                     mockRoutePath: the flown path, built with the In flight domain)
 App.tsx             tab shell: renders a tab per page and remembers the active one. Each page
                     scrolls in a ScrollArea under a fixed PageHeaderArea: a page puts its
@@ -100,10 +102,11 @@ App.tsx             tab shell: renders a tab per page and remembers the active o
                     panel is closed
 pages/
   pageRegistry.ts   the list of pages (tabs) in order
-  Info/             Info.tsx: what the pilot enters once and keeps (the callsign)
+  Info/             Info.tsx: what the pilot enters once and keeps (the callsign), and
+                    the aircraft loaded in the sim (~/aircraft)
                     + infoIcon (the tab's "i" icon: Lineicons has none)
     hooks/          useInfo (saved at once, survives closing the sim)
-    components/     CallsignCard (alphanumeric Keypad)
+    components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft)
     domain/         callsign (ICAO rules: A–Z, 0–9, at most 7)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
@@ -120,8 +123,8 @@ pages/
                     GlideslopeMonitor
     components/     Flight plan (read-only, no settings): FlightPlanOverview (phase,
                     one readout + RouteProfile side view), WaypointList (collapsible),
-                    FlightPlanMessage, CalculatorTodCard. Shared: HelpPopover (the "?"
-                    next to a readout label).
+                    FlightPlanMessage, CalculatorTodCard. The "?" next to a readout
+                    label is @nobs/ui's HelpPopover.
                     GS: GlideslopeCard (GlideslopeProfile side view + GlideslopeScale dots),
                     GlidepathCard (V/S for the angle), RunwayCard. Shared: SimValueField
     domain/         topOfDescent (the calculator, ported from descent.vercel.app),
@@ -133,13 +136,24 @@ pages/
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
                     descent), calculatorProfile (the calculator's descent as a side view)
   Planning/         Planning.tsx
-    hooks/          usePlanning, planningSimVars (+ TITLE / ATC MODEL text vars)
+                    shows TakeoffPlan for the sim's aircraft (~/aircraft) when it has
+                    takeoff data, or UnknownAircraftCard
+    hooks/          usePlanning (setup + plan for a profile), planningSimVars
+    containers/     TakeoffPlan: the plan for the recognised aircraft
     components/     TakeoffSummary, RunwayDiagram (top view: V1/VR/V2 lines), TakeoffConfig
-                    (side view: flaps + trim), AircraftCard, FlapsCard, ConditionsCard
-    domain/         takeoffMath (speeds, flap choice, trim, detection), runway (diagram
-                    geometry), types, setup, format, profiles/ (one file per aircraft;
+                    (side view: flaps + trim), TakeoffWarnings (red / yellow panels),
+                    TakeoffNotes (folded), RunwayInputs (length under the runway picture),
+                    UnknownAircraftCard, ConditionsCard. No flap
+                    picker: the page shows the recommendation, it never sets anything
+    domain/         takeoffMath (speeds, recommended flap, trim), warnings (severity,
+                    which to show), runway (diagram geometry), types, setup, format,
+                    profiles/ (takeoff data per aircraft id, takeoffProfile(id);
                     docs/takeoff-profiles.md)
   Settings/         Settings.tsx
+aircraft/           the aircraft SimTools recognises in the sim (no picker, anywhere):
+                    catalogue.ts (AIRCRAFT: id, name, match on TITLE / ATC MODEL;
+                    detectAircraft), hooks/ (useSimAircraft). Pages key their own
+                    per-aircraft data by the aircraft id (Planning's takeoff profiles)
 components/         views shared by 2+ pages: SimValueField (live sim value or manual entry)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / density / active page /
@@ -162,9 +176,10 @@ storage/            KeyValueStorage.ts (sim DataStorage | localStorage | memory)
 |---|---|
 | `App.tsx` | `~/pages`, `~/providers`, `@nobs/ui` |
 | `components/` (shared views) | `@nobs/ui` |
-| `pages/<Page>/<Page>.tsx` | its own `./hooks`, `./containers`, `./components`, `./domain`; `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
-| `pages/<Page>/hooks/` | its page's domain, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
-| `pages/<Page>/containers/` | its page's hooks, components and domain, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
+| `pages/<Page>/<Page>.tsx` | its own `./hooks`, `./containers`, `./components`, `./domain`; `~/aircraft`, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
+| `pages/<Page>/hooks/` | its page's domain, `~/aircraft`, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
+| `pages/<Page>/containers/` | its page's hooks, components and domain, `~/aircraft`, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
+| `aircraft/` | `~/sim`, `@nobs/ui` |
 | `pages/<Page>/components/` | its page's domain, `~/components`, `@nobs/ui` |
 | `pages/<Page>/domain/` | nothing app-side (type-only imports from `@nobs/ui` are fine) |
 | `providers/` | types only from `~/sim` / `~/storage` (see Providers below) |

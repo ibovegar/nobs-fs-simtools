@@ -7,7 +7,7 @@ export {
   kgToUnit,
   unitToKg,
 } from './format'
-export { AIRCRAFT_PROFILES } from './profiles'
+export { AIRCRAFT_PROFILES, takeoffProfile } from './profiles'
 export {
   formatRunwayDesignator,
   type RunwayMarks,
@@ -20,7 +20,6 @@ export {
 export { DEFAULT_TAKEOFF_SETUP, type TakeoffSetup } from './setup'
 export {
   densityRatio,
-  detectProfile,
   FT_PER_M,
   flapAngleDeg,
   LB_PER_KG,
@@ -38,3 +37,4 @@ export type {
   TakeoffSpeeds,
   TakeoffWarning,
 } from './types'
+export { shownWarnings, WARNING_SEVERITY, type WarningSeverity } from './warnings'

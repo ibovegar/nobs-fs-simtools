@@ -29,10 +29,7 @@ export function ConditionsCard(props: ConditionsCardProps) {
   const toUnit = (kg: number) => kgToUnit(kg, weightUnit)
 
   return (
-    <Card
-      title="Weight and conditions"
-      hint="From the sim when it reports them; otherwise enter them."
-    >
+    <Card title="Weight and conditions">
       <SimValueField
         label="Takeoff weight"
         liveValue={live.weightKg === undefined ? undefined : toUnit(live.weightKg)}

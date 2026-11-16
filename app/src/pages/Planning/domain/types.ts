@@ -98,14 +98,8 @@ export type TakeoffTrim =
   | { kind: 'advice'; text: string }
 
 export interface AircraftProfile {
-  /** Stable id, persisted as the user's choice. */
+  /** The id of the aircraft in ~/aircraft (AIRCRAFT) this takeoff data is for. */
   id: string
-  /** Full name ('Boeing 737-600'). */
-  name: string
-  /** Short name for buttons and badges ('737-600'). */
-  shortName: string
-  /** Matched against the sim's TITLE and ATC MODEL to pick this profile automatically. */
-  match: RegExp
   /** Single-engine aircraft have no V1/V2: the speeds are VR and the speed at 50 ft. */
   engines: 'single' | 'multi'
   maxTakeoffWeightKg: number
@@ -143,12 +137,11 @@ export interface TakeoffSpeeds {
 
 export type TakeoffWarning =
   /** Far outside the aircraft's weights (wrong aircraft or weight): no speeds shown. */
-  'weight-implausible' | 'over-mtow' | 'outside-table' | 'runway-short' | 'flaps-below-recommended'
+  'weight-implausible' | 'over-mtow' | 'runway-short'
 
 export interface TakeoffResult {
   speeds: TakeoffSpeeds
   flap: FlapSetting
-  recommendedFlap: FlapSetting
   /** Estimated runway needed with the chosen flap (m). */
   requiredRunwayM: number
   /** Trim value in the profile's unit, or undefined when the profile gives advice. */

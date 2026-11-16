@@ -1,37 +1,43 @@
-import { Card, Field, SegmentedControl, Stepper } from '@nobs/ui'
-import type { MockFlightState } from '~/dev/domain'
+import { Button, Card, Field, Stack, Stepper } from '@nobs/ui'
+import { MOCK_AIRCRAFT, type MockFlightState } from '~/dev/domain'
 
 const round = (n: number) => Math.round(n).toLocaleString('en-US')
-
-/** Aircraft titles to try the Planning page's detection with ('' = none reported). */
-const TITLES = [
-  { value: 'Cessna Grand Caravan 208B', label: 'C208B' },
-  { value: 'Beechcraft King Air 350i', label: 'KA350' },
-  { value: 'Dash 8 Q400', label: 'Q400' },
-  { value: 'PMDG 737-600 House livery', label: '737-600' },
-  { value: 'Airbus A320neo', label: 'A320' },
-  { value: '', label: 'None' },
-] as const
 
 interface TakeoffStateCardProps {
   state: MockFlightState
   onChange: (patch: Partial<MockFlightState>) => void
 }
 
-/** The values the mock sim reports for the Planning page. */
+/**
+ * The values the mock sim reports for the Planning page. Picking an aircraft "loads" it:
+ * the sim reports its TITLE and ATC MODEL (which the page recognises it from), and a
+ * plausible weight, CG and flap lever for it.
+ */
 export function TakeoffStateCard(props: TakeoffStateCardProps) {
   const { state, onChange } = props
 
   return (
     <Card title="Takeoff state">
-      <Field label="Aircraft title">
-        <SegmentedControl
-          label="Aircraft title"
-          options={TITLES}
-          value={state.aircraftTitle}
-          onChange={(aircraftTitle) => onChange({ aircraftTitle })}
-          size="sm"
-        />
+      <Field label="Aircraft in the sim">
+        <Stack direction="row" wrap gap={2}>
+          {MOCK_AIRCRAFT.map((a) => (
+            <Button
+              key={a.id}
+              size="sm"
+              selected={a.id === state.aircraftId}
+              onClick={() =>
+                onChange({
+                  aircraftId: a.id,
+                  totalWeightLb: a.totalWeightLb,
+                  cgPercentMac: a.cgPercentMac,
+                  flapHandleIndex: a.flapHandleIndex,
+                })
+              }
+            >
+              {a.label}
+            </Button>
+          ))}
+        </Stack>
       </Field>
       <Field label="Total weight">
         <Stepper

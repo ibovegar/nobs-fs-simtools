@@ -2,6 +2,7 @@ import { ChevronDownOutlined, ChevronUpOutlined } from '@lineiconshq/free-icons'
 import { type ReactNode, useId, useState } from 'react'
 import { cx } from '../../utils'
 import { Icon } from '../Icon'
+import { SectionTitle } from '../SectionTitle'
 import styles from './Disclosure.module.css'
 
 interface DisclosureProps {
@@ -52,7 +53,9 @@ export function Disclosure(props: DisclosureProps) {
         aria-controls={bodyId}
         onClick={() => setOpen(!open)}
       >
-        <span className={styles.title}>{title}</span>
+        <SectionTitle component="span" className={styles.title}>
+          {title}
+        </SectionTitle>
         {summary && <span className={styles.summary}>{summary}</span>}
         <Icon icon={open ? ChevronUpOutlined : ChevronDownOutlined} className={styles.chevron} />
       </button>
