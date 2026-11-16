@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format is based on
 
 ### Added
 
+- **Info** tab (first): your callsign, entered on an on-screen keypad (letters and digits,
+  up to 7). It is saved straight away and kept when you close the sim.
 - A floating "back to top" button in the bottom right corner of every page, once you have
   scrolled down.
 - **In flight › TOD calculator**: the rules-of-thumb top-of-descent calculator from
@@ -39,7 +41,7 @@ All notable changes to this project are documented here. The format is based on
     faster you go, and a dashed one to the planned path. The chart is taller and runs the
     full width, with the altitude labels inside it, above their lines. On the Climb
     view, flying past its end (a little after TOC) switches to the whole flight.
-  - A waypoint list (folded each time the tab opens): distance (to go while flying), planned
+  - A waypoint list (unfolded each time the tab opens): distance (to go while flying), planned
     altitude, altitude and speed limits, TOC / TOD rows, the next fix highlighted.
   - Without a flight plan (or a sim), the tab shows the TOD calculator's descent instead:
     its results in the same place as on the calculator, the descent from the side (level, TOD, descent,
@@ -57,7 +59,9 @@ All notable changes to this project are documented here. The format is based on
 ### Changed
 
 - The Takeoff tab is now called **Planning**.
-- The tabs are in flight order: Planning, In flight, Notes, then Settings as an icon.
+- The tabs are in flight order: Info, Planning, In flight, Notes, then Settings as an icon.
+- Buttons use the same tinted blue as the calculator's −/+ buttons, and the ATC and callsign
+  keypads use the same keys as the Notes keyboard.
 - For developers: the page modules follow the tab names, `pages/Descent` → `pages/InFlight`
   and `pages/Takeoff` → `pages/Planning`.
 - Sub-tabs (In flight's tools, Notes' note types) stay in place while the page scrolls.

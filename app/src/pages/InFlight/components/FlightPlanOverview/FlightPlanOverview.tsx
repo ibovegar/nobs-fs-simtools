@@ -66,8 +66,9 @@ interface FlightPlanOverviewProps {
 }
 
 /**
- * The flight at a glance: the route and phase, the one number that matters now (to TOC,
- * to TOD, or the descent path deviation), and the planned profile from the side.
+ * The flight at a glance, in two sections: the route and phase with the one number that
+ * matters now (to TOC, to TOD, or the descent path deviation), then the planned profile
+ * from the side with its view switch.
  */
 export function FlightPlanOverview(props: FlightPlanOverviewProps) {
   const {
@@ -90,38 +91,42 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
     // Laid out exactly like the TOD calculator's results (no section header, label line
     // then the big value), so switching tabs doesn't shift the answer. The route is the
     // label line; the status badge takes the calculator's pin corner.
-    <Section>
-      <SectionContent>
-        <Results
-          label={`${title}  ·  ${cruise}`}
-          action={
-            <Badge tone={badge.tone} dot pulse={badge.pulse}>
-              {badge.label}
-            </Badge>
-          }
-          progress={progress}
-          descentRateFpm={descentRateFpm}
-        />
-      </SectionContent>
-      <SectionMedia>
-        <RouteProfile
-          profile={profile}
-          waypoints={waypoints}
-          view={view}
-          aircraft={aircraft}
-          nextIndex={nextIndex}
-        />
-      </SectionMedia>
-      <SectionContent>
-        <SegmentedControl
-          label="Profile view"
-          options={VIEWS}
-          value={view}
-          onChange={onViewChange}
-          size="sm"
-        />
-      </SectionContent>
-    </Section>
+    <>
+      <Section>
+        <SectionContent>
+          <Results
+            label={`${title}  ·  ${cruise}`}
+            action={
+              <Badge tone={badge.tone} dot pulse={badge.pulse}>
+                {badge.label}
+              </Badge>
+            }
+            progress={progress}
+            descentRateFpm={descentRateFpm}
+          />
+        </SectionContent>
+      </Section>
+      <Section label="Profile">
+        <SectionMedia>
+          <RouteProfile
+            profile={profile}
+            waypoints={waypoints}
+            view={view}
+            aircraft={aircraft}
+            nextIndex={nextIndex}
+          />
+        </SectionMedia>
+        <SectionContent>
+          <SegmentedControl
+            label="Profile view"
+            options={VIEWS}
+            value={view}
+            onChange={onViewChange}
+            size="sm"
+          />
+        </SectionContent>
+      </Section>
+    </>
   )
 }
 

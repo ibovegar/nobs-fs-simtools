@@ -5,7 +5,7 @@ import { Button } from '../Button'
 import { Icon } from '../Icon'
 import styles from './Keypad.module.css'
 
-export type KeypadLayout = 'numeric' | 'decimal' | 'alpha'
+export type KeypadLayout = 'numeric' | 'decimal' | 'alpha' | 'alphanumeric'
 
 const LAYOUTS: Record<KeypadLayout, string[][]> = {
   numeric: [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['0']],
@@ -20,6 +20,14 @@ const LAYOUTS: Record<KeypadLayout, string[][]> = {
     ['H', 'I', 'J', 'K', 'L', 'M', 'N'],
     ['O', 'P', 'Q', 'R', 'S', 'T', 'U'],
     ['V', 'W', 'X', 'Y', 'Z'],
+  ],
+  // Codes such as callsigns and registrations: a number row above the letters, ten keys
+  // a row so every key is the same width.
+  alphanumeric: [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+    ['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'],
+    ['U', 'V', 'W', 'X', 'Y', 'Z'],
   ],
 }
 
@@ -58,7 +66,7 @@ export function Keypad(props: KeypadProps) {
   const rows = extraKeys.length > 0 ? [...LAYOUTS[layout], [...extraKeys]] : LAYOUTS[layout]
 
   return (
-    <div className={cx(styles.keypad, layout === 'alpha' && styles.alpha, className)}>
+    <div className={cx(styles.keypad, className)}>
       {rows.map((row, i) => (
         <KeyRow key={row.join('')}>
           {row.map((key) => (
@@ -75,7 +83,7 @@ export function Keypad(props: KeypadProps) {
           {i === rows.length - 1 && (
             <Button
               variant="ghost"
-              className={styles.key}
+              className={cx(styles.key, styles.functionKey)}
               aria-label="Backspace"
               onClick={onBackspace}
             >
@@ -87,7 +95,11 @@ export function Keypad(props: KeypadProps) {
       {(onClear || onDone) && (
         <KeyRow>
           {onClear && (
-            <Button variant="secondary" className={styles.action} onClick={onClear}>
+            <Button
+              variant="ghost"
+              className={cx(styles.key, styles.functionKey, styles.action)}
+              onClick={onClear}
+            >
               Clear
             </Button>
           )}

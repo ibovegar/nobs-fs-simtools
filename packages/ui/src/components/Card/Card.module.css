@@ -18,6 +18,10 @@
   justify-content: space-between;
 }
 
+.centred {
+  align-items: center;
+}
+
 .header > *:not(:first-child) {
   margin-left: var(--sp-3);
 }

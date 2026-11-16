@@ -13,7 +13,9 @@
 //
 // Pages never import another page's internals. Code needed by two or more pages is
 // either generic (move it to @nobs/ui) or app-specific (src/components/, e.g. SimValueField).
+
 export { InFlight } from './InFlight'
+export { Info } from './Info'
 export { Notes } from './Notes'
 export { Planning } from './Planning'
 export { PAGES, type PageDefinition } from './pageRegistry'

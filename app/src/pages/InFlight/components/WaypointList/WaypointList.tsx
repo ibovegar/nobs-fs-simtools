@@ -150,7 +150,7 @@ export function WaypointList(props: WaypointListProps) {
           )
         })}
       </div>
-      <Button variant="secondary" onClick={onReload} className={styles.gutters}>
+      <Button variant="soft" onClick={onReload} className={styles.gutters}>
         Reload flight plan
       </Button>
     </Disclosure>

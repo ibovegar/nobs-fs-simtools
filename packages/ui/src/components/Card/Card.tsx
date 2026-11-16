@@ -22,7 +22,8 @@ export function Card(props: CardProps) {
   return (
     <div className={cx(styles.card, className)}>
       {hasHeader && (
-        <div className={styles.header}>
+        // Without a hint the title is one line: centre it on the actions.
+        <div className={cx(styles.header, !hint && styles.centred)}>
           <div className={styles.heading}>
             {title && <h3 className={styles.title}>{title}</h3>}
             {hint && <p className={styles.hint}>{hint}</p>}

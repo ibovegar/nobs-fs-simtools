@@ -1,10 +1,12 @@
+/* Keys look and space exactly like VirtualKeyboard's (the Notes keyboard), so every
+   on-screen keyboard and keypad in an app reads as one. */
 .keypad {
   display: flex;
   flex-direction: column;
 }
 
 .keypad > *:not(:first-child) {
-  margin-top: var(--sp-2);
+  margin-top: var(--sp-1);
 }
 
 .row {
@@ -12,18 +14,19 @@
 }
 
 .row > *:not(:first-child) {
-  margin-left: var(--sp-2);
+  margin-left: var(--sp-1);
 }
 
-/* Keys are quieter than regular buttons — a block of accent outlines would be loud. */
 .key {
   flex: 1 1 0;
   min-width: 0;
-  border-color: var(--border-mid);
+  min-height: calc(var(--control-h) * 0.8);
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--border-mid);
   background: var(--bg);
   color: var(--text-bright);
   font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size);
 }
 
 .key:hover {
@@ -31,11 +34,22 @@
   background: var(--bg-card-hi);
 }
 
-.alpha .key {
-  font-size: var(--font-size);
-  padding: 0;
+/* The pressed-key flash. */
+.key:active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
 }
 
+/* Function keys (backspace, Clear): quieter, sans-serif labels. */
+.functionKey {
+  background: var(--bg-card);
+  color: var(--text-mid);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+}
+
+/* The bottom row's Clear / Done share it equally, and Done keeps the key height. */
 .action {
   flex: 1 1 0;
+  min-height: calc(var(--control-h) * 0.8);
 }

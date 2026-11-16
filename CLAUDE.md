@@ -100,6 +100,11 @@ App.tsx             tab shell: renders a tab per page and remembers the active o
                     panel is closed
 pages/
   pageRegistry.ts   the list of pages (tabs) in order
+  Info/             Info.tsx: what the pilot enters once and keeps (the callsign)
+                    + infoIcon (the tab's "i" icon: Lineicons has none)
+    hooks/          useInfo (saved at once, survives closing the sim)
+    components/     CallsignCard (alphanumeric Keypad)
+    domain/         callsign (ICAO rules: A–Z, 0–9, at most 7)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
     containers/     InkPad, AtcPad, TextPad: the three note modes
@@ -238,6 +243,14 @@ must be fully usable with either, and without a physical keyboard:
   a one-tap fill button), with a manual fallback.
 - **Big hit targets** (Comfort density); small controls (24px `size="sm"` buttons) only as
   secondary actions next to a label, never as the only way to do something important.
+- **Buttons are `variant="soft"`**: the tinted blue of the `Stepper`'s −/+. It's the
+  app's button: use it for every action (Change, Reload, Open calculator…). Exceptions:
+  `primary` (filled) only for the one main action that closes something (a keypad's Done),
+  `ghost` for quiet tool buttons (Notes' toolbar, trash / Clear all), and `selected`
+  toggles for picking one of several (the aircraft list).
+- **Keyboards and keypads share one key style**: `Keypad` keys look and space exactly like
+  `VirtualKeyboard`'s (the Notes keyboard): dark keys with a hairline border, quieter
+  function keys (backspace, Clear). Never build keys from `soft` buttons.
 - **No hover-only affordances.** Hover may decorate, but everything works by tap / click
   (popovers open on tap, nothing hides behind a tooltip).
 

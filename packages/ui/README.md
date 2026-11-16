@@ -59,7 +59,7 @@ import {
 | `Container` | Outer frame for a screen: `maxWidth` `sm` / `md` / `lg` / `false`, plus `fill` to take the parent's height |
 | `Stack` | Flex layout on the spacing scale; `component` renders a `span` / `ul` instead of a `div` |
 | `Divider` | Hairline between groups (`orientation` `horizontal` / `vertical`); takes no space itself, the parent `Stack` spaces it |
-| `Typography` | Text in the type scale: `variant` `body` / `caption` / `label` (uppercase mono), `color` (`dim`, `mid`, `danger`, …), `mono`, `noWrap`, `component` |
+| `Typography` | Text in the type scale: `variant` `body` / `caption` / `label` (uppercase mono) / `inherit` (the surrounding size), `color` (`dim`, `mid`, `danger`, …), `mono`, `noWrap`, `component` |
 | `ScrollArea` | Vertical scroll box with its own visible scrollbar (draggable thumb, click the track to page), for hosts that draw none (MSFS) and VR controllers without a wheel. Width from `--scrollbar-w`; the gutter is always reserved. `viewportClassName` styles the scrolling content box. `dragToScroll` lets the user drag the content itself (starts after 10px, swallows the click after a drag; inputs, canvases and `[data-no-drag-scroll]` opt out), `naturalScroll` (default `true`) sets its direction. `scrollbarGutter="auto"` reserves the gutter only while there is something to scroll (content takes the full width otherwise); `onScrollbarChange` reports when the scrollbar comes or goes |
 | `Section`, `Card` | Surfaces: labelled panel, and bordered group with title/hint/actions |
 | `SectionContent`, `SectionMedia` | A `Section`'s body: padded content with a `gap`, and edge-to-edge media (a chart) between contents. Padding never doubles where they meet |
@@ -68,7 +68,7 @@ import {
 | `Tabs`, `TabList`, `Tab`, `TabPanel` | Compound tabs; `size` on `Tabs`: `sm` / `md` (default) / `lg` (full control height). `iconOnly` on a `Tab` shows just its icon in a square (the label stays for screen readers) |
 | `Field` + `TextInput` / `TextArea` / `Stepper` | Labelled controls, ids wired via context |
 | `Stepper` | −/+ number entry without typing |
-| `Keypad` | On-screen numeric / decimal / alpha keypad |
+| `Keypad` | On-screen numeric / decimal / alpha / alphanumeric keypad (`alphanumeric`: rows of ten, digits first, for codes such as callsigns). Keys look and space like `VirtualKeyboard`'s |
 | `VirtualKeyboard` | On-screen QWERTY keyboard ([react-simple-keyboard](https://github.com/hodgef/react-simple-keyboard), re-skinned). Pass `target` (a textarea/input ref) so its caret follows |
 | `Badge`, `Readout` | Status pill; instrument-style value display (`action`: a pin button or badge in its top-right corner) |
 | `ReadoutGroup` | Readouts side by side in equal widths; `divided` puts hairlines between them |

@@ -49,9 +49,9 @@ export function useFlightPlanProfile() {
   const [view, setView] = usePersistentState<ProfileView>('inflight.plan.view.v1', 'all', {
     debounceMs: 0,
   })
-  // Whether the waypoint list is unfolded. Not saved: it starts folded every time the tab
-  // opens, so the overview is what you see first.
-  const [waypointsOpen, setWaypointsOpen] = useState(false)
+  // Whether the waypoint list is unfolded. Not saved: it starts unfolded every time the
+  // tab opens.
+  const [waypointsOpen, setWaypointsOpen] = useState(true)
   const sim = useSimVars(FLIGHT_PLAN_SIM_VARS, 1)
 
   const plan = state.status === 'ready' ? planView(state.route) : undefined

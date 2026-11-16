@@ -10,6 +10,10 @@
   font-size: var(--font-size-sm);
 }
 
+.inheritSize {
+  font-size: inherit;
+}
+
 .label {
   font-family: var(--font-mono);
   font-size: var(--font-size-label);

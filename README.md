@@ -5,6 +5,7 @@ work in VR and on a monitor.
 
 **Tools**
 
+- **Info**: your callsign, set once on an on-screen keypad and kept when you close the sim.
 - **Notes**: freehand ink (write with the VR controller laser or the mouse), ATC quick entry
   with an on-screen keypad (frequency, squawk, runway, altitude…), and free text typed on an
   on-screen keyboard (shown by default in VR-sized Comfort mode) or a physical keyboard.

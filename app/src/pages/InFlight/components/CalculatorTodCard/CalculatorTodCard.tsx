@@ -106,7 +106,7 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
           No flight plan: the TOD calculator's descent, {formatAltitude(startAltitudeFt)} →{' '}
           {formatAltitude(endAltitudeFt)}.
         </Typography>
-        <Button variant="secondary" fullWidth onClick={onOpenCalculator}>
+        <Button variant="soft" fullWidth onClick={onOpenCalculator}>
           Open TOD calculator
         </Button>
       </SectionContent>

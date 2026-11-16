@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { cx } from '../../utils'
 import styles from './Typography.module.css'
 
-export type TypographyVariant = 'body' | 'caption' | 'label'
+export type TypographyVariant = 'body' | 'caption' | 'label' | 'inherit'
 export type TypographyColor =
   | 'inherit'
   | 'default'
@@ -15,7 +15,10 @@ export type TypographyColor =
   | 'danger'
 
 interface TypographyProps {
-  /** `body` text, a smaller `caption` (hints, notes), or an uppercase mono `label`. */
+  /**
+   * `body` text, a smaller `caption` (hints, notes), an uppercase mono `label`, or
+   * `inherit` to keep the surrounding size (e.g. a value inside a title).
+   */
   variant?: TypographyVariant
   color?: TypographyColor
   /** Monospaced (figures, codes). `label` is always mono. */
@@ -45,7 +48,8 @@ export function Typography(props: TypographyProps) {
     <Component
       className={cx(
         styles.text,
-        styles[variant],
+        // `inherit` is also a colour class, so the size one has its own name.
+        styles[variant === 'inherit' ? 'inheritSize' : variant],
         styles[color],
         mono && styles.mono,
         noWrap && styles.noWrap,

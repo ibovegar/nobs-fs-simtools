@@ -1,12 +1,13 @@
 import {
+  Aeroplane1Outlined,
+  ClipboardOutlined,
   Gear1Outlined,
   Pencil1Outlined,
-  TrendDown1Outlined,
-  TrendUp1Outlined,
 } from '@lineiconshq/free-icons'
 import type { IconData } from '@nobs/ui'
 import type { ComponentType } from 'react'
 import { InFlight } from './InFlight'
+import { Info, InfoCircleOutlined } from './Info'
 import { Notes } from './Notes'
 import { Planning } from './Planning'
 import { Settings } from './Settings'
@@ -24,8 +25,9 @@ export interface PageDefinition {
 
 /** Every page, in tab order. Adding a page = adding an entry here. */
 export const PAGES: readonly PageDefinition[] = [
-  { id: 'planning', label: 'Planning', icon: TrendUp1Outlined, Component: Planning },
-  { id: 'in-flight', label: 'In flight', icon: TrendDown1Outlined, Component: InFlight },
+  { id: 'info', label: 'Info', icon: InfoCircleOutlined, Component: Info },
+  { id: 'planning', label: 'Planning', icon: ClipboardOutlined, Component: Planning },
+  { id: 'in-flight', label: 'In flight', icon: Aeroplane1Outlined, Component: InFlight },
   { id: 'notes', label: 'Notes', icon: Pencil1Outlined, Component: Notes },
   { id: 'settings', label: 'Settings', icon: Gear1Outlined, iconOnly: true, Component: Settings },
 ]
