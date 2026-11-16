@@ -4,7 +4,7 @@
 //   pages/<Page>/
 //     <Page>.tsx     the screen: the page's top-level container (state via a hook from
 //                    ./hooks), laid out in a @nobs/ui <Container>
-//     hooks/         the page's stateful hooks: persistence, sim data (useDescentPlanner,
+//     hooks/         the page's stateful hooks: persistence, sim data (useTopOfDescent,
 //                    useInkPages)
 //     containers/    sub-containers with their own state, when the page has several
 //                    (e.g. Notes' InkPad / AtcPad / TextPad)
@@ -13,8 +13,8 @@
 //
 // Pages never import another page's internals. Code needed by two or more pages is
 // either generic (move it to @nobs/ui) or app-specific (src/components/, e.g. SimValueField).
-export { Descent } from './Descent'
+export { InFlight } from './InFlight'
 export { Notes } from './Notes'
+export { Planning } from './Planning'
 export { PAGES, type PageDefinition } from './pageRegistry'
 export { Settings } from './Settings'
-export { Takeoff } from './Takeoff'

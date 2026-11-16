@@ -10,7 +10,7 @@ All notable changes to this project are documented here. The format is based on
 
 - A floating "back to top" button in the bottom right corner of every page, once you have
   scrolled down.
-- **Descent › TOD calculator**: the rules-of-thumb top-of-descent calculator from
+- **In flight › TOD calculator**: the rules-of-thumb top-of-descent calculator from
   descent.vercel.app, with the same inputs and the same maths: start / end altitude, start /
   end speed, wind, and glideslope or vertical speed (either fills in the other), giving the
   distance to start down before the end altitude, the vertical speed and the descent time.
@@ -19,7 +19,7 @@ All notable changes to this project are documented here. The format is based on
   (indicated altitude, true airspeed).
   A pin in the results box's corner keeps the results at the top while you scroll the
   inputs.
-- **Descent › Flight plan**: the sim's flight plan (EFB / World Map, including SimBrief
+- **In flight › Flight plan**: the sim's flight plan (EFB / World Map, including SimBrief
   plans loaded there) as a planned vertical profile. SimTools reads the route and looks up
   every fix, the runways and the SID / STAR / approach legs in the sim's navigation
   database, then plans a climb (1,500 fpm at 250 kt), cruise (the plan's altitude) and a 3°
@@ -56,13 +56,17 @@ All notable changes to this project are documented here. The format is based on
 
 ### Changed
 
-- The Takeoff tab is hidden for now (the page is still in the code, to be re-enabled later).
-- Sub-tabs (Descent's tools, Notes' note types) stay in place while the page scrolls.
+- The Takeoff tab is now called **Planning**.
+- The tabs are in flight order: Planning, In flight, Notes, then Settings as an icon.
+- For developers: the page modules follow the tab names, `pages/Descent` → `pages/InFlight`
+  and `pages/Takeoff` → `pages/Planning`.
+- Sub-tabs (In flight's tools, Notes' note types) stay in place while the page scrolls.
 - Closing the SimTools panel now stops the app completely (nothing runs while it is closed);
   it picks up where you left off and reads the sim afresh when reopened.
+- The Descent tab is now called **In flight**.
 - The old TOD tab is now the **Flight plan** tab. Its manual / GPS-waypoint distance
   switch is gone: the distance comes from the flight plan, and the manual case is covered
-  by Calc. Descent tab and TOD settings are reset once. Its target altitude and level-off
+  by Calc. In flight tab and TOD settings are reset once. Its target altitude and level-off
   buffer are replaced by the full climb / cruise / descent profile.
 - The Flight plan tab loads the flight plan once and remembers it: going back to the tab
   or reopening the panel shows it at once instead of a loading message. It still picks up

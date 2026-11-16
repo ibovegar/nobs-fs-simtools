@@ -75,11 +75,16 @@ export function TabList(props: TabListProps) {
 interface TabProps {
   value: string
   icon?: IconData
+  /**
+   * Show only the icon, in a square tab that doesn't share the bar's width. The label is
+   * still read by screen readers.
+   */
+  iconOnly?: boolean
   children: ReactNode
 }
 
 export function Tab(props: TabProps) {
-  const { value, icon, children } = props
+  const { value, icon, iconOnly = false, children } = props
 
   const { value: active, onValueChange, baseId } = useTabs()
   const selected = value === active
@@ -90,11 +95,11 @@ export function Tab(props: TabProps) {
       id={`${baseId}-tab-${value}`}
       aria-selected={selected}
       aria-controls={`${baseId}-panel-${value}`}
-      className={cx(styles.tab, selected && styles.selected)}
+      className={cx(styles.tab, iconOnly && styles.iconOnly, selected && styles.selected)}
       onClick={() => onValueChange(value)}
     >
       {icon && <Icon icon={icon} />}
-      <span className={styles.tabLabel}>{children}</span>
+      <span className={iconOnly ? styles.hiddenLabel : styles.tabLabel}>{children}</span>
     </button>
   )
 }

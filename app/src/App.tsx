@@ -32,7 +32,7 @@ export function App() {
       <Tabs value={active} onValueChange={(id) => updateSettings({ activePage: id })}>
         <TabList label="SimTools pages">
           {PAGES.map((page) => (
-            <Tab key={page.id} value={page.id} icon={page.icon}>
+            <Tab key={page.id} value={page.id} icon={page.icon} iconOnly={page.iconOnly}>
               {page.label}
             </Tab>
           ))}

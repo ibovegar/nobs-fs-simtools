@@ -1,8 +1,8 @@
 # Takeoff aircraft profiles
 
-The **Takeoff** tab computes V1 / VR / V2, recommends a flap setting and gives the takeoff
+The **Planning** tab computes V1 / VR / V2, recommends a flap setting and gives the takeoff
 trim from an *aircraft profile*. Each profile is one TypeScript file of data in
-[`app/src/pages/Takeoff/domain/profiles/`](../app/src/pages/Takeoff/domain/profiles/). This
+[`app/src/pages/Planning/domain/profiles/`](../app/src/pages/Planning/domain/profiles/). This
 page explains how the calculation works and how to add an aircraft.
 
 > For flight simulation only. The data comes from public, simulator-oriented sources and,
@@ -31,15 +31,15 @@ page explains how the calculation works and how to add an aircraft.
 5. **Trim:** `computed` (a function of CG, weight and flap, in the aircraft's units, with
    the indicator's `scale` and green takeoff `band`) or `advice` (a sentence on how to set
    it, when there is no table; the picture then shows a generic band).
-6. **Pictures** ([`runway.ts`](../app/src/pages/Takeoff/domain/runway.ts)): V2 is drawn at
+6. **Pictures** ([`runway.ts`](../app/src/pages/Planning/domain/runway.ts)): V2 is drawn at
    the estimated takeoff distance (field length / 1.15), VR a quarter before it (the
    airborne part), and V1 on the ground roll at d(VR) · (V1 / VR)². The side view uses the
    flap's `angleDeg` (defaults to the number in its label).
 7. **Weight check:** below 40 % or above 120 % of MTOW the weight can't be this aircraft,
    so no speeds are shown.
 
-The maths is in [`takeoffMath.ts`](../app/src/pages/Takeoff/domain/takeoffMath.ts) and the
-types in [`types.ts`](../app/src/pages/Takeoff/domain/types.ts).
+The maths is in [`takeoffMath.ts`](../app/src/pages/Planning/domain/takeoffMath.ts) and the
+types in [`types.ts`](../app/src/pages/Planning/domain/types.ts).
 
 ## Adding an aircraft
 
@@ -48,7 +48,7 @@ types in [`types.ts`](../app/src/pages/Takeoff/domain/types.ts).
    from a sister type with the same wing, or a few published points. You need, per takeoff
    flap: V1 / VR / V2 at two or more weights (or one point plus minimum speeds), the max
    takeoff weight, and roughly the runway needed at MTOW.
-2. **Create** `app/src/pages/Takeoff/domain/profiles/<aircraft>.ts`. Start from the closest
+2. **Create** `app/src/pages/Planning/domain/profiles/<aircraft>.ts`. Start from the closest
    existing profile:
    - a table by weight, with or without OAT/altitude corrections: `boeing737.ts`
    - a weight × altitude grid: `dash8Q400.ts`

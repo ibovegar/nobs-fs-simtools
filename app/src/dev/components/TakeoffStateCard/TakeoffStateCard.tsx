@@ -3,7 +3,7 @@ import type { MockFlightState } from '~/dev/domain'
 
 const round = (n: number) => Math.round(n).toLocaleString('en-US')
 
-/** Aircraft titles to try the Takeoff page's detection with ('' = none reported). */
+/** Aircraft titles to try the Planning page's detection with ('' = none reported). */
 const TITLES = [
   { value: 'Cessna Grand Caravan 208B', label: 'C208B' },
   { value: 'Beechcraft King Air 350i', label: 'KA350' },
@@ -18,7 +18,7 @@ interface TakeoffStateCardProps {
   onChange: (patch: Partial<MockFlightState>) => void
 }
 
-/** The values the mock sim reports for the Takeoff page. */
+/** The values the mock sim reports for the Planning page. */
 export function TakeoffStateCard(props: TakeoffStateCardProps) {
   const { state, onChange } = props
 

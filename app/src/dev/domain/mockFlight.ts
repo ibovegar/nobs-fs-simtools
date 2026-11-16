@@ -23,7 +23,7 @@ export interface MockFlightState {
   /** Leave one fix out of the mock navigation database, to test missing fixes. */
   missingFix: boolean
   simTimeSec: number
-  /** The aircraft TITLE the sim reports ('' = none), for the Takeoff page's detection. */
+  /** The aircraft TITLE the sim reports ('' = none), for the Planning page's detection. */
   aircraftTitle: string
   totalWeightLb: number
   cgPercentMac: number

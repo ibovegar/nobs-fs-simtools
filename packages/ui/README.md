@@ -65,7 +65,7 @@ import {
 | `SectionContent`, `SectionMedia` | A `Section`'s body: padded content with a `gap`, and edge-to-edge media (a chart) between contents. Padding never doubles where they meet |
 | `Button`, `IconButton` | primary / secondary / ghost / danger, toggle via `selected` |
 | `SegmentedControl` | Pick one of a few options (label + hint + icon); `size`: `sm` / `md` / `lg` (default, full control height), `md` suits sub-tabs |
-| `Tabs`, `TabList`, `Tab`, `TabPanel` | Compound tabs; `size` on `Tabs`: `sm` / `md` (default) / `lg` (full control height) |
+| `Tabs`, `TabList`, `Tab`, `TabPanel` | Compound tabs; `size` on `Tabs`: `sm` / `md` (default) / `lg` (full control height). `iconOnly` on a `Tab` shows just its icon in a square (the label stays for screen readers) |
 | `Field` + `TextInput` / `TextArea` / `Stepper` | Labelled controls, ids wired via context |
 | `Stepper` | −/+ number entry without typing |
 | `Keypad` | On-screen numeric / decimal / alpha keypad |

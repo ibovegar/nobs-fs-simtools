@@ -1,1 +1,0 @@
-export { Descent } from './Descent'

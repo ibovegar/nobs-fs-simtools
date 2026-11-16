@@ -21,7 +21,7 @@ controls. **Fly** advances sim time, closes the GPS distance at groundspeed and 
 altitude by vertical speed until it reaches the **selected altitude** (like an autopilot
 ALT capture). **Disconnect sim** tests the manual fallbacks. Storage uses `localStorage`.
 
-**Flight plan** (for Descent › Flight plan) picks a sample route the mock sim serves exactly
+**Flight plan** (for In flight › Flight plan) picks a sample route the mock sim serves exactly
 like the sim's EFB route and navigation database (`dev/MockNavData.ts`,
 `dev/domain/mockRoutes.ts`): Oslo–Bergen with a SID, airway fixes, a STAR with altitude and
 speed limits and an ILS; a short Oslo–Torp hop that can't reach its cruise level; or none.

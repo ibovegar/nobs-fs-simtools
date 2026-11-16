@@ -68,7 +68,7 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
   - `hooks/`: the page's stateful hooks (persistence, sim data, derived values):
     `useTopOfDescent`, `useInkPages`, `useNotesMode`. Logic only, no JSX.
   - `containers/`: only when a page has several stateful parts of its own (Notes' InkPad /
-    AtcPad / TextPad, Descent's DescentCalculator / FlightPlanProfile / GlideslopeMonitor, each with persistence). Same rules as the page: state via a hook from
+    AtcPad / TextPad, In flight's DescentCalculator / FlightPlanProfile / GlideslopeMonitor, each with persistence). Same rules as the page: state via a hook from
     `hooks/`, and compose the views.
   - `components/`: views. Props in, callbacks out; they may hold UI-only state (e.g. the
     stroke being drawn) but never persist, read the sim or use providers.
@@ -93,7 +93,7 @@ dev/                browser dev harness (`pnpm dev`): same tree with a mock sim 
                     (useMockFlight), components/ (PanelFrame, SimulatorCard,
                     AircraftStateCard, FlightPlanCard), domain/ (mockFlight: the tested
                     flight model; mockRoutes: sample flight plans in the sim's shapes;
-                    mockRoutePath: the flown path, built with the Descent domain)
+                    mockRoutePath: the flown path, built with the In flight domain)
 App.tsx             tab shell: renders a tab per page and remembers the active one. Each page
                     scrolls in a ScrollArea under a fixed PageHeaderArea: a page puts its
                     sub-tabs in <PageHeader> so they don't scroll. Renders nothing while the
@@ -105,11 +105,11 @@ pages/
     containers/     InkPad, AtcPad, TextPad: the three note modes
     components/     InkCanvas, InkToolbar, AtcFieldTile, AtcKeypad
     domain/         atcFields (ATC input rules), ink (stroke geometry)
-  Descent/          Descent.tsx
-    hooks/          useDescentTool (TOD calculator / Flight plan / GS tab), useTopOfDescent,
+  InFlight/         InFlight.tsx
+    hooks/          useInFlightTool (TOD calculator / Flight plan / GS tab), useTopOfDescent,
                     useFlightPlanRoute (loads the sim's flight plan + facilities once / on
                     change), useFlightPlanProfile (profile, TOC / TOD, live progress),
-                    useGlideslope, useManualDistanceCountdown, descentSimVars
+                    useGlideslope, useManualDistanceCountdown, inFlightSimVars
     containers/     the three tabs: DescentCalculator, FlightPlanProfile
                     (+ CalculatorTod: the calculator's descent when there's no flight plan),
                     GlideslopeMonitor
@@ -127,8 +127,8 @@ pages/
                     flightProgress (position on route, phase, path deviation),
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
                     descent), calculatorProfile (the calculator's descent as a side view)
-  Takeoff/          Takeoff.tsx
-    hooks/          useTakeoff, takeoffSimVars (+ TITLE / ATC MODEL text vars)
+  Planning/         Planning.tsx
+    hooks/          usePlanning, planningSimVars (+ TITLE / ATC MODEL text vars)
     components/     TakeoffSummary, RunwayDiagram (top view: V1/VR/V2 lines), TakeoffConfig
                     (side view: flaps + trim), AircraftCard, FlapsCard, ConditionsCard
     domain/         takeoffMath (speeds, flap choice, trim, detection), runway (diagram

@@ -8,7 +8,7 @@ import {
   type LatLon,
   offsetLatLon,
   type RouteWaypoint,
-} from '~/pages/Descent/domain'
+} from '~/pages/InFlight/domain'
 import type { MockRoute } from './mockRoutes'
 
 export interface MockRoutePath {

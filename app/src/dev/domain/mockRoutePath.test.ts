@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { greatCircleNm, positionOnRoute } from '~/pages/Descent/domain'
+import { greatCircleNm, positionOnRoute } from '~/pages/InFlight/domain'
 import { mockRoutePath, pointAlong } from './mockRoutePath'
 import { MOCK_ROUTES } from './mockRoutes'
 

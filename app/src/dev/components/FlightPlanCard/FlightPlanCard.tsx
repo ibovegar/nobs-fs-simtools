@@ -9,7 +9,7 @@ interface FlightPlanCardProps {
 }
 
 /**
- * The mock flight plan behind Descent › Flight plan: which sample route the sim reports,
+ * The mock flight plan behind In flight › Flight plan: which sample route the sim reports,
  * where the aircraft is along it (moves at groundspeed while flying), quick set-ups for
  * the start of the flight and the cruise, and a missing-fix test.
  */
@@ -37,7 +37,7 @@ export function FlightPlanCard(props: FlightPlanCardProps) {
     })
 
   return (
-    <Card title="Flight plan" hint="Read by Descent › Flight plan, like the sim's EFB route.">
+    <Card title="Flight plan" hint="Read by In flight › Flight plan, like the sim's EFB route.">
       <Field label="Route">
         <SegmentedControl
           label="Route"
