@@ -1,5 +1,5 @@
 import { Container, PageHeader, SegmentedControl } from '@nobs/ui'
-import { DescentCalculator, FlightPlanTod, GlideslopeMonitor } from './containers'
+import { DescentCalculator, FlightPlanProfile, GlideslopeMonitor } from './containers'
 import { useDescentTool } from './hooks'
 
 const TOOLS = [
@@ -10,8 +10,9 @@ const TOOLS = [
 
 /**
  * Descent page, three tools as tabs: Calc (a simple top-of-descent calculator), Flight plan
- * (TOD worked out from the active flight plan) and GS (where you are on the approach
- * glideslope). Remembers the open tab; each tool is its own container with its own state.
+ * (the sim's flight plan as a climb / cruise / descent profile with TOC and TOD) and GS
+ * (where you are on the approach glideslope). Remembers the open tab; each tool is its own
+ * container with its own state.
  */
 export function Descent() {
   const [tool, setTool] = useDescentTool()
@@ -30,7 +31,7 @@ export function Descent() {
       {tool === 'gs' ? (
         <GlideslopeMonitor />
       ) : tool === 'plan' ? (
-        <FlightPlanTod />
+        <FlightPlanProfile onOpenCalculator={() => setTool('calc')} />
       ) : (
         <DescentCalculator />
       )}

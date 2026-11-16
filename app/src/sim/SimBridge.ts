@@ -1,3 +1,5 @@
+import type { NavData } from './navdata'
+
 /** A simulation variable to read, e.g. `{ name: 'GROUND VELOCITY', unit: 'knots' }`. */
 export interface SimVarSpec {
   name: string
@@ -19,4 +21,6 @@ export interface SimBridge {
    * isn't available or is empty.
    */
   readText(name: string): string | undefined
+  /** The flight plan and navigation database; absent when the bridge has none (offline). */
+  readonly navData?: NavData
 }

@@ -46,6 +46,20 @@ export function AircraftStateCard(props: AircraftStateCardProps) {
           format={round}
         />
       </Field>
+      <Field
+        label="Selected altitude"
+        hint="Like the autopilot: climbing or descending through it levels off there."
+      >
+        <Stepper
+          value={state.selectedAltitudeFt}
+          onChange={(selectedAltitudeFt) => onChange({ selectedAltitudeFt })}
+          steps={[100, 1000]}
+          min={0}
+          max={50000}
+          unit="ft"
+          format={round}
+        />
+      </Field>
       <Field label="GPS distance to next waypoint">
         <Stepper
           value={state.gpsDistanceNm}

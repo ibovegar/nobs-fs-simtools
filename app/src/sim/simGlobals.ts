@@ -15,6 +15,10 @@ export function getCoherent() {
   return typeof Coherent !== 'undefined' ? Coherent : undefined
 }
 
+export function getRegisterViewListener() {
+  return typeof RegisterViewListener === 'function' ? RegisterViewListener : undefined
+}
+
 export function getSimDataStorage() {
   if (typeof GetStoredData !== 'function' || typeof SetStoredData !== 'function') return undefined
   return {

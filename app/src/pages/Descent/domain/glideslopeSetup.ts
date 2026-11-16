@@ -1,4 +1,5 @@
-import type { DistanceSource } from './setup'
+/** Where the distance to the threshold comes from. */
+export type DistanceSource = 'manual' | 'gps'
 
 /** What the pilot sets up on the GS tab — persisted between flights. */
 export interface GlideslopeSetup {

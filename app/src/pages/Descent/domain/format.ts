@@ -35,3 +35,31 @@ export function formatAltitude(ft: number, transitionAltitudeFt = 18000): string
   if (ft >= transitionAltitudeFt) return `FL${String(Math.round(ft / 100)).padStart(3, '0')}`
   return formatInteger(ft)
 }
+
+/**
+ * Altitude limits as on an FMS: '5000' at, '5000A' at or above, 'FL120B' at or below,
+ * '5000A 7000B' between.
+ */
+export function formatAltitudeLimit(limit: {
+  kind: 'at' | 'atOrAbove' | 'atOrBelow' | 'between'
+  lowerFt?: number
+  upperFt?: number
+}): string {
+  const lower = limit.lowerFt === undefined ? '' : formatAltitude(limit.lowerFt)
+  const upper = limit.upperFt === undefined ? '' : formatAltitude(limit.upperFt)
+  switch (limit.kind) {
+    case 'at':
+      return lower || upper
+    case 'atOrAbove':
+      return `${lower}A`
+    case 'atOrBelow':
+      return `${upper}B`
+    default:
+      return `${lower}A ${upper}B`
+  }
+}
+
+/** Speed limits: '250' at, '210B' at or below, '180A' at or above. */
+export function formatSpeedLimit(limit: { kind: 'at' | 'atOrAbove' | 'atOrBelow'; kt: number }) {
+  return `${limit.kt}${limit.kind === 'atOrBelow' ? 'B' : limit.kind === 'atOrAbove' ? 'A' : ''}`
+}

@@ -1,1 +1,0 @@
-export { DescentTargetCard } from './DescentTargetCard'

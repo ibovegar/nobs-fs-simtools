@@ -1,4 +1,5 @@
 import type { SimBridge, SimVarSpec } from '~/sim'
+import { MockNavData } from './MockNavData'
 
 /**
  * In-memory stand-in for the sim, driven by the dev harness (and usable in tests).
@@ -7,6 +8,8 @@ import type { SimBridge, SimVarSpec } from '~/sim'
  */
 export class MockSimBridge implements SimBridge {
   readonly source = 'mock' as const
+  /** The mock flight plan and navigation database (the harness picks the route). */
+  readonly navData = new MockNavData()
   private readonly values = new Map<string, number>()
   private readonly texts = new Map<string, string>()
 

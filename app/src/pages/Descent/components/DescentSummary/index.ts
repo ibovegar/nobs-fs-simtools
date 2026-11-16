@@ -1,1 +1,0 @@
-export { DescentSummary } from './DescentSummary'

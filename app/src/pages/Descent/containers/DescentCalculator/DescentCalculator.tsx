@@ -4,10 +4,10 @@ import {
   RefreshCircle1ClockwiseOutlined,
 } from '@lineiconshq/free-icons'
 import { Card, Field, IconButton, Readout, Section, Stack, Stepper, Sticky } from '@nobs/ui'
+import { HelpPopover } from '~/pages/Descent/components'
 import { formatInteger, type TopOfDescentResult } from '~/pages/Descent/domain'
 import { type SimFillField, useTopOfDescent } from '~/pages/Descent/hooks'
 import styles from './DescentCalculator.module.css'
-import { HelpPopover } from './HelpPopover'
 
 const formatWind = (kt: number) => (kt > 0 ? `+${kt}` : String(kt))
 const formatAngle = (deg: number) => deg.toFixed(1)

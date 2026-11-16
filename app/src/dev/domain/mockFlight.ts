@@ -1,5 +1,7 @@
 // The dev harness's tiny flight model. Pure and unit-tested.
 
+import type { MockRouteId } from './mockRoutes'
+
 export interface MockFlightState {
   connected: boolean
   running: boolean
@@ -9,6 +11,17 @@ export interface MockFlightState {
   groundSpeedKt: number
   verticalSpeedFpm: number
   gpsDistanceNm: number
+  /**
+   * Autopilot selected altitude: climbing or descending through it levels off there
+   * (vertical speed back to 0), like an ALT capture.
+   */
+  selectedAltitudeFt: number
+  /** The mock flight plan the sim reports ('none' = no flight plan). */
+  routeId: MockRouteId
+  /** Distance flown along the flight plan; the sim reports the matching position. */
+  routeProgressNm: number
+  /** Leave one fix out of the mock navigation database, to test missing fixes. */
+  missingFix: boolean
   simTimeSec: number
   /** The aircraft TITLE the sim reports ('' = none), for the Takeoff page's detection. */
   aircraftTitle: string
@@ -28,6 +41,10 @@ export const INITIAL_MOCK_FLIGHT: MockFlightState = {
   groundSpeedKt: 450,
   verticalSpeedFpm: 0,
   gpsDistanceNm: 150,
+  selectedAltitudeFt: 35000,
+  routeId: 'oslo-bergen',
+  routeProgressNm: 0,
+  missingFix: false,
   simTimeSec: 0,
   aircraftTitle: 'PMDG 737-600 House livery',
   totalWeightLb: 120_000,
@@ -40,15 +57,35 @@ export const INITIAL_MOCK_FLIGHT: MockFlightState = {
 
 /**
  * Advance the flight by `realSec` of wall-clock time (scaled by `timeScale`): sim time
- * moves on, the GPS distance closes at groundspeed and altitude follows the vertical
- * speed. Distance and altitude never go below zero.
+ * moves on, the GPS distance closes and the aircraft moves along the flight plan (up to
+ * `routeLengthNm`) at groundspeed, and altitude follows the vertical speed until it reaches
+ * the selected altitude. Distances and altitude never go below zero.
  */
-export function advanceFlight(state: MockFlightState, realSec: number): MockFlightState {
+export function advanceFlight(
+  state: MockFlightState,
+  realSec: number,
+  routeLengthNm = Number.POSITIVE_INFINITY,
+): MockFlightState {
   const dt = realSec * state.timeScale
+  const flown = (state.groundSpeedKt * dt) / 3600
+
+  let altitudeFt = state.altitudeFt + (state.verticalSpeedFpm * dt) / 60
+  let verticalSpeedFpm = state.verticalSpeedFpm
+  const selected = state.selectedAltitudeFt
+  const crossed =
+    (verticalSpeedFpm > 0 && state.altitudeFt <= selected && altitudeFt >= selected) ||
+    (verticalSpeedFpm < 0 && state.altitudeFt >= selected && altitudeFt <= selected)
+  if (crossed) {
+    altitudeFt = selected
+    verticalSpeedFpm = 0
+  }
+
   return {
     ...state,
     simTimeSec: state.simTimeSec + dt,
-    gpsDistanceNm: Math.max(0, state.gpsDistanceNm - (state.groundSpeedKt * dt) / 3600),
-    altitudeFt: Math.max(0, state.altitudeFt + (state.verticalSpeedFpm * dt) / 60),
+    gpsDistanceNm: Math.max(0, state.gpsDistanceNm - flown),
+    routeProgressNm: Math.min(routeLengthNm, state.routeProgressNm + flown),
+    altitudeFt: Math.max(0, altitudeFt),
+    verticalSpeedFpm,
   }
 }

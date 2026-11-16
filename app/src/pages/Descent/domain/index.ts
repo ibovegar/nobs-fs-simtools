@@ -1,18 +1,26 @@
 // Descent's pure maths, formatting and setup — no React. Unit-tested.
+export { type CalculatorProfile, calculatorProfile } from './calculatorProfile'
+export { advanceDistance, FEET_PER_NM, MIN_GROUNDSPEED_KT, rateForAngle } from './descentMath'
 export {
-  advanceDistance,
-  type DescentInputs,
-  type DescentPlan,
-  type DescentProfile,
-  type DescentStatus,
-  descentStatus,
-  distanceFromEte,
-  FEET_PER_NM,
-  MIN_GROUNDSPEED_KT,
-  planDescent,
-  rateForAngle,
-} from './descentMath'
-export { formatAltitude, formatDistance, formatDuration, formatInteger, formatRate } from './format'
+  CRUISE_TOLERANCE_FT,
+  cruiseRateFpm,
+  type FlightPlanStatus,
+  type FlightProgress,
+  flightProgress,
+  ON_PATH_TOLERANCE_FT,
+  positionOnRoute,
+  type RoutePosition,
+} from './flightProgress'
+export {
+  formatAltitude,
+  formatAltitudeLimit,
+  formatDistance,
+  formatDuration,
+  formatInteger,
+  formatRate,
+  formatSpeedLimit,
+} from './format'
+export { greatCircleNm, initialBearingDeg, type LatLon, offsetLatLon } from './geo'
 export {
   GLIDEPATH_DEG,
   GLIDEPATH_TABLE_SPEEDS,
@@ -39,13 +47,54 @@ export {
   slopeState,
   THRESHOLD_CROSSING_HEIGHT_FT,
 } from './glideslope'
-export { DEFAULT_GLIDESLOPE_SETUP, type GlideslopeSetup } from './glideslopeSetup'
 export {
-  DEFAULT_DESCENT_SETUP,
-  type DescentSetup,
+  DEFAULT_GLIDESLOPE_SETUP,
   type DistanceSource,
-  profileFromSetup,
-} from './setup'
+  type GlideslopeSetup,
+} from './glideslopeSetup'
+export {
+  CLIMB_FT_PER_NM,
+  DESCENT_FT_PER_NM,
+  gradientFtPerNm,
+  PROFILE_ASSUMPTIONS,
+  type ProfileView,
+} from './profileAssumptions'
+export {
+  type AircraftOnRoute,
+  type AltitudeScale,
+  altitudeScale,
+  type ChartWaypoint,
+  clipProfile,
+  inClimbWindow,
+  type LabelCandidate,
+  niceStep,
+  pickLabels,
+  ticks,
+  trendEnd,
+  trendLengthPx,
+  type ViewRange,
+  viewRange,
+} from './profileChart'
+export {
+  type AltitudeConstraint,
+  type BuiltRoute,
+  buildRoute,
+  type CollectedRoute,
+  collectRouteFixes,
+  describeRoute,
+  fixesToLoad,
+  icaoKey,
+  isSamePlan,
+  type PlanAirport,
+  type PlanRoute,
+  planCruiseFt,
+  type RouteFix,
+  type RouteIcao,
+  type RoutePhase,
+  type RouteWaypoint,
+  type SpeedConstraint,
+  THRESHOLD_HEIGHT_FT,
+} from './route'
 export {
   angleForVerticalSpeed,
   DEFAULT_TOP_OF_DESCENT_FIELDS,
@@ -56,3 +105,12 @@ export {
   topOfDescent,
   verticalSpeedForAngle,
 } from './topOfDescent'
+export {
+  altitudeAt,
+  computeVerticalProfile,
+  meetsConstraint,
+  type PlannedWaypoint,
+  type ProfilePoint,
+  planWaypoints,
+  type VerticalProfile,
+} from './verticalProfile'

@@ -18,8 +18,24 @@ pnpm dev
 
 Opens the real app in a resizable "panel" frame (presets: VR, narrow, wide) next to mock sim
 controls. **Fly** advances sim time, closes the GPS distance at groundspeed and changes
-altitude by vertical speed. **Disconnect sim** tests the manual fallbacks. Storage uses
-`localStorage`.
+altitude by vertical speed until it reaches the **selected altitude** (like an autopilot
+ALT capture). **Disconnect sim** tests the manual fallbacks. Storage uses `localStorage`.
+
+**Flight plan** (for Descent › Flight plan) picks a sample route the mock sim serves exactly
+like the sim's EFB route and navigation database (`dev/MockNavData.ts`,
+`dev/domain/mockRoutes.ts`): Oslo–Bergen with a SID, airway fixes, a STAR with altitude and
+speed limits and an ILS; a short Oslo–Torp hop that can't reach its cruise level; or none.
+While flying, the aircraft moves along the route at groundspeed and reports its position
+(`PLANE LATITUDE` / `PLANE LONGITUDE`). To fly a whole flight:
+
+1. **Take off**: puts the aircraft on the departure runway climbing at 2,000 fpm with the
+   selected altitude at the plan's cruise level. Pick **60×** time and **Fly**.
+2. The tab counts down to TOC, then TOD. Or **Jump to cruise** to skip ahead.
+3. At TOD, set a negative vertical speed and a lower selected altitude, and watch the path
+   deviation. The **Descent** view zooms in on the arrival.
+
+**Fix missing from the database** leaves one fix out, to test the warning. The mock routes'
+procedures and fix names are made up; airport and runway positions are close to real.
 
 ## Running inside MSFS 2024
 

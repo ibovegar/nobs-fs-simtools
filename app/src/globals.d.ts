@@ -14,7 +14,19 @@ declare global {
 
   const Coherent: {
     trigger(event: string, ...args: unknown[]): void
+    call(name: string, ...args: unknown[]): Promise<unknown>
   }
+
+  /** A Coherent view listener (common.js): sim events in, `call`s out. */
+  interface SimViewListener {
+    on(event: string, callback: (...args: never[]) => void): void
+    off(event: string, callback: (...args: never[]) => void): void
+    call(name: string, ...args: unknown[]): Promise<unknown>
+    unregister(): void
+  }
+
+  /** Registers a named view listener; `onReady` runs once the sim has bound it. */
+  function RegisterViewListener(name: string, onReady?: () => void): SimViewListener
 
   function GetStoredData(key: string): string | null
   function SetStoredData(key: string, value: string): void

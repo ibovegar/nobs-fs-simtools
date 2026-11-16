@@ -53,6 +53,9 @@ export const palette = {
     // Added for the toolkit (not in nobs-fs-app yet): an amber for "attention soon"
     // states, e.g. approaching top of descent.
     warning: '#f59e0b',
+    // Added for the toolkit: a bright yellow for a highlight that must stand out from the
+    // accent and status colours, e.g. the own aircraft on a chart.
+    yellow: '#facc15',
   },
 } as const
 

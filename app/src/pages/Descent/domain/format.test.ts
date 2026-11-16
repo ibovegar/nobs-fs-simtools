@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatAltitude, formatDistance, formatDuration, formatInteger, formatRate } from './format'
+import {
+  formatAltitude,
+  formatAltitudeLimit,
+  formatDistance,
+  formatDuration,
+  formatInteger,
+  formatRate,
+  formatSpeedLimit,
+} from './format'
 
 describe('formatDistance', () => {
   it('shows a decimal under 10 nm', () => expect(formatDistance(4.26)).toBe('4.3'))
@@ -28,4 +36,23 @@ describe('formatAltitude', () => {
   it('uses flight levels above transition', () => expect(formatAltitude(35000)).toBe('FL350'))
   it('pads low flight levels', () => expect(formatAltitude(18000)).toBe('FL180'))
   it('uses feet below transition', () => expect(formatAltitude(3000)).toBe('3,000'))
+})
+
+describe('formatAltitudeLimit', () => {
+  it('writes limits FMS-style', () => {
+    expect(formatAltitudeLimit({ kind: 'at', lowerFt: 3000, upperFt: 3000 })).toBe('3,000')
+    expect(formatAltitudeLimit({ kind: 'atOrAbove', lowerFt: 5000 })).toBe('5,000A')
+    expect(formatAltitudeLimit({ kind: 'atOrBelow', upperFt: 24000 })).toBe('FL240B')
+    expect(formatAltitudeLimit({ kind: 'between', lowerFt: 5000, upperFt: 7000 })).toBe(
+      '5,000A 7,000B',
+    )
+  })
+})
+
+describe('formatSpeedLimit', () => {
+  it('marks at-or-below and at-or-above', () => {
+    expect(formatSpeedLimit({ kind: 'atOrBelow', kt: 210 })).toBe('210B')
+    expect(formatSpeedLimit({ kind: 'atOrAbove', kt: 180 })).toBe('180A')
+    expect(formatSpeedLimit({ kind: 'at', kt: 250 })).toBe('250')
+  })
 })

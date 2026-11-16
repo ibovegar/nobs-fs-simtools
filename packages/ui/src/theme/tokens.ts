@@ -24,6 +24,7 @@ export interface ThemeTokens {
   dangerMain: string
   green: string
   warning: string
+  yellow: string
 }
 
 export const darkTokens: ThemeTokens = {
@@ -45,6 +46,7 @@ export const darkTokens: ThemeTokens = {
   dangerMain: p.secondary.main,
   green: p.status.success,
   warning: p.status.warning,
+  yellow: p.status.yellow,
 }
 
 export const lightTokens: ThemeTokens = {
@@ -67,6 +69,8 @@ export const lightTokens: ThemeTokens = {
   dangerMain: p.secondary.main,
   green: p.status.success,
   warning: '#B45309',
+  // Darker on white so it stays readable.
+  yellow: '#CA8A04',
 }
 
 /**

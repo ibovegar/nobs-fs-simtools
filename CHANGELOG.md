@@ -19,23 +19,59 @@ All notable changes to this project are documented here. The format is based on
   (indicated altitude, true airspeed).
   A pin in the results box's corner keeps the results at the top while you scroll the
   inputs.
-- **Descent › Flight plan**: top of descent worked out automatically from the active flight
-  plan (distance left = time to destination × groundspeed; unverified in the sim).
+- **Descent › Flight plan**: the sim's flight plan (EFB / World Map, including SimBrief
+  plans loaded there) as a planned vertical profile. SimTools reads the route and looks up
+  every fix, the runways and the SID / STAR / approach legs in the sim's navigation
+  database, then plans a climb (1,500 fpm at 250 kt), cruise (the plan's altitude) and a 3°
+  descent that respect the procedures' altitude limits, with TOC and TOD worked out
+  automatically. Read-only: nothing to set up.
+  - One overview, laid out exactly like the TOD calculator's results (the label line, big
+    value and second row sit in the same place, so switching tabs doesn't shift them; "?"
+    buttons explain each value): the number that matters now
+    big (to TOC, to TOD, or past TOD how far above or below the planned path you are), two
+    supporting values (time, the V/S to fly: in the climb the rate that reaches cruise at
+    TOC from where you are; in cruise 0, or the rate back to the cruise altitude when off it
+    (the gap per minute, at most 1500 fpm); two minutes before TOD the descent rate;
+    distance to go), and a side view
+    of the whole flight, the climb or the descent, topping out at the cruise level, with
+    every fix, its altitude limits, TOC / TOD and the aircraft: a yellow arrow along its
+    current flight path, a yellow line pointing the same way (V/S at groundspeed), longer the
+    faster you go, and a dashed one to the planned path. The chart is taller and runs the
+    full width, with the altitude labels inside it, above their lines. On the Climb
+    view, flying past its end (a little after TOC) switches to the whole flight.
+  - A waypoint list (folded each time the tab opens): distance (to go while flying), planned
+    altitude, altitude and speed limits, TOC / TOD rows, the next fix highlighted.
+  - Without a flight plan (or a sim), the tab shows the TOD calculator's descent instead:
+    its results in the same place as on the calculator, the descent from the side (level, TOD, descent,
+    slow-down, target) and a button to open the calculator.
+  - Updates by itself when the flight plan changes; only the aircraft position is polled
+    (once a second). Plans kept only inside an add-on FMS / GPS (PMDG, Fenix, GTN750…)
+    aren't visible to the sim and so not to SimTools. Unverified in the sim yet.
+- `@nobs/ui`: a `--yellow` colour token (darker in the light theme), for highlights that
+  must stand out from the accent and status colours.
+- Dev harness: mock flight plans (Oslo–Bergen with SID / STAR / ILS, a short hop, none)
+  served like the sim's, a mock aircraft that flies along the route at groundspeed, an
+  autopilot-style selected altitude, quick "Take off" / "Jump to cruise" set-ups and a
+  missing-fix test.
 
 ### Changed
 
+- The Takeoff tab is hidden for now (the page is still in the code, to be re-enabled later).
 - Sub-tabs (Descent's tools, Notes' note types) stay in place while the page scrolls.
 - Closing the SimTools panel now stops the app completely (nothing runs while it is closed);
   it picks up where you left off and reads the sim afresh when reopened.
 - The old TOD tab is now the **Flight plan** tab. Its manual / GPS-waypoint distance
   switch is gone: the distance comes from the flight plan, and the manual case is covered
-  by Calc. Descent tab and TOD settings are reset once.
+  by Calc. Descent tab and TOD settings are reset once. Its target altitude and level-off
+  buffer are replaced by the full climb / cruise / descent profile.
+- The Flight plan tab loads the flight plan once and remembers it: going back to the tab
+  or reopening the panel shows it at once instead of a loading message. It still picks up
+  changes (checked quietly on each visit, and live while the tab is open).
 
 ### Fixed
 
 - Lighter on the sim: status badges pulse a few times instead of forever, the GS diamond
-  no longer animates, and Takeoff / Flight plan read the sim less often (1 / 2 times a
-  second).
+  no longer animates, and Takeoff / Flight plan read the sim less often (once a second).
 
 ## [0.2.0] - 2026-11-14
 

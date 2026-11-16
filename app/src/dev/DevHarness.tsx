@@ -3,7 +3,13 @@ import { useState } from 'react'
 import { App } from '~/App'
 import { AppProviders } from '~/providers'
 import { createBrowserStorage } from '~/storage'
-import { AircraftStateCard, PanelFrame, SimulatorCard, TakeoffStateCard } from './components'
+import {
+  AircraftStateCard,
+  FlightPlanCard,
+  PanelFrame,
+  SimulatorCard,
+  TakeoffStateCard,
+} from './components'
 import styles from './DevHarness.module.css'
 import { useMockFlight } from './hooks'
 
@@ -22,7 +28,7 @@ type FramePreset = (typeof FRAME_PRESETS)[number]['value']
  * with a MockSimBridge and localStorage instead of the sim.
  */
 export function DevHarness() {
-  const { bridge, state, update } = useMockFlight()
+  const { bridge, state, update, path } = useMockFlight()
   const [storage] = useState(() => createBrowserStorage())
   const [preset, setPreset] = useState<FramePreset>('vr')
   const frame = FRAME_PRESETS.find((p) => p.value === preset) ?? FRAME_PRESETS[0]
@@ -48,6 +54,7 @@ export function DevHarness() {
           </Field>
           <SimulatorCard state={state} onChange={update} />
           <AircraftStateCard state={state} onChange={update} />
+          <FlightPlanCard state={state} path={path} onChange={update} />
           <TakeoffStateCard state={state} onChange={update} />
         </Stack>
       </Section>

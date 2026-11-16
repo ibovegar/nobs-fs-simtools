@@ -56,6 +56,8 @@ function colorVars(t: ThemeTokens): Record<string, string> {
 
     '--warning': t.warning,
     '--warning-dim': hexToRgba(t.warning, 0.15),
+
+    '--yellow': t.yellow,
   }
 }
 

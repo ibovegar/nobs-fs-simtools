@@ -54,6 +54,9 @@ community panels boot (for example PMS50 GTN750 and TheFlightSimKit).
 | `Popover` drawn on `document.body` with `position: fixed` lands next to its button | unverified | Render it inside the panel root (`container` prop) |
 | `:empty` / `:not(:empty)` (the page header strip collapses on pages without one) | unverified | Extra top space on those pages; give `PageHeaderArea` a `hasHeader` flag instead |
 | `Sticky` (transform on scroll) keeps the pinned TOD results at the top | unverified | — |
-| `GPS ETE` (seconds) is the time to the end of the flight plan | unverified | Sum leg distances from the flight plan |
+| `RegisterViewListener('JS_LISTENER_PLANNEDROUTE')` binds in a toolbar panel; `GET_EFB_ROUTE` returns the EFB / World Map plan; `EfbRouteUpdated` fires on change | unverified | Flight plan tab shows "No flight plan"; the Reload button reads it again |
+| `JS_LISTENER_FACILITY`: `LOAD_AIRPORT_FROM_STRUCT` (with data flags 71) / `LOAD_INTERSECTION_` / `LOAD_VOR_` / `LOAD_NDB_FROM_STRUCT` answered by `SendAirport` / `SendIntersection` / `SendVor` / `SendNdb` with `icaoStruct` | unverified | Unanswered loads time out after 8 s; the fix is listed as not found |
+| Procedure legs carry `fixIcaoStruct`, `altDesc` / `altitude1` / `altitude2` (metres) and `speedRestriction` (+ `speedRestrictionDesc`) | unverified | Older string `fixIcao` is parsed too; without limits the profile is plain climb / cruise / descent |
+| `cruiseAltitude.altitude` is in feet (also for flight levels) | unverified | Values under 1000 with `isFlightLevel` are read as a level |
 | On-screen keyboard keys with a VR controller | unverified | Set `useMouseEvents` on the keyboard |
 | Text box keeps focus and caret while pressing on-screen keys (`preventMouseDownDefault`) | unverified | Restore focus to the textarea after each key |
