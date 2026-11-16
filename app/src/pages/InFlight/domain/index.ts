@@ -53,10 +53,13 @@ export {
   type GlideslopeSetup,
 } from './glideslopeSetup'
 export {
+  angleForGradientDeg,
   CLIMB_FT_PER_NM,
   DESCENT_FT_PER_NM,
+  GENERIC_PROFILE_BASIS,
   gradientFtPerNm,
   PROFILE_ASSUMPTIONS,
+  type ProfileBasis,
   type ProfileView,
 } from './profileAssumptions'
 export {

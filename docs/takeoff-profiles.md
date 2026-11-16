@@ -53,6 +53,9 @@ types in [`types.ts`](../app/src/pages/Planning/domain/types.ts).
    (`id`, `name`, `shortName`, and a `match` pattern tested against `TITLE` and
    `ATC MODEL`; a more specific pattern goes before a broader one), and its sim title /
    ATC MODEL to the cases in `catalogue.test.ts`.
+   Optionally give it `performance` (climb / cruise / descent tables and the approach speed
+   at max landing weight, see `performance.ts`): the Info tab then shows its speeds to fly,
+   and the Flight plan profile plans TOC / TOD with its own climb and descent.
 1. **Find data.** In order of preference: the aircraft's own documents (an add-on's
    performance manual or speed card is often the best public source), FCOM-style tables
    from a sister type with the same wing, or a few published points. You need, per takeoff

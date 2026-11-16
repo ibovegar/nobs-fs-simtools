@@ -13,7 +13,7 @@ import type {
   NavRunway,
 } from '~/sim'
 
-export type MockRouteId = 'none' | 'oslo-bergen' | 'oslo-torp'
+export type MockRouteId = 'none' | 'oslo-bergen' | 'oslo-bergen-low' | 'oslo-torp'
 
 export interface MockRoute {
   route: NavFlightPlanRoute
@@ -238,6 +238,16 @@ const OSLO_BERGEN: MockRoute = {
   droppableFix: 'VADUX',
 }
 
+/**
+ * The same route planned for a turboprop like the Caravan: FL120, within its ceiling
+ * (23,700 ft) and the procedures' limits (8,000 ft or above at GM402, 15,000 ft or below at
+ * BERGI), so the profile has a real cruise between TOC and TOD.
+ */
+const OSLO_BERGEN_LOW: MockRoute = {
+  ...OSLO_BERGEN,
+  route: { ...OSLO_BERGEN.route, cruiseAltitude: { altitude: 12_000, isFlightLevel: true } },
+}
+
 /** A short hop with no procedures: too short to reach the planned cruise level. */
 const OSLO_TORP: MockRoute = {
   route: {
@@ -262,13 +272,15 @@ const OSLO_TORP: MockRoute = {
 
 export const MOCK_ROUTES: Record<Exclude<MockRouteId, 'none'>, MockRoute> = {
   'oslo-bergen': OSLO_BERGEN,
+  'oslo-bergen-low': OSLO_BERGEN_LOW,
   'oslo-torp': OSLO_TORP,
 }
 
 export const MOCK_ROUTE_OPTIONS = [
   { value: 'none', label: 'None' },
-  { value: 'oslo-bergen', label: 'Oslo–Bergen' },
-  { value: 'oslo-torp', label: 'Oslo–Torp (short)' },
+  { value: 'oslo-bergen', label: 'ENGM–ENBR', hint: 'FL250' },
+  { value: 'oslo-bergen-low', label: 'ENGM–ENBR', hint: 'FL120' },
+  { value: 'oslo-torp', label: 'ENGM–ENTO', hint: 'short' },
 ] as const
 
 export function mockRoute(id: MockRouteId): MockRoute | undefined {

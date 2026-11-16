@@ -10,6 +10,15 @@ All notable changes to this project are documented here. The format is based on
 
 - **Planning**: Socata TBM 850 takeoff profile (Black Square's TBM 850: VR 85, 50 ft
   speed 95 KIAS, flaps TO). Black Square's Caravan Professional is recognised as the 208B.
+- **Info**: the aircraft card is titled with the aircraft's name, and shows the speeds
+  to fly for the Caravan and TBM 850, two by two: climb,
+  cruise (TAS), descent (with its vertical speed) and approach. The approach speed follows
+  the live weight (by its square root). Each has a "?" explaining it. Figures from the
+  Black Square manuals' performance tables; approach speeds from the type handbooks.
+- **In flight › Flight plan**: for the Caravan and TBM 850, TOC and TOD come from the
+  aircraft's own climb and descent tables (at the plan's cruise altitude) instead of a
+  generic 250 kt / 1,500 fpm climb and 3° descent; "How is this planned?" says which.
+  Other aircraft keep the generic figures.
 - The aircraft list (`app/src/aircraft`) is shared by every page: pages key their own
   per-aircraft data (Planning's takeoff profiles) by its id.
 - **Info** tab (first): your callsign, shown large, entered on an on-screen keypad (letters
@@ -67,6 +76,11 @@ All notable changes to this project are documented here. The format is based on
   the sim's title when it isn't recognised). An aircraft SimTools has no data for gets an
   "Aircraft not supported" card listing the supported ones, instead of another
   aircraft's numbers.
+- Dev harness: the flight plans are labelled by ICAO codes (ENGM–ENBR FL250 / FL120,
+  ENGM–ENTO short) so they fit their buttons.
+- Dev harness: an *Oslo–Bergen FL120* flight plan, the same route planned for a turboprop
+  like the Caravan (FL250 is above its ceiling and leaves no cruise). The harness starts
+  on it, at 12,000 ft and 160 kt.
 - Dev harness: *Takeoff state* picks the aircraft "loaded" in the mock sim (Black Square
   Caravan and TBM 850, King Air 350, Q400, 737-600, an unsupported A320, none). It sets
   TITLE and ATC MODEL and a plausible weight, CG and flap lever.

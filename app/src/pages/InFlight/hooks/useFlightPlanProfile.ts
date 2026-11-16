@@ -1,16 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  type Aircraft,
+  climbGradientFtPerNm,
+  climbRateFpm,
+  descentGradientFtPerNm,
+  useSimAircraft,
+} from '~/aircraft'
+import {
   type AircraftOnRoute,
-  CLIMB_FT_PER_NM,
+  angleForGradientDeg,
   computeVerticalProfile,
-  DESCENT_FT_PER_NM,
   type FlightProgress,
   flightProgress,
+  GENERIC_PROFILE_BASIS,
   gradientFtPerNm,
   inClimbWindow,
   MIN_GROUNDSPEED_KT,
   type PlannedWaypoint,
   PROFILE_ASSUMPTIONS,
+  type ProfileBasis,
   type ProfileView,
   planWaypoints,
   positionOnRoute,
@@ -31,6 +39,8 @@ export interface FlightPlanView {
   cruiseFt: number
   /** False when the plan has no cruise altitude and the fallback is assumed. */
   cruiseFromPlan: boolean
+  /** The climb and descent the profile is planned with: the aircraft's, or generic. */
+  basis: ProfileBasis
   progress: FlightProgress
   /** Live aircraft on the route, for the side view; undefined without a position. */
   aircraft: AircraftOnRoute | undefined
@@ -40,7 +50,8 @@ export interface FlightPlanView {
 
 /**
  * State behind the (read-only) Flight plan tab: the sim's flight plan as a route, the
- * planned vertical profile with TOC and TOD (fixed climb / descent assumptions), and where
+ * planned vertical profile with TOC and TOD (the aircraft's climb / descent when SimTools
+ * has its figures, generic ones otherwise), and where
  * the aircraft is along it. The route is loaded once (and on change); only the aircraft
  * position is polled, at 1 Hz.
  */
@@ -53,8 +64,9 @@ export function useFlightPlanProfile() {
   // tab opens.
   const [waypointsOpen, setWaypointsOpen] = useState(true)
   const sim = useSimVars(FLIGHT_PLAN_SIM_VARS, 1)
+  const { aircraft: simAircraft } = useSimAircraft()
 
-  const plan = state.status === 'ready' ? planView(state.route) : undefined
+  const plan = state.status === 'ready' ? planView(state.route, simAircraft) : undefined
 
   let live: FlightPlanView | undefined
   if (plan) {
@@ -88,7 +100,7 @@ export function useFlightPlanProfile() {
           : undefined,
       descentRateFpm: rateForAngle(
         sim.groundSpeed ?? PROFILE_ASSUMPTIONS.climbSpeedKt,
-        PROFILE_ASSUMPTIONS.descentAngleDeg,
+        plan.basis.descentAngleDeg,
       ),
     }
   }
@@ -117,9 +129,13 @@ export function useFlightPlanProfile() {
   }
 }
 
-/** The planned profile for a route (no live data: recomputed only when the route changes). */
-function planView(route: LoadedRoute) {
+/**
+ * The planned profile for a route and aircraft (no live data: recomputed only when either
+ * changes).
+ */
+function planView(route: LoadedRoute, aircraft: Aircraft | undefined) {
   const cruiseFt = route.cruiseFt ?? PROFILE_ASSUMPTIONS.fallbackCruiseFt
+  const basis = profileBasis(aircraft, cruiseFt)
   const first = route.waypoints[0]
   const last = route.waypoints[route.waypoints.length - 1]
   const profile = computeVerticalProfile({
@@ -127,8 +143,8 @@ function planView(route: LoadedRoute) {
     startFt: first?.elevationFt ?? 0,
     endFt: (last?.elevationFt ?? 0) + (last?.runway ? THRESHOLD_HEIGHT_FT : 0),
     cruiseFt,
-    climbFtPerNm: CLIMB_FT_PER_NM,
-    descentFtPerNm: DESCENT_FT_PER_NM,
+    climbFtPerNm: basis.climbFtPerNm,
+    descentFtPerNm: basis.descentFtPerNm,
   })
   return {
     route,
@@ -136,5 +152,29 @@ function planView(route: LoadedRoute) {
     profile,
     cruiseFt,
     cruiseFromPlan: route.cruiseFt !== undefined,
+    basis,
+  }
+}
+
+/**
+ * The aircraft's climb and descent to and from the cruise altitude, from its tables in
+ * ~/aircraft; the generic figures when SimTools has none for it.
+ */
+function profileBasis(aircraft: Aircraft | undefined, cruiseFt: number): ProfileBasis {
+  const perf = aircraft?.performance
+  if (!perf) return GENERIC_PROFILE_BASIS
+  const climb = climbGradientFtPerNm(perf, cruiseFt)
+  const descent = descentGradientFtPerNm(perf, cruiseFt)
+  const rate = climbRateFpm(perf, cruiseFt)
+  if (climb === undefined || descent === undefined || rate === undefined) {
+    return GENERIC_PROFILE_BASIS
+  }
+  return {
+    aircraftName: aircraft?.shortName,
+    climbFtPerNm: climb,
+    descentFtPerNm: descent,
+    climbSpeedKt: perf.climb.speedKias,
+    climbRateFpm: rate,
+    descentAngleDeg: angleForGradientDeg(descent),
   }
 }

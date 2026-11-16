@@ -21,7 +21,7 @@ describe('advanceFlight', () => {
       { ...INITIAL_MOCK_FLIGHT, verticalSpeedFpm: -1200, selectedAltitudeFt: 0 },
       30,
     )
-    expect(next.altitudeFt).toBe(35000 - 600)
+    expect(next.altitudeFt).toBe(INITIAL_MOCK_FLIGHT.altitudeFt - 600)
   })
 
   it('levels off at the selected altitude', () => {

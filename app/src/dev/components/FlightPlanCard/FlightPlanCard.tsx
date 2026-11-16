@@ -44,6 +44,7 @@ export function FlightPlanCard(props: FlightPlanCardProps) {
           options={MOCK_ROUTE_OPTIONS}
           value={state.routeId}
           onChange={(routeId) => onChange({ routeId, routeProgressNm: 0 })}
+          size="sm"
         />
       </Field>
       {path && (

@@ -21,14 +21,12 @@ import {
   formatDuration,
   formatInteger,
   type PlannedWaypoint,
-  PROFILE_ASSUMPTIONS,
+  type ProfileBasis,
   type ProfileView,
   type RouteWaypoint,
   type VerticalProfile,
 } from '~/pages/InFlight/domain'
 import { RouteProfile } from '../RouteProfile'
-
-const A = PROFILE_ASSUMPTIONS
 
 const STATUS_BADGE: Record<FlightPlanStatus, { tone: BadgeTone; label: string; pulse?: boolean }> =
   {
@@ -58,6 +56,8 @@ interface FlightPlanOverviewProps {
   progress: FlightProgress
   /** Vertical speed that flies the planned descent at the current groundspeed. */
   descentRateFpm: number
+  /** The climb and descent the profile is planned with, for the explanation. */
+  basis: ProfileBasis
   view: ProfileView
   onViewChange: (view: ProfileView) => void
   /** The live aircraft on the route; omitted without a position. */
@@ -79,6 +79,7 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
     waypoints,
     progress,
     descentRateFpm,
+    basis,
     view,
     onViewChange,
     aircraft,
@@ -103,6 +104,7 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
             }
             progress={progress}
             descentRateFpm={descentRateFpm}
+            basis={basis}
           />
         </SectionContent>
       </Section>
@@ -137,6 +139,7 @@ interface ResultsProps {
   action: ReactNode
   progress: FlightProgress
   descentRateFpm: number
+  basis: ProfileBasis
 }
 
 interface Value {
@@ -238,7 +241,7 @@ function resultValues(progress: FlightProgress, descentRateFpm: number): ResultV
  * a hairline. What the answer is follows the phase of flight.
  */
 function Results(props: ResultsProps) {
-  const { label, action, progress, descentRateFpm } = props
+  const { label, action, progress, descentRateFpm, basis } = props
   // Worked out outside the component: the React Compiler mis-memoises a `let` assigned in
   // branches here (it read `main.tone` before `main` was set).
   const { main, secondary } = resultValues(progress, descentRateFpm)
@@ -250,9 +253,7 @@ function Results(props: ResultsProps) {
         label={label}
         labelAddon={
           <HelpPopover label="How is this planned?" size="lg">
-            From the sim's flight plan: a climb at {formatInteger(A.climbRateFpm)} fpm and{' '}
-            {A.climbSpeedKt} kt, cruise at the plan's altitude and a {A.descentAngleDeg}° descent,
-            kept within the procedures' altitude limits. TOC and TOD follow from that.
+            {planningText(basis)}
           </HelpPopover>
         }
         action={action}
@@ -278,4 +279,14 @@ function Results(props: ResultsProps) {
       </Stack>
     </>
   )
+}
+
+/** "How is this planned?": the aircraft's own climb and descent, or the generic ones. */
+function planningText(basis: ProfileBasis): string {
+  const climb = `a climb at ${basis.climbSpeedKt} kt (about ${formatInteger(basis.climbRateFpm)} fpm)`
+  const descent = `a descent of about ${basis.descentAngleDeg.toFixed(1)}°`
+  const limits = "kept within the procedures' altitude limits. TOC and TOD follow from that."
+  return basis.aircraftName
+    ? `From the sim's flight plan and the ${basis.aircraftName}'s climb and descent tables: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
+    : `From the sim's flight plan: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
 }

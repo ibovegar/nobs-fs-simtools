@@ -105,8 +105,10 @@ pages/
   Info/             Info.tsx: what the pilot enters once and keeps (the callsign), and
                     the aircraft loaded in the sim (~/aircraft)
                     + infoIcon (the tab's "i" icon: Lineicons has none)
-    hooks/          useInfo (saved at once, survives closing the sim)
-    components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft)
+    hooks/          useInfo (saved at once, survives closing the sim), useAircraftSpeeds
+                    (the sim's aircraft + its speeds; approach from the live weight)
+    components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft
+                    and its climb / cruise / descent / approach speeds)
     domain/         callsign (ICAO rules: A–Z, 0–9, at most 7)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
@@ -151,9 +153,11 @@ pages/
                     docs/takeoff-profiles.md)
   Settings/         Settings.tsx
 aircraft/           the aircraft SimTools recognises in the sim (no picker, anywhere):
-                    catalogue.ts (AIRCRAFT: id, name, match on TITLE / ATC MODEL;
-                    detectAircraft), hooks/ (useSimAircraft). Pages key their own
-                    per-aircraft data by the aircraft id (Planning's takeoff profiles)
+                    catalogue.ts (AIRCRAFT: id, name, match on TITLE / ATC MODEL,
+                    optional performance; detectAircraft), performance.ts (climb /
+                    cruise / descent / approach figures + gradients, approach speed by
+                    √weight), hooks/ (useSimAircraft). Data used by one page stays in
+                    that page, keyed by the aircraft id (Planning's takeoff profiles)
 components/         views shared by 2+ pages: SimValueField (live sim value or manual entry)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / density / active page /

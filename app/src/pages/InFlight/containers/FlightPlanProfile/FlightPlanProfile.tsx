@@ -44,6 +44,7 @@ export function FlightPlanProfile(props: FlightPlanProfileProps) {
         waypoints={plan.waypoints}
         progress={plan.progress}
         descentRateFpm={plan.descentRateFpm}
+        basis={plan.basis}
         view={view}
         onViewChange={setView}
         aircraft={plan.aircraft}
