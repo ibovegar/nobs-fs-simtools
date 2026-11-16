@@ -4,6 +4,7 @@ import {
   type ReactNode,
   type PointerEvent as ReactPointerEvent,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
@@ -178,13 +179,17 @@ export function ScrollArea(props: ScrollAreaProps) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const thumbDrag = useRef<{ startY: number; startScroll: number; ratio: number } | null>(null)
-  const [thumb, setThumb] = useState<Thumb>(NO_THUMB)
+  // null until first measured (just before the first paint): until then, don't guess.
+  const [measured, setMeasured] = useState<Thumb | null>(null)
+  const thumb = measured ?? NO_THUMB
   const [scrolledDown, setScrolledDown] = useState(false)
   const [thumbDragging, setThumbDragging] = useState(false)
   /** Where to draw the drag-scroll indicator (relative to the root), or null when idle. */
   const [grab, setGrab] = useState<{ x: number; y: number } | null>(null)
 
-  useEffect(() => {
+  // A layout effect: the first measurement (and the gutter it decides) lands before the
+  // first paint, so a page never shows a frame at the wrong width.
+  useLayoutEffect(() => {
     const viewport = viewportRef.current
     const track = trackRef.current
     if (!viewport || !track) return
@@ -196,7 +201,7 @@ export function ScrollArea(props: ScrollAreaProps) {
     }
     const measure = () => {
       const next = thumbFor(viewport, track.clientHeight)
-      setThumb((prev) => (sameThumb(prev, next) ? prev : next))
+      setMeasured((prev) => (prev && sameThumb(prev, next) ? prev : next))
       setScrolledDown(viewport.scrollTop > viewport.clientHeight * TO_TOP_AFTER)
     }
     const onResize = () => {
@@ -209,7 +214,7 @@ export function ScrollArea(props: ScrollAreaProps) {
     const settle = window.setTimeout(onResize, 0)
     // Event-driven, so nothing runs while nothing changes (sim performance): scrolling,
     // window resizes and, with ResizeObserver, any size change of the viewport or its
-    // content. setThumb / setScrolledDown bail out when nothing changed.
+    // content. setMeasured / setScrolledDown bail out when nothing changed.
     viewport.addEventListener('scroll', measure)
     window.addEventListener('resize', onResize)
     const cleanups: (() => void)[] = [
@@ -246,10 +251,12 @@ export function ScrollArea(props: ScrollAreaProps) {
   }, [paused])
 
   // Tell the host when the scrollbar comes or goes (rarely: content grows past or shrinks
-  // within the viewport). Pass a stable callback (e.g. a state setter).
-  useEffect(() => {
-    onScrollbarChange?.(thumb.visible)
-  }, [thumb.visible, onScrollbarChange])
+  // within the viewport), once measured. Pass a stable callback (e.g. a state setter). A
+  // layout effect too, so the host's layout also changes before the paint.
+  const scrollbar = measured ? measured.visible : undefined
+  useLayoutEffect(() => {
+    if (scrollbar !== undefined) onScrollbarChange?.(scrollbar)
+  }, [scrollbar, onScrollbarChange])
 
   // Drag-to-scroll on the content. Native listeners on the window follow the pointer
   // outside the viewport without pointer capture, which would steal the press from the
@@ -381,7 +388,7 @@ export function ScrollArea(props: ScrollAreaProps) {
       ref={rootRef}
       className={cx(
         styles.root,
-        scrollbarGutter === 'auto' && !thumb.visible && styles.noGutter,
+        scrollbarGutter === 'auto' && measured && !measured.visible && styles.noGutter,
         grab && styles.grabbing,
         className,
       )}

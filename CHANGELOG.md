@@ -84,6 +84,7 @@ All notable changes to this project are documented here. The format is based on
 - The scrollbar sits evenly between the page and the panel edge, and starts level with the
   first section. Pages with nothing to scroll use the full width, with the same margin on
   both sides.
+- Switching tabs no longer shifts the page sideways for a moment.
 
 ## [0.2.0] - 2026-11-14
 
