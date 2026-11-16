@@ -70,7 +70,7 @@ import {
 | `Stepper` | −/+ number entry without typing |
 | `Keypad` | On-screen numeric / decimal / alpha / alphanumeric keypad (`alphanumeric`: rows of ten, digits first, for codes such as callsigns). Keys look and space like `VirtualKeyboard`'s |
 | `VirtualKeyboard` | On-screen QWERTY keyboard ([react-simple-keyboard](https://github.com/hodgef/react-simple-keyboard), re-skinned). Pass `target` (a textarea/input ref) so its caret follows |
-| `Badge`, `Readout` | Status pill; instrument-style value display (`action`: a pin button or badge in its top-right corner) |
+| `Badge`, `Readout` | Status pill; instrument-style value display (`action`: a pin button or badge in its top-right corner; `mono={false}` for words and codes) |
 | `ReadoutGroup` | Readouts side by side in equal widths; `divided` puts hairlines between them |
 | `Icon` | Lineicons renderer (`@lineiconshq/free-icons` icon objects) |
 

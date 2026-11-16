@@ -20,7 +20,7 @@ export function CallsignCard(props: CallsignCardProps) {
     <Card>
       <Stack direction="row" align="center" gap={3}>
         <Stack grow>
-          <Readout size="lg" label="Callsign" value={callsign || '—'} />
+          <Readout size="lg" mono={false} label="Callsign" value={callsign || '—'} />
         </Stack>
         {!editing && (
           <Button variant="soft" onClick={() => setEditing(true)}>

@@ -1,21 +1,23 @@
 import { Container, PageHeader, SegmentedControl } from '@nobs/ui'
-import { DescentCalculator, FlightPlanProfile, GlideslopeMonitor } from './containers'
+import { DescentCalculator, FlightPlanProfile } from './containers'
 import { useInFlightTool } from './hooks'
 
+// GS is hidden for now (its container, GlideslopeMonitor, is still in the code). To show
+// it again, add { value: 'gs', label: 'GS' } here and render <GlideslopeMonitor /> for it.
 const TOOLS = [
   { value: 'calc', label: 'TOD calculator' },
   { value: 'plan', label: 'Flight plan' },
-  { value: 'gs', label: 'GS' },
 ] as const
 
 /**
- * The In flight page, three tools as tabs: Calc (a simple top-of-descent calculator), Flight plan
- * (the sim's flight plan as a climb / cruise / descent profile with TOC and TOD) and GS
- * (where you are on the approach glideslope). Remembers the open tab; each tool is its own
- * container with its own state.
+ * The In flight page, its tools as tabs: Calc (a simple top-of-descent calculator) and
+ * Flight plan (the sim's flight plan as a climb / cruise / descent profile with TOC and
+ * TOD). Remembers the open tab; each tool is its own container with its own state.
  */
 export function InFlight() {
-  const [tool, setTool] = useInFlightTool()
+  const [saved, setTool] = useInFlightTool()
+  // A saved tool that is hidden now (GS) opens the calculator instead.
+  const tool = TOOLS.some((t) => t.value === saved) ? saved : 'calc'
 
   return (
     <Container maxWidth={false}>
@@ -28,9 +30,7 @@ export function InFlight() {
           size="sm"
         />
       </PageHeader>
-      {tool === 'gs' ? (
-        <GlideslopeMonitor />
-      ) : tool === 'plan' ? (
+      {tool === 'plan' ? (
         <FlightPlanProfile onOpenCalculator={() => setTool('calc')} />
       ) : (
         <DescentCalculator />

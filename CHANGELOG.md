@@ -8,8 +8,8 @@ All notable changes to this project are documented here. The format is based on
 
 ### Added
 
-- **Info** tab (first): your callsign, entered on an on-screen keypad (letters and digits,
-  up to 7). It is saved straight away and kept when you close the sim.
+- **Info** tab (first): your callsign, shown large, entered on an on-screen keypad (letters
+  and digits, up to 7). It is saved straight away and kept when you close the sim.
 - A floating "back to top" button in the bottom right corner of every page, once you have
   scrolled down.
 - **In flight › TOD calculator**: the rules-of-thumb top-of-descent calculator from
@@ -60,6 +60,7 @@ All notable changes to this project are documented here. The format is based on
 
 - The Takeoff tab is now called **Planning**.
 - The tabs are in flight order: Info, Planning, In flight, Notes, then Settings as an icon.
+- The GS tool is hidden for now (still in the code, to come back later).
 - Buttons use the same tinted blue as the calculator's −/+ buttons, and the ATC and callsign
   keypads use the same keys as the Notes keyboard.
 - For developers: the page modules follow the tab names, `pages/Descent` → `pages/InFlight`

@@ -11,6 +11,8 @@ interface ReadoutProps {
   /** Colours the value; `neutral` is the plain bright text colour. */
   tone?: BadgeTone
   size?: 'md' | 'lg'
+  /** Monospaced value (default), for figures that line up. `false` for words and codes. */
+  mono?: boolean
   /** Shown right of the label, e.g. a help button. */
   labelAddon?: ReactNode
   /** Secondary line under the value. */
@@ -31,6 +33,7 @@ export function Readout(props: ReadoutProps) {
     unit,
     tone = 'neutral',
     size = 'md',
+    mono = true,
     labelAddon,
     caption,
     action,
@@ -47,7 +50,9 @@ export function Readout(props: ReadoutProps) {
       ) : (
         label && <span className={styles.label}>{label}</span>
       )}
-      <span className={cx(styles.value, styles[tone], size === 'lg' && styles.lg)}>
+      <span
+        className={cx(styles.value, styles[tone], size === 'lg' && styles.lg, !mono && styles.sans)}
+      >
         {value}
         {unit && <span className={styles.unit}>{unit}</span>}
       </span>

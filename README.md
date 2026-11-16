@@ -15,14 +15,13 @@ work in VR and on a monitor.
   picture shows where V1, VR and V2 fall, and a side view shows the flap and trim settings.
   Adding aircraft: [docs/takeoff-profiles.md](docs/takeoff-profiles.md).
 - **In flight**, two tabs:
-  - **TOD**: a top-of-descent calculator using live altitude, groundspeed and GPS distance
-    from the sim, with manual fallbacks. It shows the distance and time to TOD and the
-    vertical speed to fly.
-  - **GS**: where you are on the approach glideslope (2.5–4°): a side view with the
-    aircraft against the slope, an ILS-style dot scale, and the deviation in feet. Plus the
-    vertical speed that holds the slope at your groundspeed (and the "groundspeed × 5" rule
-    of thumb). Set the runway elevation, and use the runway as the active GPS waypoint or
-    enter the distance by hand.
+  - **TOD calculator**: where to start down, from start / end altitude, speeds, wind and
+    the glideslope or vertical speed (fill altitude and speed from the sim). It shows the
+    distance, the vertical speed to fly and the descent time; pin the results to keep them
+    in view.
+  - **Flight plan**: the sim's flight plan (EFB / World Map, SimBrief) as a climb / cruise /
+    descent profile with TOC and TOD, the number that matters now (to TOC, to TOD, or the
+    path deviation), and the waypoints with planned altitudes and procedure limits.
 - **Settings**: dark/light theme, and Comfort (VR) or Compact (monitor) control size.
 
 ## Install
