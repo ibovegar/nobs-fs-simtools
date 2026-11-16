@@ -1,4 +1,13 @@
-import { Badge, Readout, Section } from '@nobs/ui'
+import {
+  Badge,
+  Divider,
+  Readout,
+  ReadoutGroup,
+  Section,
+  SectionContent,
+  Stack,
+  Typography,
+} from '@nobs/ui'
 import {
   type AircraftProfile,
   type FlapSetting,
@@ -51,87 +60,96 @@ export function TakeoffSummary(props: TakeoffSummaryProps) {
     `${Math.round(conditions.oatC)} °C`,
     `PA ${Math.round(conditions.pressureAltitudeFt)} ft`,
   ].join('  ·  ')
+  const notes = [
+    profile.trim.kind === 'advice' ? profile.trim.text : undefined,
+    profile.trim.kind === 'computed' ? profile.trim.note : undefined,
+    ...profile.notes,
+  ].filter((note): note is string => Boolean(note))
 
   return (
     <Section label={`Takeoff · ${profile.shortName}`}>
-      <div className={styles.body}>
-        <div className={styles.speeds}>
-          {!single && (
-            <Readout size="lg" label="V1" value={kt(speeds.v1)} unit="kt" className={styles.cell} />
-          )}
-          <Readout size="lg" label="VR" value={kt(speeds.vr)} unit="kt" className={styles.cell} />
-          <Readout
-            size="lg"
-            label={single ? '50 ft' : 'V2'}
-            value={kt(speeds.v2)}
-            unit="kt"
-            className={styles.cell}
-          />
-        </div>
+      <SectionContent>
+        <ReadoutGroup>
+          {!single && <Readout size="lg" label="V1" value={kt(speeds.v1)} unit="kt" />}
+          <Readout size="lg" label="VR" value={kt(speeds.vr)} unit="kt" />
+          <Readout size="lg" label={single ? '50 ft' : 'V2'} value={kt(speeds.v2)} unit="kt" />
+        </ReadoutGroup>
 
-        <div className={styles.config}>
-          <Readout
-            label="Flaps"
-            value={flap.label}
-            caption={
-              leverKnown ? (
-                <Badge tone={leverSet ? 'success' : 'warning'} dot>
-                  {leverSet
-                    ? 'Lever set'
-                    : leverFlap
-                      ? `Lever at ${leverFlap.label}`
-                      : 'Lever not set'}
-                </Badge>
-              ) : undefined
-            }
-            className={styles.cell}
-          />
-          {trim !== undefined && profile.trim.kind === 'computed' ? (
+        <Stack gap={3}>
+          <Divider />
+          <ReadoutGroup>
             <Readout
-              label="Trim"
-              value={formatTrim(trim)}
-              unit={profile.trim.unit}
-              caption={`CG ${conditions.cgPercentMac.toFixed(1)} % MAC`}
-              className={styles.cell}
-            />
-          ) : (
-            <Readout
-              label="Runway needed"
-              value={implausible ? '—' : formatInteger(result.requiredRunwayM)}
-              unit="m"
+              label="Flaps"
+              value={flap.label}
               caption={
-                implausible
-                  ? undefined
-                  : `estimate, ${formatInteger(result.requiredRunwayM * FT_PER_M)} ft`
+                leverKnown ? (
+                  <Badge tone={leverSet ? 'success' : 'warning'} dot>
+                    {leverSet
+                      ? 'Lever set'
+                      : leverFlap
+                        ? `Lever at ${leverFlap.label}`
+                        : 'Lever not set'}
+                  </Badge>
+                ) : undefined
               }
-              className={styles.cell}
             />
+            {trim !== undefined && profile.trim.kind === 'computed' ? (
+              <Readout
+                label="Trim"
+                value={formatTrim(trim)}
+                unit={profile.trim.unit}
+                caption={`CG ${conditions.cgPercentMac.toFixed(1)} % MAC`}
+              />
+            ) : (
+              <Readout
+                label="Runway needed"
+                value={implausible ? '—' : formatInteger(result.requiredRunwayM)}
+                unit="m"
+                caption={
+                  implausible
+                    ? undefined
+                    : `estimate, ${formatInteger(result.requiredRunwayM * FT_PER_M)} ft`
+                }
+              />
+            )}
+          </ReadoutGroup>
+
+          {warnings.length > 0 && (
+            <Stack component="ul" gap={2} className={styles.list}>
+              {warnings.map((w) => (
+                <Typography
+                  key={w}
+                  component="li"
+                  color={w === 'outside-table' ? 'warning' : 'danger'}
+                  className={styles.warning}
+                >
+                  {WARNING_TEXT[w]}
+                </Typography>
+              ))}
+            </Stack>
           )}
-        </div>
 
-        {warnings.length > 0 && (
-          <ul className={styles.warnings}>
-            {warnings.map((w) => (
-              <li key={w} className={w === 'outside-table' ? styles.caution : styles.danger}>
-                {WARNING_TEXT[w]}
-              </li>
+          <Stack component="ul" gap={1} className={styles.list}>
+            {notes.map((note) => (
+              <Typography key={note} component="li" variant="caption" color="mid">
+                {note}
+              </Typography>
             ))}
-          </ul>
-        )}
+          </Stack>
+        </Stack>
 
-        <ul className={styles.notes}>
-          {profile.trim.kind === 'advice' && <li>{profile.trim.text}</li>}
-          {profile.trim.kind === 'computed' && profile.trim.note && <li>{profile.trim.note}</li>}
-          {profile.notes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-
-        <div className={styles.basis}>
-          <span className={styles.basisValues}>{basis}</span>
-          <span className={styles.source}>{live ? 'live' : 'manual · set below'}</span>
-        </div>
-      </div>
+        <Stack gap={3}>
+          <Divider />
+          <Stack direction="row" wrap gap={3} align="baseline" justify="between">
+            <Typography variant="caption" mono noWrap color="default">
+              {basis}
+            </Typography>
+            <Typography variant="caption" color="dim">
+              {live ? 'live' : 'manual · set below'}
+            </Typography>
+          </Stack>
+        </Stack>
+      </SectionContent>
     </Section>
   )
 }

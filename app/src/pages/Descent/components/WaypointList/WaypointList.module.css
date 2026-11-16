@@ -1,10 +1,6 @@
 .table {
   display: flex;
   flex-direction: column;
-  /* Bleed to the card edges so row lines and the next-fix band span the card, while the
-     cells (padded by the same --sp-4) line up with the title and notes. */
-  margin-right: calc(-1 * var(--sp-4));
-  margin-left: calc(-1 * var(--sp-4));
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
 }
@@ -110,8 +106,10 @@
   width: 48px;
 }
 
-.notes {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--warning);
+/* The Disclosure has no gutters (the table runs edge to edge, its cells padded by --sp-4
+   so they line up with the title); the notes and the button get them back here. Side
+   margins only: the Disclosure spaces its children vertically. */
+.gutters {
+  margin-right: var(--sp-4);
+  margin-left: var(--sp-4);
 }

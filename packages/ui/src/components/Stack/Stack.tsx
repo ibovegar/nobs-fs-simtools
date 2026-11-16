@@ -11,6 +11,8 @@ interface StackProps extends HTMLAttributes<HTMLDivElement> {
   wrap?: boolean
   /** Fill the remaining space in a parent flex container. */
   grow?: boolean
+  /** The element to render; `span` inside phrasing content such as a heading. */
+  component?: 'div' | 'span' | 'ul'
   children?: ReactNode
 }
 
@@ -28,14 +30,18 @@ export function Stack(props: StackProps) {
     justify = 'start',
     wrap = false,
     grow = false,
+    component = 'div',
     className,
     style,
     children,
     ...rest
   } = props
 
+  // The props are typed for a div; span and ul take the same attributes.
+  const Component = component as 'div'
+
   return (
-    <div
+    <Component
       className={cx(
         styles.stack,
         styles[direction],
@@ -50,6 +56,6 @@ export function Stack(props: StackProps) {
       {...rest}
     >
       {children}
-    </div>
+    </Component>
   )
 }

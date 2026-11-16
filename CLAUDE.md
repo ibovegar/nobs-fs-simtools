@@ -52,6 +52,13 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
 - **Composition**: shells own surface + layout (`Card`, `Section`, `Stack`), content
   components don't. Compound components share state through context (`Tabs`/`Tab`/`TabPanel`,
   `Field` → `TextInput`/`Stepper` ids).
+- **JSX is built from `@nobs/ui`**, by composing its components: `Stack` for layout (rows,
+  columns, wrapping), `Section` + `SectionContent` / `SectionMedia` for a section's padded
+  body and edge-to-edge charts, `ReadoutGroup` + `Divider` for readouts side by side,
+  `Typography` for text (hints, notes, problems, labels). No `div` / `p` with a CSS Module
+  for spacing, padding, hairlines or text styles. A component's own CSS Module is for what
+  the toolkit doesn't cover (an instrument, an SVG drawing, a table). When a pattern repeats
+  across pages, propose a toolkit component (and ask before adding one).
 - **Code is organised by page (feature modules).** Each page under `pages/<Page>/` owns
   everything only it uses, split into these kinds:
   - `<Page>.tsx`: the screen and its top-level container. It owns the page's state and

@@ -15,6 +15,11 @@ interface ReadoutProps {
   labelAddon?: ReactNode
   /** Secondary line under the value. */
   caption?: ReactNode
+  /**
+   * In the top-right corner (a pin button, a status badge), out of the flow so it never
+   * moves the value. Nudged a little past the corner, into a surrounding padding.
+   */
+  action?: ReactNode
   className?: string
 }
 
@@ -28,11 +33,12 @@ export function Readout(props: ReadoutProps) {
     size = 'md',
     labelAddon,
     caption,
+    action,
     className,
   } = props
 
   return (
-    <div className={cx(styles.readout, className)}>
+    <div className={cx(styles.readout, action != null && styles.withAction, className)}>
       {label && labelAddon ? (
         <div className={styles.labelRow}>
           <span className={styles.label}>{label}</span>
@@ -46,6 +52,7 @@ export function Readout(props: ReadoutProps) {
         {unit && <span className={styles.unit}>{unit}</span>}
       </span>
       {caption && <span className={styles.caption}>{caption}</span>}
+      {action != null && <div className={styles.action}>{action}</div>}
     </div>
   )
 }

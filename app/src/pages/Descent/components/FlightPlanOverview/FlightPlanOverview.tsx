@@ -1,4 +1,16 @@
-import { Badge, type BadgeTone, Readout, Section, SegmentedControl } from '@nobs/ui'
+import {
+  Badge,
+  type BadgeTone,
+  Divider,
+  Readout,
+  ReadoutGroup,
+  Section,
+  SectionContent,
+  SectionMedia,
+  SegmentedControl,
+  Stack,
+} from '@nobs/ui'
+import type { ReactNode } from 'react'
 import {
   type AircraftOnRoute,
   type FlightPlanStatus,
@@ -15,7 +27,6 @@ import {
 } from '~/pages/Descent/domain'
 import { HelpPopover } from '../HelpPopover'
 import { RouteProfile } from '../RouteProfile'
-import styles from './FlightPlanOverview.module.css'
 
 const A = PROFILE_ASSUMPTIONS
 
@@ -76,30 +87,32 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
   const cruise = cruiseFromPlan ? formatAltitude(cruiseFt) : `${formatAltitude(cruiseFt)} assumed`
 
   return (
-    // Laid out exactly like the TOD calculator's results box (no section header, same
-    // padding, label line then the big value), so switching tabs doesn't shift the answer.
-    // The route is the label line; the status badge takes the calculator's pin corner.
+    // Laid out exactly like the TOD calculator's results (no section header, label line
+    // then the big value), so switching tabs doesn't shift the answer. The route is the
+    // label line; the status badge takes the calculator's pin corner.
     <Section>
-      <div className={styles.results}>
-        <Badge className={styles.badge} tone={badge.tone} dot pulse={badge.pulse}>
-          {badge.label}
-        </Badge>
+      <SectionContent>
         <Results
           label={`${title}  ·  ${cruise}`}
+          action={
+            <Badge tone={badge.tone} dot pulse={badge.pulse}>
+              {badge.label}
+            </Badge>
+          }
           progress={progress}
           descentRateFpm={descentRateFpm}
         />
-      </div>
-      <div className={styles.body}>
-        <div className={styles.bleed}>
-          <RouteProfile
-            profile={profile}
-            waypoints={waypoints}
-            view={view}
-            aircraft={aircraft}
-            nextIndex={nextIndex}
-          />
-        </div>
+      </SectionContent>
+      <SectionMedia>
+        <RouteProfile
+          profile={profile}
+          waypoints={waypoints}
+          view={view}
+          aircraft={aircraft}
+          nextIndex={nextIndex}
+        />
+      </SectionMedia>
+      <SectionContent>
         <SegmentedControl
           label="Profile view"
           options={VIEWS}
@@ -107,7 +120,7 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
           onChange={onViewChange}
           size="sm"
         />
-      </div>
+      </SectionContent>
     </Section>
   )
 }
@@ -115,6 +128,8 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
 interface ResultsProps {
   /** The label line above the big value: the route. */
   label: string
+  /** In the top-right corner: the status badge. */
+  action: ReactNode
   progress: FlightProgress
   descentRateFpm: number
 }
@@ -218,7 +233,7 @@ function resultValues(progress: FlightProgress, descentRateFpm: number): ResultV
  * a hairline. What the answer is follows the phase of flight.
  */
 function Results(props: ResultsProps) {
-  const { label, progress, descentRateFpm } = props
+  const { label, action, progress, descentRateFpm } = props
   // Worked out outside the component: the React Compiler mis-memoises a `let` assigned in
   // branches here (it read `main.tone` before `main` was set).
   const { main, secondary } = resultValues(progress, descentRateFpm)
@@ -235,24 +250,27 @@ function Results(props: ResultsProps) {
             kept within the procedures' altitude limits. TOC and TOD follow from that.
           </HelpPopover>
         }
+        action={action}
         value={main.value}
         unit={main.unit}
         tone={main.tone}
       />
-      <div className={styles.secondary}>
-        {secondary.map((v) => (
-          <Readout
-            key={v.label}
-            className={styles.secondaryItem}
-            label={v.label}
-            labelAddon={
-              <HelpPopover label={`What is ${v.label.toLowerCase()}?`}>{v.help}</HelpPopover>
-            }
-            value={v.value}
-            unit={v.unit}
-          />
-        ))}
-      </div>
+      <Stack gap={3}>
+        <Divider />
+        <ReadoutGroup divided>
+          {secondary.map((v) => (
+            <Readout
+              key={v.label}
+              label={v.label}
+              labelAddon={
+                <HelpPopover label={`What is ${v.label.toLowerCase()}?`}>{v.help}</HelpPopover>
+              }
+              value={v.value}
+              unit={v.unit}
+            />
+          ))}
+        </ReadoutGroup>
+      </Stack>
     </>
   )
 }

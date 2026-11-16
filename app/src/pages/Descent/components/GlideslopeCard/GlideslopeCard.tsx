@@ -1,4 +1,14 @@
-import { Badge, type BadgeTone, Readout, Section } from '@nobs/ui'
+import {
+  Badge,
+  type BadgeTone,
+  Divider,
+  Readout,
+  ReadoutGroup,
+  Section,
+  SectionContent,
+  Stack,
+  Typography,
+} from '@nobs/ui'
 import {
   formatDistance,
   formatInteger,
@@ -8,7 +18,6 @@ import {
 } from '~/pages/Descent/domain'
 import { GlideslopeProfile } from '../GlideslopeProfile'
 import { GlideslopeScale } from '../GlideslopeScale'
-import styles from './GlideslopeCard.module.css'
 
 const SLOPE_BADGE: Record<SlopeState, { tone: BadgeTone; label: string }> = {
   'on-slope': { tone: 'success', label: 'On slope' },
@@ -46,8 +55,8 @@ export function GlideslopeCard(props: GlideslopeCardProps) {
         ) : undefined
       }
     >
-      <div className={styles.body}>
-        <div className={styles.chart}>
+      <SectionContent>
+        <Stack direction="row" align="stretch" gap={3}>
           <GlideslopeProfile
             position={position}
             state={state}
@@ -55,32 +64,35 @@ export function GlideslopeCard(props: GlideslopeCardProps) {
             distanceNm={distanceNm}
           />
           <GlideslopeScale deviationDots={position?.deviationDots ?? null} state={state} />
-        </div>
+        </Stack>
 
         {position ? (
-          <div className={styles.readouts}>
-            <Readout
-              size="lg"
-              tone={badge?.tone}
-              label="Deviation"
-              value={`${position.deviationFt >= 0 ? '+' : '-'}${formatInteger(Math.abs(position.deviationFt))}`}
-              unit="ft"
-              caption={deviationCaption(position)}
-              className={styles.cell}
-            />
-            <Readout
-              size="lg"
-              label="On slope at"
-              value={formatInteger(position.pathAltitudeFt)}
-              unit="ft"
-              caption={`${formatDistance(position.distanceNm)} nm to runway`}
-              className={styles.cell}
-            />
-          </div>
+          <Stack gap={3}>
+            <Divider />
+            <ReadoutGroup>
+              <Readout
+                size="lg"
+                tone={badge?.tone}
+                label="Deviation"
+                value={`${position.deviationFt >= 0 ? '+' : '-'}${formatInteger(Math.abs(position.deviationFt))}`}
+                unit="ft"
+                caption={deviationCaption(position)}
+              />
+              <Readout
+                size="lg"
+                label="On slope at"
+                value={formatInteger(position.pathAltitudeFt)}
+                unit="ft"
+                caption={`${formatDistance(position.distanceNm)} nm to runway`}
+              />
+            </ReadoutGroup>
+          </Stack>
         ) : (
-          <span className={styles.hint}>Needs live altitude from the sim.</span>
+          <Typography variant="caption" color="dim">
+            Needs live altitude from the sim.
+          </Typography>
         )}
-      </div>
+      </SectionContent>
     </Section>
   )
 }

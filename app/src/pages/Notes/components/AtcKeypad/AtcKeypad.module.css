@@ -4,12 +4,3 @@
   border-radius: var(--radius);
   background: var(--bg-card);
 }
-
-.label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}

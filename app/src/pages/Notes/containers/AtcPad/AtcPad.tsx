@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { AtcFieldTile, AtcKeypad } from '~/pages/Notes/components'
 import { ATC_FIELDS } from '~/pages/Notes/domain'
 import { usePersistentState } from '~/storage'
-import styles from './AtcPad.module.css'
 
 type AtcValues = Record<string, string>
 
@@ -23,7 +22,7 @@ export function AtcPad() {
 
   return (
     <Stack gap={3}>
-      <div className={styles.tiles}>
+      <Stack direction="row" wrap gap={2}>
         {ATC_FIELDS.map((def) => (
           <AtcFieldTile
             key={def.id}
@@ -33,7 +32,7 @@ export function AtcPad() {
             onSelect={() => setEditingId(def.id === editingId ? null : def.id)}
           />
         ))}
-      </div>
+      </Stack>
 
       {editing ? (
         <AtcKeypad

@@ -1,4 +1,4 @@
-import { Keypad, Stack } from '@nobs/ui'
+import { Keypad, Stack, Typography } from '@nobs/ui'
 import {
   type AtcFieldDef,
   applyKey,
@@ -21,7 +21,9 @@ export function AtcKeypad(props: AtcKeypadProps) {
 
   return (
     <Stack gap={2} className={styles.panel}>
-      <span className={styles.label}>Editing {def.label}</span>
+      <Typography variant="label" color="dim">
+        Editing {def.label}
+      </Typography>
       <Keypad
         layout={keypadLayoutFor(def.kind)}
         extraKeys={extraKeysFor(def.kind)}

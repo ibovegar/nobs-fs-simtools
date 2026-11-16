@@ -1,0 +1,63 @@
+.text {
+  margin: 0;
+}
+
+.body {
+  font-size: var(--font-size);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.noWrap {
+  white-space: nowrap;
+}
+
+.inherit {
+  color: inherit;
+}
+
+.default {
+  color: var(--text);
+}
+
+.bright {
+  color: var(--text-bright);
+}
+
+.mid {
+  color: var(--text-mid);
+}
+
+.dim {
+  color: var(--text-dim);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.success {
+  color: var(--green);
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.danger {
+  color: var(--danger);
+}

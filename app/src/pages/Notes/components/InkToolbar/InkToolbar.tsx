@@ -7,7 +7,7 @@ import {
   PlusOutlined,
   Trash3Outlined,
 } from '@lineiconshq/free-icons'
-import { Button, IconButton, Stack } from '@nobs/ui'
+import { Button, IconButton, Stack, Typography } from '@nobs/ui'
 import type { PenSize } from '~/pages/Notes/domain'
 import type { InkTool } from '../InkCanvas'
 import styles from './InkToolbar.module.css'
@@ -89,9 +89,15 @@ export function InkToolbar(props: InkToolbarProps) {
           disabled={page === 0}
           onClick={() => onPageChange(page - 1)}
         />
-        <span className={styles.pageCounter}>
+        <Typography
+          component="span"
+          variant="caption"
+          mono
+          color="mid"
+          className={styles.pageCounter}
+        >
           {page + 1} / {pageCount}
-        </span>
+        </Typography>
         <IconButton
           icon={ChevronRightOutlined}
           label="Next page"

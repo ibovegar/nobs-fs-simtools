@@ -1,4 +1,4 @@
-import { Button, Disclosure } from '@nobs/ui'
+import { Button, Disclosure, Typography } from '@nobs/ui'
 import {
   formatAltitude,
   formatAltitudeLimit,
@@ -90,8 +90,13 @@ export function WaypointList(props: WaypointListProps) {
         .join('  ·  ')}
       open={open}
       onOpenChange={onOpenChange}
+      disableGutters
     >
-      {notes.length > 0 && <p className={styles.notes}>{notes.join(' ')}</p>}
+      {notes.length > 0 && (
+        <Typography variant="caption" color="warning" className={styles.gutters}>
+          {notes.join(' ')}
+        </Typography>
+      )}
       <div className={styles.table}>
         <div className={styles.head}>
           <span className={styles.fixCol}>Fix</span>
@@ -145,7 +150,7 @@ export function WaypointList(props: WaypointListProps) {
           )
         })}
       </div>
-      <Button variant="secondary" onClick={onReload}>
+      <Button variant="secondary" onClick={onReload} className={styles.gutters}>
         Reload flight plan
       </Button>
     </Disclosure>

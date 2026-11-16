@@ -13,6 +13,8 @@ interface DisclosureProps {
   /** Controlled open state, e.g. to remember it; pair with onOpenChange. */
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** No side padding in the body, for content that runs edge to edge (a table). */
+  disableGutters?: boolean
   className?: string
   children: ReactNode
 }
@@ -28,6 +30,7 @@ export function Disclosure(props: DisclosureProps) {
     defaultOpen = false,
     open: openProp,
     onOpenChange,
+    disableGutters = false,
     className,
     children,
   } = props
@@ -54,7 +57,7 @@ export function Disclosure(props: DisclosureProps) {
         <Icon icon={open ? ChevronUpOutlined : ChevronDownOutlined} className={styles.chevron} />
       </button>
       {open && (
-        <div id={bodyId} className={styles.body}>
+        <div id={bodyId} className={cx(styles.body, disableGutters && styles.noGutters)}>
           {children}
         </div>
       )}

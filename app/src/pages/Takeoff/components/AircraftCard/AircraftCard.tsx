@@ -1,6 +1,5 @@
-import { Button, Card } from '@nobs/ui'
+import { Button, Card, Stack } from '@nobs/ui'
 import type { AircraftProfile } from '~/pages/Takeoff/domain'
-import styles from './AircraftCard.module.css'
 
 interface AircraftCardProps {
   profiles: readonly AircraftProfile[]
@@ -26,21 +25,16 @@ export function AircraftCard(props: AircraftCardProps) {
 
   return (
     <Card title="Aircraft" hint={hint}>
-      <div className={styles.options}>
-        <Button selected={autoSelected} onClick={() => onSelect('auto')} className={styles.option}>
+      <Stack direction="row" wrap gap={2}>
+        <Button selected={autoSelected} onClick={() => onSelect('auto')}>
           {detected ? `Auto · ${detected.shortName}` : 'Auto'}
         </Button>
         {profiles.map((p) => (
-          <Button
-            key={p.id}
-            selected={p.id === selectedId}
-            onClick={() => onSelect(p.id)}
-            className={styles.option}
-          >
+          <Button key={p.id} selected={p.id === selectedId} onClick={() => onSelect(p.id)}>
             {p.shortName}
           </Button>
         ))}
-      </div>
+      </Stack>
     </Card>
   )
 }

@@ -48,9 +48,9 @@ const offset = (origin: PopoverOrigin['vertical' | 'horizontal'], size: number) 
 }
 
 /**
- * A floating panel attached to an element, in the manner of Material UI's `Popover`: the
- * caller controls `open` and `anchorEl` and handles `onClose`; `anchorOrigin` and
- * `transformOrigin` choose which point of the anchor meets which point of the popover.
+ * A floating panel attached to an element. The caller controls `open` and `anchorEl` and
+ * handles `onClose`; `anchorOrigin` and `transformOrigin` choose which point of the anchor
+ * meets which point of the popover.
  * There is no built-in trigger, and nothing depends on hover (there is none in VR).
  *
  * It is drawn on `document.body` (or `container`) with fixed positioning, under an invisible

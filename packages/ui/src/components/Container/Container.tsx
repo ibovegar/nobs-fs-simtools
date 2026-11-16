@@ -6,7 +6,7 @@ export type ContainerMaxWidth = 'sm' | 'md' | 'lg' | false
 
 interface ContainerProps {
   /**
-   * Caps the width and centres the content, like Material UI's Container:
+   * Caps the width and centres the content:
    * `sm` 600px, `md` 900px, `lg` 1200px, or `false` for the full available width.
    */
   maxWidth?: ContainerMaxWidth
@@ -21,8 +21,7 @@ interface ContainerProps {
 
 /**
  * Outer frame for a screen's content: a flex column on the spacing scale, with an optional
- * width cap. Named after Material UI's Container. No side gutters — the host provides
- * padding.
+ * width cap. No side gutters — the host provides padding.
  */
 export function Container(props: ContainerProps) {
   const { maxWidth = 'lg', fill = false, className, children } = props

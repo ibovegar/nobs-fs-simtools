@@ -34,3 +34,19 @@
 .actions > *:not(:first-child) {
   margin-left: var(--sp-2);
 }
+
+/* SectionContent: padded on every side, except where it meets the header or another
+   content (the space above is already there). A media between two contents keeps both
+   paddings, so the media sits a full step from the content on each side. */
+.content {
+  padding: var(--sp-4);
+}
+
+.header + .content,
+.content + .content {
+  padding-top: 0;
+}
+
+.media {
+  min-width: 0;
+}

@@ -1,0 +1,24 @@
+.group {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.group > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.group > *:not(:first-child) {
+  margin-left: var(--sp-4);
+}
+
+/* Lines run the full height of the row, a step from the content on both sides. */
+.divided {
+  align-items: stretch;
+}
+
+.divided > *:not(:first-child) {
+  padding-left: var(--sp-4);
+  border-left: 1px solid var(--border-mid);
+}

@@ -1,18 +1,3 @@
-/* Results panel: the answer big, the two supporting values under a hairline. */
-.results {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: var(--sp-4);
-}
-
-/* Pin / unpin, in the box's top right corner. */
-.pin {
-  position: absolute;
-  top: var(--sp-3);
-  right: var(--sp-3);
-}
-
 /* While pinned: a band of page background below the results, so content scrolling under
    them disappears in a gap instead of touching the box (above them, the page header's gap
    does the same). The negative margin cancels the padding, so pinning doesn't shift the
@@ -21,30 +6,6 @@
   margin-bottom: calc(-1 * var(--sp-3));
   padding-bottom: var(--sp-3);
   background: var(--bg);
-}
-
-.secondary {
-  display: flex;
-  margin-top: var(--sp-4);
-  padding-top: var(--sp-3);
-  border-top: 1px solid var(--border-mid);
-}
-
-.secondaryItem {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.secondaryItem + .secondaryItem {
-  margin-left: var(--sp-4);
-  padding-left: var(--sp-4);
-  border-left: 1px solid var(--border-mid);
-}
-
-.problem {
-  margin: var(--sp-3) 0 0;
-  font-size: var(--font-size-sm);
-  color: var(--danger);
 }
 
 /* The fill-from-sim button inside a value box: bigger than a label-row button, still well
@@ -62,19 +23,7 @@
   height: calc(var(--icon-size) * 0.8);
 }
 
-/* A card title with a "?" right after it. */
-.titleWithHelp {
-  display: flex;
-  align-items: center;
-}
-
-.titleWithHelp > *:not(:first-child) {
-  margin-left: var(--sp-1);
-}
-
+/* In line with the cards' content rather than their edge. */
 .note {
-  margin: 0;
   padding: 0 var(--sp-2);
-  font-size: var(--font-size-sm);
-  color: var(--text-dim);
 }

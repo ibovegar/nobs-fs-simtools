@@ -1,7 +1,4 @@
 .pageCounter {
   min-width: 4ch;
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--text-mid);
 }

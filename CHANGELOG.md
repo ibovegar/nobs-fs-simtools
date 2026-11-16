@@ -67,6 +67,11 @@ All notable changes to this project are documented here. The format is based on
 - The Flight plan tab loads the flight plan once and remembers it: going back to the tab
   or reopening the panel shows it at once instead of a loading message. It still picks up
   changes (checked quietly on each visit, and live while the tab is open).
+- `@nobs/ui`: new `SectionContent` / `SectionMedia` (a section's padded body and
+  edge-to-edge media), `Divider`, `ReadoutGroup` (readouts side by side, optionally divided)
+  and `Typography`; `Readout` takes an `action` (top-right corner), `Disclosure` takes
+  `disableGutters`, `Stack` takes `component`. The app's screens are built from them instead
+  of their own styled `div`s; they look the same.
 
 ### Fixed
 

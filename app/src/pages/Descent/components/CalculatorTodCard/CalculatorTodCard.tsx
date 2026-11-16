@@ -1,8 +1,17 @@
-import { Button, Readout, Section } from '@nobs/ui'
+import {
+  Button,
+  Divider,
+  Readout,
+  ReadoutGroup,
+  Section,
+  SectionContent,
+  SectionMedia,
+  Stack,
+  Typography,
+} from '@nobs/ui'
 import { type CalculatorProfile, formatAltitude } from '~/pages/Descent/domain'
 import { HelpPopover } from '../HelpPopover'
 import { RouteProfile } from '../RouteProfile'
-import styles from './CalculatorTodCard.module.css'
 
 interface CalculatorTodCardProps {
   startAltitudeFt: number
@@ -35,7 +44,7 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
 
   return (
     <Section>
-      <div className={styles.results}>
+      <SectionContent>
         <Readout
           size="lg"
           label="Distance"
@@ -49,54 +58,58 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
           value={distanceNm ?? '—'}
           unit={distanceNm !== null ? 'nm' : undefined}
         />
-        <div className={styles.secondary}>
-          <Readout
-            className={styles.secondaryItem}
-            label="Vertical speed"
-            labelAddon={
-              <HelpPopover label="What is vertical speed?">
-                The rate to descend at to hold the glideslope, at your average speed.
-              </HelpPopover>
-            }
-            value={String(Math.round(verticalSpeedFpm))}
-            unit="fpm"
-          />
-          <Readout
-            className={styles.secondaryItem}
-            label="Time"
-            labelAddon={
-              <HelpPopover label="What is time?">
-                How long the descent takes to fly, at your average speed.
-              </HelpPopover>
-            }
-            value={minutes ?? '—'}
-            unit={minutes !== null ? 'min' : undefined}
-          />
-        </div>
-      </div>
-
-      <div className={styles.body}>
-        {chart ? (
-          <div className={styles.bleed}>
-            <RouteProfile
-              profile={chart.profile}
-              waypoints={chart.waypoints}
-              view="arrival"
-              showToc={false}
+        <Stack gap={3}>
+          <Divider />
+          <ReadoutGroup divided>
+            <Readout
+              label="Vertical speed"
+              labelAddon={
+                <HelpPopover label="What is vertical speed?">
+                  The rate to descend at to hold the glideslope, at your average speed.
+                </HelpPopover>
+              }
+              value={String(Math.round(verticalSpeedFpm))}
+              unit="fpm"
             />
-          </div>
-        ) : (
-          <p className={styles.problem}>The calculator's inputs don't make a descent.</p>
-        )}
+            <Readout
+              label="Time"
+              labelAddon={
+                <HelpPopover label="What is time?">
+                  How long the descent takes to fly, at your average speed.
+                </HelpPopover>
+              }
+              value={minutes ?? '—'}
+              unit={minutes !== null ? 'min' : undefined}
+            />
+          </ReadoutGroup>
+        </Stack>
+      </SectionContent>
 
-        <p className={styles.hint}>
+      {chart && (
+        <SectionMedia>
+          <RouteProfile
+            profile={chart.profile}
+            waypoints={chart.waypoints}
+            view="arrival"
+            showToc={false}
+          />
+        </SectionMedia>
+      )}
+
+      <SectionContent>
+        {!chart && (
+          <Typography variant="caption" color="danger">
+            The calculator's inputs don't make a descent.
+          </Typography>
+        )}
+        <Typography variant="caption" color="dim">
           No flight plan: the TOD calculator's descent, {formatAltitude(startAltitudeFt)} →{' '}
           {formatAltitude(endAltitudeFt)}.
-        </p>
+        </Typography>
         <Button variant="secondary" fullWidth onClick={onOpenCalculator}>
           Open TOD calculator
         </Button>
-      </div>
+      </SectionContent>
     </Section>
   )
 }

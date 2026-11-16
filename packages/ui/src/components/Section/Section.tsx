@@ -11,7 +11,10 @@ interface SectionProps {
   children: ReactNode
 }
 
-/** A labelled panel surface. Owns background + radius; content owns its own layout. */
+/**
+ * A labelled panel surface. Owns background + radius; put the body in `SectionContent`
+ * (padded) and edge-to-edge content in `SectionMedia`.
+ */
 export function Section(props: SectionProps) {
   const { label, actions, className, children } = props
 

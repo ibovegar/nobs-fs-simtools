@@ -1,4 +1,4 @@
-import { Container, Section } from '@nobs/ui'
+import { Container, Section, SectionContent, Typography } from '@nobs/ui'
 import {
   AircraftCard,
   ConditionsCard,
@@ -10,7 +10,6 @@ import {
 } from './components'
 import { flapAngleDeg } from './domain'
 import { useTakeoff } from './hooks'
-import styles from './Takeoff.module.css'
 
 /**
  * Takeoff page: V1 / VR / V2, flaps and trim for the aircraft in the sim (or a picked
@@ -55,7 +54,7 @@ export function Takeoff() {
         leverKnown={leverKnown}
       />
       <Section label="Takeoff run">
-        <div className={styles.picture}>
+        <SectionContent>
           {plausible ? (
             <RunwayDiagram
               marks={runway.marks}
@@ -65,19 +64,21 @@ export function Takeoff() {
               single={single}
             />
           ) : (
-            <p className={styles.empty}>Shown when the weight fits the aircraft.</p>
+            <Typography variant="caption" color="dim">
+              Shown when the weight fits the aircraft.
+            </Typography>
           )}
-        </div>
+        </SectionContent>
       </Section>
       <Section label="Flaps and trim">
-        <div className={styles.picture}>
+        <SectionContent>
           <TakeoffConfig
             profile={profile}
             flapLabel={plan.flap.label}
             flapAngleDeg={flapAngleDeg(plan.flap)}
             trim={plan.trim}
           />
-        </div>
+        </SectionContent>
       </Section>
       <AircraftCard
         profiles={profiles}

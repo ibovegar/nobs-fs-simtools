@@ -1,4 +1,4 @@
-import { cx } from '@nobs/ui'
+import { cx, Typography } from '@nobs/ui'
 import { FULL_SCALE_DOTS, type SlopeState } from '~/pages/Descent/domain'
 import styles from './GlideslopeScale.module.css'
 
@@ -27,7 +27,9 @@ export function GlideslopeScale(props: GlideslopeScaleProps) {
 
   return (
     <div className={styles.scale} aria-hidden="true">
-      <span className={styles.label}>GS</span>
+      <Typography variant="label" color="dim">
+        GS
+      </Typography>
       <div className={styles.track}>
         <span className={styles.centre} />
         {DOTS.map((d) => (

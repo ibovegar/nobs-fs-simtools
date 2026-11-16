@@ -1,4 +1,4 @@
-import { Field, Section, SegmentedControl, Stack } from '@nobs/ui'
+import { Field, Section, SectionContent, SegmentedControl, Stack } from '@nobs/ui'
 import { useState } from 'react'
 import { App } from '~/App'
 import { AppProviders } from '~/providers'
@@ -34,7 +34,7 @@ export function DevHarness() {
   const frame = FRAME_PRESETS.find((p) => p.value === preset) ?? FRAME_PRESETS[0]
 
   return (
-    <div className={styles.harness}>
+    <Stack direction="row" align="start" gap={6} className={styles.harness}>
       {/* key: remount with the preset's size; the frame itself is user-resizable */}
       <PanelFrame key={preset} width={frame.width} height={frame.height}>
         <AppProviders bridge={bridge} storage={storage}>
@@ -43,7 +43,7 @@ export function DevHarness() {
       </PanelFrame>
 
       <Section label="Dev harness — mock sim" className={styles.controls}>
-        <Stack gap={4} className={styles.controlsBody}>
+        <SectionContent>
           <Field label="Panel size">
             <SegmentedControl
               label="Panel size"
@@ -56,8 +56,8 @@ export function DevHarness() {
           <AircraftStateCard state={state} onChange={update} />
           <FlightPlanCard state={state} path={path} onChange={update} />
           <TakeoffStateCard state={state} onChange={update} />
-        </Stack>
+        </SectionContent>
       </Section>
-    </div>
+    </Stack>
   )
 }

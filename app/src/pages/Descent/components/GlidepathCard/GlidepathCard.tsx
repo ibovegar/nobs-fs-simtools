@@ -1,4 +1,14 @@
-import { Badge, type BadgeTone, Readout, Section } from '@nobs/ui'
+import {
+  Badge,
+  type BadgeTone,
+  Divider,
+  Readout,
+  ReadoutGroup,
+  Section,
+  SectionContent,
+  Stack,
+  Typography,
+} from '@nobs/ui'
 import {
   formatInteger,
   formatRate,
@@ -56,16 +66,15 @@ export function GlidepathCard(props: GlidepathCardProps) {
         ) : undefined
       }
     >
-      <div className={styles.body}>
+      <SectionContent>
         {live ? (
-          <div className={styles.row}>
+          <ReadoutGroup>
             <Readout
               size="lg"
               label="Target V/S"
               value={formatRate(-rateForAngle(groundSpeedKt, degrees))}
               unit="fpm"
               caption={`at ${formatInteger(groundSpeedKt)} kt`}
-              className={styles.cell}
             />
             {verticalSpeedFpm !== undefined && angle !== null && (
               <Readout
@@ -75,19 +84,21 @@ export function GlidepathCard(props: GlidepathCardProps) {
                 value={formatRate(verticalSpeedFpm)}
                 unit="fpm"
                 caption={`${angle.toFixed(1)}° path`}
-                className={styles.cell}
               />
             )}
-          </div>
+          </ReadoutGroup>
         ) : (
           <RateTable degrees={degrees} />
         )}
-        <span className={styles.hint}>
-          {degrees === GLIDEPATH_DEG
-            ? `Rule of thumb: V/S ≈ groundspeed × ${RULE_OF_THUMB_FACTOR}`
-            : `V/S ≈ groundspeed × ${(rateForAngle(1, degrees)).toFixed(1)}`}
-        </span>
-      </div>
+        <Stack gap={3}>
+          <Divider />
+          <Typography variant="caption" color="dim">
+            {degrees === GLIDEPATH_DEG
+              ? `Rule of thumb: V/S ≈ groundspeed × ${RULE_OF_THUMB_FACTOR}`
+              : `V/S ≈ groundspeed × ${(rateForAngle(1, degrees)).toFixed(1)}`}
+          </Typography>
+        </Stack>
+      </SectionContent>
     </Section>
   )
 }

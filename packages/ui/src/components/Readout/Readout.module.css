@@ -8,6 +8,19 @@
   margin-top: var(--sp-1);
 }
 
+.withAction {
+  position: relative;
+}
+
+/* Out of the flow (so the margin above doesn't apply), in the corner of the padding
+   around the readout. */
+.readout > .action {
+  position: absolute;
+  top: calc(-1 * var(--sp-1));
+  right: calc(-1 * var(--sp-1));
+  margin-top: 0;
+}
+
 .label {
   font-family: var(--font-mono);
   font-size: var(--font-size-label);

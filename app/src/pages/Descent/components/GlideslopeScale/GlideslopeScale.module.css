@@ -4,15 +4,6 @@
   align-items: center;
   width: 44px;
   height: 190px;
-  margin-left: var(--sp-3);
-}
-
-.label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--text-dim);
 }
 
 .track {
