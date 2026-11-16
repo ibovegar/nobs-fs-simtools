@@ -1,4 +1,5 @@
-import { PageHeaderArea, ScrollArea, Tab, TabList, TabPanel, Tabs } from '@nobs/ui'
+import { cx, PageHeaderArea, ScrollArea, Tab, TabList, TabPanel, Tabs } from '@nobs/ui'
+import { useState } from 'react'
 import { PAGES } from '~/pages'
 import { useSettings, useSim } from '~/providers'
 import styles from './App.module.css'
@@ -16,6 +17,9 @@ import styles from './App.module.css'
 export function App() {
   const { settings, updateSettings } = useSettings()
   const { panelVisible } = useSim()
+  // Whether the open page scrolls: the page and its header make room for the scrollbar
+  // only then, and otherwise take the full width. Only the open page is mounted.
+  const [scrollbar, setScrollbar] = useState(false)
   // Fall back to the first page if a stored id no longer exists.
   const active = PAGES.some((p) => p.id === settings.activePage)
     ? settings.activePage
@@ -24,7 +28,7 @@ export function App() {
   if (!panelVisible) return null
 
   return (
-    <div className={styles.app}>
+    <div className={cx(styles.app, scrollbar && styles.withScrollbar)}>
       <Tabs value={active} onValueChange={(id) => updateSettings({ activePage: id })}>
         <TabList label="SimTools pages">
           {PAGES.map((page) => (
@@ -43,6 +47,8 @@ export function App() {
                 dragToScroll
                 naturalScroll={settings.naturalScroll}
                 scrollToTopButton
+                scrollbarGutter="auto"
+                onScrollbarChange={setScrollbar}
               >
                 <Component />
               </ScrollArea>

@@ -109,6 +109,14 @@ interface ScrollAreaProps {
    */
   scrollToTopButton?: boolean
   /**
+   * `stable` (default): the scrollbar's gutter is always reserved, so content never
+   * reflows when the scrollbar appears. `auto`: reserved only while there is something to
+   * scroll, so content takes the full width otherwise (as the CSS `scrollbar-gutter`).
+   */
+  scrollbarGutter?: 'stable' | 'auto'
+  /** Called when the scrollbar appears or goes away, e.g. to line up a header with it. */
+  onScrollbarChange?: (visible: boolean) => void
+  /**
    * Stop all background work, e.g. while the host panel is hidden. Only the fallback poll
    * (browsers without ResizeObserver) runs in the background at all.
    */
@@ -149,7 +157,9 @@ function glideToTop(viewport: HTMLElement) {
  *
  * The viewport is a flex column with a definite height, so a child with
  * `min-height: 100%` (e.g. `<Container fill>`) fills it. A gutter for the scrollbar is
- * always reserved, so content never reflows when the scrollbar appears.
+ * always reserved, so content never reflows when the scrollbar appears. The track sits a
+ * step from the content and from the edge, and starts level with the content (the
+ * viewport's top padding).
  */
 export function ScrollArea(props: ScrollAreaProps) {
   const {
@@ -158,6 +168,8 @@ export function ScrollArea(props: ScrollAreaProps) {
     dragToScroll = false,
     naturalScroll = true,
     scrollToTopButton = false,
+    scrollbarGutter = 'stable',
+    onScrollbarChange,
     paused = false,
     children,
   } = props
@@ -176,23 +188,37 @@ export function ScrollArea(props: ScrollAreaProps) {
     const viewport = viewportRef.current
     const track = trackRef.current
     if (!viewport || !track) return
+    // Start the track level with the content: at the viewport's top padding. Read on mount
+    // and on size changes (a page header filling in changes it), never per scroll.
+    const placeTrack = () => {
+      const top = window.getComputedStyle(viewport).paddingTop
+      if (track.style.top !== top) track.style.top = top
+    }
     const measure = () => {
       const next = thumbFor(viewport, track.clientHeight)
       setThumb((prev) => (sameThumb(prev, next) ? prev : next))
       setScrolledDown(viewport.scrollTop > viewport.clientHeight * TO_TOP_AFTER)
     }
-    measure()
+    const onResize = () => {
+      placeTrack()
+      measure()
+    }
+    onResize()
+    // Once more just after: a page header is drawn into its slot right after this mounts,
+    // which changes the padding (ResizeObserver catches it too, where there is one).
+    const settle = window.setTimeout(onResize, 0)
     // Event-driven, so nothing runs while nothing changes (sim performance): scrolling,
     // window resizes and, with ResizeObserver, any size change of the viewport or its
     // content. setThumb / setScrolledDown bail out when nothing changed.
     viewport.addEventListener('scroll', measure)
-    window.addEventListener('resize', measure)
+    window.addEventListener('resize', onResize)
     const cleanups: (() => void)[] = [
+      () => window.clearTimeout(settle),
       () => viewport.removeEventListener('scroll', measure),
-      () => window.removeEventListener('resize', measure),
+      () => window.removeEventListener('resize', onResize),
     ]
     if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(measure)
+      const observer = new ResizeObserver(onResize)
       observer.observe(viewport)
       for (const child of Array.from(viewport.children)) observer.observe(child)
       cleanups.push(() => observer.disconnect())
@@ -202,7 +228,7 @@ export function ScrollArea(props: ScrollAreaProps) {
       let tapTimer = 0
       const onTap = () => {
         window.clearTimeout(tapTimer)
-        tapTimer = window.setTimeout(measure, AFTER_TAP_MS)
+        tapTimer = window.setTimeout(onResize, AFTER_TAP_MS)
       }
       viewport.addEventListener('click', onTap)
       cleanups.push(() => {
@@ -210,7 +236,7 @@ export function ScrollArea(props: ScrollAreaProps) {
         window.clearTimeout(tapTimer)
       })
       if (!paused) {
-        const timer = window.setInterval(measure, FALLBACK_POLL_MS)
+        const timer = window.setInterval(onResize, FALLBACK_POLL_MS)
         cleanups.push(() => window.clearInterval(timer))
       }
     }
@@ -218,6 +244,12 @@ export function ScrollArea(props: ScrollAreaProps) {
       for (const cleanup of cleanups) cleanup()
     }
   }, [paused])
+
+  // Tell the host when the scrollbar comes or goes (rarely: content grows past or shrinks
+  // within the viewport). Pass a stable callback (e.g. a state setter).
+  useEffect(() => {
+    onScrollbarChange?.(thumb.visible)
+  }, [thumb.visible, onScrollbarChange])
 
   // Drag-to-scroll on the content. Native listeners on the window follow the pointer
   // outside the viewport without pointer capture, which would steal the press from the
@@ -345,7 +377,15 @@ export function ScrollArea(props: ScrollAreaProps) {
   }
 
   return (
-    <div ref={rootRef} className={cx(styles.root, grab && styles.grabbing, className)}>
+    <div
+      ref={rootRef}
+      className={cx(
+        styles.root,
+        scrollbarGutter === 'auto' && !thumb.visible && styles.noGutter,
+        grab && styles.grabbing,
+        className,
+      )}
+    >
       <div ref={viewportRef} className={cx(styles.viewport, viewportClassName)}>
         {children}
       </div>

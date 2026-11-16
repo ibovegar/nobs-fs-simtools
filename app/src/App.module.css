@@ -13,17 +13,26 @@
 
 /* Each page scrolls in a ScrollArea (visible, draggable scrollbar, since the sim's browser
    draws none); the tab strip stays put. Pages keep their natural height; pages that should
-   fill the panel (e.g. Notes, for the drawing canvas) use <Container fill>. The scrollbar
-   gutter sits to the right of this padding, so the right side needs less. */
+   fill the panel (e.g. Notes, for the drawing canvas) use <Container fill>. The same
+   padding on both sides; with a scrollbar, none on the right: the ScrollArea's gutter
+   spaces the content from the scrollbar. */
 .page {
-  padding: var(--sp-3) var(--sp-1) var(--sp-3) var(--sp-3);
+  padding: var(--sp-3);
+}
+
+.withScrollbar .page {
+  padding-right: 0;
 }
 
 /* A page's fixed header (sub-tabs) above its scrolling content: lined up with the page
-   content, which ends left of the scrollbar gutter, with a gap beneath it that scrolling
-   content never enters. */
+   content (which ends left of the scrollbar gutter when there is a scrollbar), with a gap
+   beneath it that scrolling content never enters. */
 .header {
-  padding: var(--sp-2) calc(var(--scrollbar-w) + var(--sp-2) + var(--sp-1)) var(--sp-2) var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.withScrollbar .header {
+  padding-right: calc(var(--scrollbar-w) + var(--sp-4));
 }
 
 /* Under a header, the header's gap already spaces the page from the top. */

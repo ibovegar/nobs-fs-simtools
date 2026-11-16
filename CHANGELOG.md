@@ -77,6 +77,9 @@ All notable changes to this project are documented here. The format is based on
 
 - Lighter on the sim: status badges pulse a few times instead of forever, the GS diamond
   no longer animates, and Takeoff / Flight plan read the sim less often (once a second).
+- The scrollbar sits evenly between the page and the panel edge, and starts level with the
+  first section. Pages with nothing to scroll use the full width, with the same margin on
+  both sides.
 
 ## [0.2.0] - 2026-11-14
 

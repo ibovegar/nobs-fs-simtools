@@ -210,11 +210,6 @@ export function DescentCalculator() {
           />
         </Field>
       </Card>
-
-      <Typography variant="caption" color="dim" className={styles.note}>
-        Rules of thumb, not strictly accurate: it depends on aircraft type and weather. Use it for
-        an approximate decision.
-      </Typography>
     </Stack>
   )
 }

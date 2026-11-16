@@ -7,14 +7,14 @@
   min-height: 0;
 }
 
-/* The gutter on the right (scrollbar + a small gap) is always reserved, so content never
-   reflows when the scrollbar appears. */
+/* The gutter on the right (the scrollbar with the same gap on each side) is always
+   reserved, so content never reflows when the scrollbar appears. */
 .viewport {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  right: calc(var(--scrollbar-w) + var(--sp-2));
+  right: calc(var(--scrollbar-w) + var(--sp-4));
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -27,17 +27,24 @@
   display: none;
 }
 
+/* scrollbarGutter="auto" with nothing to scroll: the content takes the full width. */
+.noGutter > .viewport {
+  right: 0;
+}
+
 /* Children keep their natural height and the viewport scrolls, rather than being
    squashed to fit. */
 .viewport > * {
   flex-shrink: 0;
 }
 
+/* A step from the content and from the edge. `top` is set from the viewport's top padding
+   (ScrollArea.tsx), so the track starts level with the content. */
 .track {
   position: absolute;
   top: var(--sp-2);
   bottom: var(--sp-2);
-  right: var(--sp-1);
+  right: var(--sp-2);
   width: var(--scrollbar-w);
   border-radius: calc(var(--scrollbar-w) / 2);
   background: var(--bg-card);
@@ -99,7 +106,7 @@
    and a full control size so it is an easy target in VR. */
 .toTop {
   position: absolute;
-  right: calc(var(--scrollbar-w) + var(--sp-2) + var(--sp-3));
+  right: calc(var(--scrollbar-w) + var(--sp-4) + var(--sp-3));
   bottom: var(--sp-3);
   z-index: 10;
   width: var(--control-h);

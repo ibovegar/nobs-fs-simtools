@@ -22,8 +22,3 @@
   width: calc(var(--icon-size) * 0.8);
   height: calc(var(--icon-size) * 0.8);
 }
-
-/* In line with the cards' content rather than their edge. */
-.note {
-  padding: 0 var(--sp-2);
-}
