@@ -157,24 +157,32 @@ function planView(route: LoadedRoute, aircraft: Aircraft | undefined) {
 }
 
 /**
- * The aircraft's climb and descent to and from the cruise altitude, from its tables in
- * ~/aircraft; the generic figures when SimTools has none for it.
+ * The climb and descent to and from the cruise altitude: each the aircraft's own when
+ * ~/aircraft has figures for it (climb: its climb table; descent: its table, or its descent
+ * speed and vertical speed), the generic figures otherwise.
  */
 function profileBasis(aircraft: Aircraft | undefined, cruiseFt: number): ProfileBasis {
+  const generic = GENERIC_PROFILE_BASIS
   const perf = aircraft?.performance
-  if (!perf) return GENERIC_PROFILE_BASIS
-  const climb = climbGradientFtPerNm(perf, cruiseFt)
-  const descent = descentGradientFtPerNm(perf, cruiseFt)
-  const rate = climbRateFpm(perf, cruiseFt)
-  if (climb === undefined || descent === undefined || rate === undefined) {
-    return GENERIC_PROFILE_BASIS
-  }
+  if (!aircraft || !perf) return generic
+
+  const climbGradient = climbGradientFtPerNm(perf, cruiseFt)
+  const climbRate = climbRateFpm(perf, cruiseFt)
+  const ownClimb =
+    perf.climb && climbGradient !== undefined && climbRate !== undefined
+      ? { ftPerNm: climbGradient, rateFpm: climbRate, speedKt: perf.climb.speedKias }
+      : undefined
+  const descentGradient = descentGradientFtPerNm(perf, cruiseFt)
+  const descentFtPerNm = descentGradient ?? generic.descentFtPerNm
+
   return {
-    aircraftName: aircraft?.shortName,
-    climbFtPerNm: climb,
-    descentFtPerNm: descent,
-    climbSpeedKt: perf.climb.speedKias,
-    climbRateFpm: rate,
-    descentAngleDeg: angleForGradientDeg(descent),
+    aircraftName: ownClimb || descentGradient !== undefined ? aircraft.shortName : undefined,
+    climbFromAircraft: ownClimb !== undefined,
+    descentFromAircraft: descentGradient !== undefined,
+    climbFtPerNm: ownClimb?.ftPerNm ?? generic.climbFtPerNm,
+    climbSpeedKt: ownClimb?.speedKt ?? generic.climbSpeedKt,
+    climbRateFpm: ownClimb?.rateFpm ?? generic.climbRateFpm,
+    descentFtPerNm,
+    descentAngleDeg: angleForGradientDeg(descentFtPerNm),
   }
 }

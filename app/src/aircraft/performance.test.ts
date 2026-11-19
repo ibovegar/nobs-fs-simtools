@@ -6,6 +6,7 @@ import {
   climbGradientFtPerNm,
   climbRateFpm,
   descentGradientFtPerNm,
+  trueAirspeedKt,
 } from './performance'
 
 const perf = (id: string) => AIRCRAFT.find((a) => a.id === id)?.performance as AircraftPerformance
@@ -56,5 +57,45 @@ describe('approachSpeedKias', () => {
     expect(approachSpeedKias(perf('c208b'), undefined)).toBe(78)
     expect(approachSpeedKias(perf('c208b'), 120_000 * LB)).toBe(78)
     expect(approachSpeedKias(perf('c208b'), 0)).toBe(78)
+  })
+})
+
+describe('aircraft with only some figures', () => {
+  it('has no climb gradient without a climb table', () => {
+    expect(climbGradientFtPerNm(perf('kingair-350'), 20_000)).toBeUndefined()
+    expect(climbRateFpm(perf('dash8-q400'), 20_000)).toBeUndefined()
+  })
+
+  it('plans a descent from its speed and vertical speed when there is no table', () => {
+    // Q400 from FL240: 1,500 fpm at the true airspeed of 250 KIAS at 12,000 ft.
+    const tas = trueAirspeedKt(250, 12_000)
+    expect(descentGradientFtPerNm(perf('dash8-q400'), 24_000)).toBeCloseTo(1500 / (tas / 60), 6)
+    // About 3°: 300 ft per nm or so.
+    expect(descentGradientFtPerNm(perf('dash8-q400'), 24_000)).toBeGreaterThan(270)
+    expect(descentGradientFtPerNm(perf('dash8-q400'), 24_000)).toBeLessThan(320)
+    // No vertical speed, no table: nothing to plan with.
+    expect(descentGradientFtPerNm({ descent: { speedKias: 250 } }, 24_000)).toBeUndefined()
+  })
+
+  it('scales the King Air and Q400 approach speeds from their reference weights', () => {
+    expect(approachSpeedKias(perf('kingair-350'), 15_000 * LB)).toBe(109)
+    expect(approachSpeedKias(perf('dash8-q400'), 62_000 * LB)).toBe(121)
+    expect(approachSpeedKias(perf('dash8-q400'), 0.81 * 62_000 * LB)).toBe(Math.round(121 * 0.9))
+  })
+
+  it('has no approach speed when the aircraft has none', () => {
+    expect(approachSpeedKias({ cruise: { speedKtas: 200 } }, 5000)).toBeUndefined()
+  })
+})
+
+describe('trueAirspeedKt', () => {
+  it('equals the indicated airspeed at sea level', () => {
+    expect(trueAirspeedKt(150, 0)).toBeCloseTo(150, 6)
+  })
+
+  it('grows with altitude (standard atmosphere)', () => {
+    // 217 KIAS at FL240 ≈ 312 KTAS; 250 KIAS at 10,000 ft ≈ 289 KTAS.
+    expect(trueAirspeedKt(217, 24_000)).toBeCloseTo(312, 0)
+    expect(trueAirspeedKt(250, 10_000)).toBeCloseTo(289, 0)
   })
 })

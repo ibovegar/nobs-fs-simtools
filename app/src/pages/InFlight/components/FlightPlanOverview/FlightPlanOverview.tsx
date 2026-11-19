@@ -283,10 +283,10 @@ function Results(props: ResultsProps) {
 
 /** "How is this planned?": the aircraft's own climb and descent, or the generic ones. */
 function planningText(basis: ProfileBasis): string {
-  const climb = `a climb at ${basis.climbSpeedKt} kt (about ${formatInteger(basis.climbRateFpm)} fpm)`
-  const descent = `a descent of about ${basis.descentAngleDeg.toFixed(1)}°`
+  const own = (fromAircraft: boolean) =>
+    fromAircraft && basis.aircraftName ? ` (the ${basis.aircraftName}'s)` : ' (generic)'
+  const climb = `a climb at ${basis.climbSpeedKt} kt, about ${formatInteger(basis.climbRateFpm)} fpm${own(basis.climbFromAircraft)}`
+  const descent = `a descent of about ${basis.descentAngleDeg.toFixed(1)}°${own(basis.descentFromAircraft)}`
   const limits = "kept within the procedures' altitude limits. TOC and TOD follow from that."
-  return basis.aircraftName
-    ? `From the sim's flight plan and the ${basis.aircraftName}'s climb and descent tables: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
-    : `From the sim's flight plan: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
+  return `From the sim's flight plan: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
 }

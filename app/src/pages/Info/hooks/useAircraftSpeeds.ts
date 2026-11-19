@@ -20,19 +20,25 @@ export function useAircraftSpeeds() {
 
   const weightKg = sim.weightLb === undefined ? undefined : sim.weightLb / LB_PER_KG
   const approachKias = perf ? approachSpeedKias(perf, weightKg) : undefined
-  const scaled = perf !== undefined && approachKias !== perf.approach.speedKias
 
-  const speeds: AircraftSpeeds | undefined =
-    perf && approachKias !== undefined
-      ? {
-          climbKias: perf.climb.speedKias,
-          cruiseKtas: perf.cruise.speedKtas,
-          descentKias: perf.descent.speedKias,
-          descentFpm: perf.descent.rateFpm,
-          approachKias,
-          approachWeightLb: scaled ? sim.weightLb : undefined,
-        }
-      : undefined
+  const speeds: AircraftSpeeds | undefined = perf && {
+    climb: perf.climb && {
+      kias: perf.climb.speedKias,
+      schedule: perf.climb.schedule,
+      power: perf.climb.power,
+    },
+    cruiseKtas: perf.cruise?.speedKtas,
+    descent: perf.descent && { kias: perf.descent.speedKias, fpm: perf.descent.rateFpm },
+    approach:
+      perf.approach && approachKias !== undefined
+        ? {
+            kias: approachKias,
+            // Scaled from the live weight: say which weight it's for.
+            weightLb: approachKias !== perf.approach.speedKias ? sim.weightLb : undefined,
+            flaps: perf.approach.flaps,
+          }
+        : undefined,
+  }
 
   return { aircraft, title, speeds }
 }

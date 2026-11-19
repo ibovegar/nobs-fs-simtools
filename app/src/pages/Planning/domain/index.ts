@@ -17,7 +17,16 @@ export {
   runwayMarks,
   runwayNumberFromHeading,
 } from './runway'
-export { DEFAULT_TAKEOFF_SETUP, type TakeoffSetup } from './setup'
+export {
+  type AircraftLoad,
+  type ConditionField,
+  conditionValues,
+  DEFAULT_AIRCRAFT_LOAD,
+  DEFAULT_TAKEOFF_SETUP,
+  roundConditionFill,
+  type TakeoffSetup,
+  withCondition,
+} from './setup'
 export {
   densityRatio,
   FT_PER_M,

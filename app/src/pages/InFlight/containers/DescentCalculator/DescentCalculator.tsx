@@ -1,8 +1,4 @@
-import {
-  MapPin5Outlined,
-  MapPin5Solid,
-  RefreshCircle1ClockwiseOutlined,
-} from '@lineiconshq/free-icons'
+import { MapPin5Outlined, MapPin5Solid } from '@lineiconshq/free-icons'
 import {
   Card,
   Divider,
@@ -18,6 +14,7 @@ import {
   Sticky,
   Typography,
 } from '@nobs/ui'
+import { SimFillButton } from '~/components'
 import { formatInteger, type TopOfDescentResult } from '~/pages/InFlight/domain'
 import { type SimFillField, useTopOfDescent } from '~/pages/InFlight/hooks'
 import styles from './DescentCalculator.module.css'
@@ -39,16 +36,7 @@ export function DescentCalculator() {
   const problem = problemText(result.errors)
 
   const fillButton = (field: SimFillField, what: string) => (
-    <IconButton
-      icon={RefreshCircle1ClockwiseOutlined}
-      label={`Fill ${what} from the sim`}
-      size="sm"
-      variant="solid"
-      color="accent"
-      className={styles.fillButton}
-      disabled={!canFill}
-      onClick={() => fillFromSim(field)}
-    />
+    <SimFillButton what={what} disabled={!canFill} onClick={() => fillFromSim(field)} />
   )
 
   return (

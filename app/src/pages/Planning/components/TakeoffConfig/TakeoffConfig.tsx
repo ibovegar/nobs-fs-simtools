@@ -4,6 +4,8 @@ import { type AircraftProfile, formatTrim } from '~/pages/Planning/domain'
 import styles from './TakeoffConfig.module.css'
 
 const HEIGHT = 150
+/** Where the wing and the tailplane are drawn: the same height in both panels. */
+const DRAWING_Y = HEIGHT * 0.4
 /** Gap between the two panels. */
 const GAP = 16
 const DEG = Math.PI / 180
@@ -112,7 +114,7 @@ function WingPanel(props: WingPanelProps) {
   const { x, w, label, angleDeg } = props
   const chord = w * 0.8
   const le = x + w * 0.08
-  const y = HEIGHT * 0.42
+  const y = DRAWING_Y
   const hingeX = le + chord * FLAP_HINGE
   const flapLen = chord * (1 - FLAP_HINGE)
   // Arc showing the flap angle, from the chord line down to the flap.
@@ -152,9 +154,6 @@ function WingPanel(props: WingPanelProps) {
           </text>
         </>
       )}
-      <text className={styles.caption} x={x + w / 2} y={HEIGHT - 8} textAnchor="middle">
-        Wing, nose left
-      </text>
     </g>
   )
 }
@@ -174,7 +173,7 @@ function TailPanel(props: TailPanelProps) {
   const { x, w, stabDeg, scale, band, value, label } = props
   const chord = w * 0.6
   const pivotX = x + w * 0.2 + chord * STAB_PIVOT
-  const y = HEIGHT * 0.36
+  const y = DRAWING_Y
 
   // Trim indicator: a bar across the panel, nose-down on the left, nose-up on the right.
   const barX = x + w * 0.08

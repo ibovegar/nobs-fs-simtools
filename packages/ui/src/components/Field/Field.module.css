@@ -21,6 +21,16 @@
   margin-left: var(--sp-2);
 }
 
+.labelGroup {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.labelGroup > *:not(:first-child) {
+  margin-left: var(--sp-1);
+}
+
 .label {
   font-family: var(--font-mono);
   font-size: var(--font-size-label);

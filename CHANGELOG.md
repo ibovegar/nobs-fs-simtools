@@ -13,7 +13,20 @@ All notable changes to this project are documented here. The format is based on
 - **Info**: the aircraft card is titled with the aircraft's name, and shows the speeds
   to fly for the Caravan and TBM 850, two by two: climb,
   cruise (TAS), descent (with its vertical speed) and approach. The approach speed follows
-  the live weight (by its square root). Each has a "?" explaining it. Figures from the
+  the live weight (by its square root). Each has a "?" explaining it. Under Climb: the climb
+  power (torque · ITT limit); its "?" lists the torque by altitude and the prop RPM.
+  Also for the King Air 350, Dash 8 Q400 and Dash 8-100/200/300, with only the figures
+  that have a source: the King Air from a simulator checklist (climb schedule, power,
+  cruise, descent) and a Vref card; the Q400 from Majestic's performance manual (climb
+  schedule and torque, cruise, flaps 35 Vref; no descent figures); the Dash 8 classics only
+  partly (climb option and cruise for the -100, Vref for all three). Climb speeds that
+  change with altitude are listed in the climb "?". The Q400 descends at 250 kt and 1,500 fpm
+  (Chuck's Majestic Q400 guide).
+- **In flight › Flight plan**: climb and descent are each the aircraft's own when SimTools
+  has figures for it, generic otherwise. A descent without a table is planned from the
+  aircraft's descent speed and vertical speed (at the true airspeed halfway down), so the
+  Q400 and King Air get their own descent; "How is this planned?" marks each part as the
+  aircraft's or generic. Figures from the
   Black Square manuals' performance tables; approach speeds from the type handbooks.
 - **In flight › Flight plan**: for the Caravan and TBM 850, TOC and TOD come from the
   aircraft's own climb and descent tables (at the plan's cruise altitude) instead of a
@@ -109,6 +122,22 @@ All notable changes to this project are documented here. The format is based on
   names the aircraft.
 - **Planning**: the line under the takeoff answer (weight · OAT · pressure altitude, and
   "live" / "manual · set below") is gone.
+- **Planning › Weight and conditions**: weight, CG, temperature and pressure altitude are
+  no longer polled from the sim. Each is an editable stepper with a "fill from the sim"
+  button, like the TOD calculator: tap to copy the sim's value, then adjust. Weight and CG
+  are kept per aircraft (temperature and pressure altitude are shared), so switching
+  aircraft never carries one aircraft's weight over to another. Until an aircraft's
+  weight is set, the plan assumes its max takeoff weight.
+- **Planning › Takeoff run**: the runway picture is always shown, also when the weight
+  doesn't fit the aircraft (the red warning says so). Saved under a new key, so earlier
+  manual values start over.
+- **Planning › Flaps and trim**: no "Wing, nose left" caption; the wing and the tailplane
+  are drawn at the same height.
+- **Planning › Pressure altitude**: a "?" after the label explains how to set it (fill
+  button, altimeter at 1013, or field elevation + (1013 − QNH) × 27 ft), replacing the
+  hint under it. `@nobs/ui` `Field` gets a `labelAddon` for it.
+- The "fill from the sim" button is one shared view (`SimFillButton`), used by the TOD
+  calculator and Planning.
 - **Planning** only recommends, it doesn't set: the flaps are always the recommended
   setting (the usual one, or more flap when the runway is short), and the Flaps card
   (Auto / a fixed setting) is gone. The lever badge shows whether the sim's flap lever

@@ -4,8 +4,11 @@ export { useSimAircraft } from './hooks'
 export {
   type AircraftPerformance,
   approachSpeedKias,
+  type ClimbPower,
   type ClimbRow,
+  type ClimbSpeedStep,
   climbGradientFtPerNm,
   climbRateFpm,
   descentGradientFtPerNm,
+  trueAirspeedKt,
 } from './performance'

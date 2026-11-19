@@ -1,6 +1,6 @@
 // Info's pure rules: no React. Unit-tested.
 
-export type { AircraftSpeeds } from './aircraftSpeeds'
+export type { AircraftSpeeds, ClimbPowerInfo } from './aircraftSpeeds'
 export {
   applyCallsignKey,
   CALLSIGN_KEYS,

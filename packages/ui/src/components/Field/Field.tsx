@@ -20,6 +20,8 @@ export function useFieldControl(): FieldContextValue | null {
 interface FieldProps {
   label: string
   hint?: ReactNode
+  /** Right after the label, e.g. a HelpPopover "?". */
+  labelAddon?: ReactNode
   /** Right-aligned content on the label row, e.g. a "LIVE" badge. */
   trailing?: ReactNode
   className?: string
@@ -31,7 +33,7 @@ interface FieldProps {
  * Stepper…) reads the generated ids from context, so callers never wire `htmlFor`.
  */
 export function Field(props: FieldProps) {
-  const { label, hint, trailing, className, children } = props
+  const { label, hint, labelAddon, trailing, className, children } = props
 
   const controlId = useId()
   const hintId = hint ? `${controlId}-hint` : undefined
@@ -40,9 +42,12 @@ export function Field(props: FieldProps) {
     <FieldContext value={{ controlId, hintId }}>
       <div className={cx(styles.field, className)}>
         <div className={styles.labelRow}>
-          <label htmlFor={controlId} className={styles.label}>
-            {label}
-          </label>
+          <span className={styles.labelGroup}>
+            <label htmlFor={controlId} className={styles.label}>
+              {label}
+            </label>
+            {labelAddon}
+          </span>
           {trailing}
         </div>
         {children}

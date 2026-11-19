@@ -1,0 +1,13 @@
+/* Sized to sit inside a Stepper's value box, at its right edge. */
+.button {
+  width: calc(var(--control-h) * 0.6);
+  height: calc(var(--control-h) * 0.6);
+  min-width: calc(var(--control-h) * 0.6);
+  min-height: calc(var(--control-h) * 0.6);
+  margin-right: calc(var(--sp-2) - 10px);
+}
+
+.button > svg {
+  width: calc(var(--icon-size) * 0.8);
+  height: calc(var(--icon-size) * 0.8);
+}

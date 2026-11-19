@@ -68,7 +68,7 @@ import {
 | `Button`, `IconButton` | primary / secondary / ghost / danger, toggle via `selected` |
 | `SegmentedControl` | Pick one of a few options (label + hint + icon); `size`: `sm` / `md` / `lg` (default, full control height), `md` suits sub-tabs |
 | `Tabs`, `TabList`, `Tab`, `TabPanel` | Compound tabs; `size` on `Tabs`: `sm` / `md` (default) / `lg` (full control height). `iconOnly` on a `Tab` shows just its icon in a square (the label stays for screen readers) |
-| `Field` + `TextInput` / `TextArea` / `Stepper` | Labelled controls, ids wired via context |
+| `Field` + `TextInput` / `TextArea` / `Stepper` | Labelled controls, ids wired via context; `labelAddon` after the label (a `HelpPopover`), `trailing` at the right |
 | `Stepper` | −/+ number entry without typing |
 | `Keypad` | On-screen numeric / decimal / alpha / alphanumeric keypad (`alphanumeric`: rows of ten, digits first, for codes such as callsigns). Keys look and space like `VirtualKeyboard`'s |
 | `VirtualKeyboard` | On-screen QWERTY keyboard ([react-simple-keyboard](https://github.com/hodgef/react-simple-keyboard), re-skinned). Pass `target` (a textarea/input ref) so its caret follows |

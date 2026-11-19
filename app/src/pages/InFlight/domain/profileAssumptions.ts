@@ -37,8 +37,12 @@ export function angleForGradientDeg(ftPerNm: number): number {
 
 /** What a planned profile is based on: the gradients, and the figures to explain them. */
 export interface ProfileBasis {
-  /** The aircraft whose climb and descent tables were used; undefined: generic figures. */
+  /** The aircraft whose figures were used for the climb and / or descent. */
   aircraftName?: string
+  /** The climb is the aircraft's (its climb table); otherwise generic. */
+  climbFromAircraft: boolean
+  /** The descent is the aircraft's (its table, or speed and vertical speed); otherwise generic. */
+  descentFromAircraft: boolean
   climbFtPerNm: number
   descentFtPerNm: number
   climbSpeedKt: number
@@ -49,6 +53,8 @@ export interface ProfileBasis {
 
 /** The generic basis, when SimTools has no figures for the aircraft. */
 export const GENERIC_PROFILE_BASIS: ProfileBasis = {
+  climbFromAircraft: false,
+  descentFromAircraft: false,
   climbFtPerNm: CLIMB_FT_PER_NM,
   descentFtPerNm: DESCENT_FT_PER_NM,
   climbSpeedKt: PROFILE_ASSUMPTIONS.climbSpeedKt,

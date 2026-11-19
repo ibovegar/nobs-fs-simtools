@@ -1,4 +1,4 @@
-import { Section, SectionContent, Typography } from '@nobs/ui'
+import { Section, SectionContent } from '@nobs/ui'
 import {
   ConditionsCard,
   RunwayDiagram,
@@ -31,15 +31,16 @@ export function TakeoffPlan(props: TakeoffPlanProps) {
     setNotesOpen,
     weightUnit,
     conditions,
-    live,
+    setCondition,
     plan,
+    canFill,
+    fillFromSim,
     leverFlap,
     leverKnown,
     runway,
   } = usePlanning(profile)
 
   const single = profile.engines === 'single'
-  const plausible = !plan.warnings.includes('weight-implausible')
 
   return (
     <>
@@ -54,18 +55,12 @@ export function TakeoffPlan(props: TakeoffPlanProps) {
       <TakeoffWarnings warnings={plan.warnings} />
       <Section label="Takeoff run">
         <SectionContent>
-          {plausible ? (
-            <RunwayDiagram
-              marks={runway.marks}
-              speeds={plan.speeds}
-              runwayNumber={runway.number}
-              single={single}
-            />
-          ) : (
-            <Typography variant="caption" color="dim">
-              Shown when the weight fits the aircraft.
-            </Typography>
-          )}
+          <RunwayDiagram
+            marks={runway.marks}
+            speeds={plan.speeds}
+            runwayNumber={runway.number}
+            single={single}
+          />
           <RunwayInputs
             setup={setup}
             supportsWet={profile.wetV1ReductionKt !== undefined}
@@ -84,10 +79,12 @@ export function TakeoffPlan(props: TakeoffPlanProps) {
         </SectionContent>
       </Section>
       <ConditionsCard
-        setup={setup}
         weightUnit={weightUnit}
-        live={live}
+        conditions={conditions}
         usesCg={profile.trim.kind === 'computed'}
+        canFill={canFill}
+        onFill={fillFromSim}
+        onConditionChange={setCondition}
         onChange={update}
       />
     </>

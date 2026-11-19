@@ -140,7 +140,8 @@ pages/
   Planning/         Planning.tsx
                     shows TakeoffPlan for the sim's aircraft (~/aircraft) when it has
                     takeoff data, or UnknownAircraftCard
-    hooks/          usePlanning (setup + plan for a profile), planningSimVars
+    hooks/          usePlanning (setup + plan for a profile; conditions filled from the
+                    sim on tap), planningSimVars
     containers/     TakeoffPlan: the plan for the recognised aircraft
     components/     TakeoffSummary, RunwayDiagram (top view: V1/VR/V2 lines), TakeoffConfig
                     (side view: flaps + trim), TakeoffWarnings (red / yellow panels),
@@ -158,7 +159,8 @@ aircraft/           the aircraft SimTools recognises in the sim (no picker, anyw
                     cruise / descent / approach figures + gradients, approach speed by
                     √weight), hooks/ (useSimAircraft). Data used by one page stays in
                     that page, keyed by the aircraft id (Planning's takeoff profiles)
-components/         views shared by 2+ pages: SimValueField (live sim value or manual entry)
+components/         views shared by 2+ pages: SimValueField (live sim value or manual entry),
+                    SimFillButton (the "fill from the sim" button in a Stepper: read on tap)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / density / active page /
                     drag-scroll direction),

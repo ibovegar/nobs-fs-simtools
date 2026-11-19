@@ -18,9 +18,11 @@ page explains how the calculation works and how to add an aircraft.
    ones that are. In the dev harness (`pnpm dev`), *Takeoff state › Aircraft in the sim*
    loads a mock aircraft (its TITLE, ATC MODEL, a weight and flap lever).
 2. **Inputs:** takeoff weight (`TOTAL WEIGHT`), CG (`CG PERCENT`, % MAC), OAT
-   (`AMBIENT TEMPERATURE`) and pressure altitude (`PRESSURE ALTITUDE`) from the sim, each
-   with a manual value when the sim doesn't report it. The runway length is always entered
-   by hand.
+   (`AMBIENT TEMPERATURE`) and pressure altitude (`PRESSURE ALTITUDE`): steppers with a
+   "fill from the sim" button each, which reads the sim once on tap (nothing is polled);
+   the value stays editable. Weight and CG are kept per aircraft; until an aircraft's
+   weight is set, its max takeoff weight is assumed.
+   The runway length is always entered by hand.
 3. **Flaps:** the profile's usual setting (`defaultFlapId`). With a runway length set, the
    estimated runway needed is `fieldLengthM × (W / MTOW)² / σ^1.5` (σ = air density ratio);
    if it doesn't fit, the next setting with more flap is tried. The page always shows this
