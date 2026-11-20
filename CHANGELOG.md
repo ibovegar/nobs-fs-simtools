@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-20
+
 ### Added
 
 - **Planning**: Socata TBM 850 takeoff profile (Black Square's TBM 850: VR 85, 50 ft
