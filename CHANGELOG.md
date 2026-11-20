@@ -171,6 +171,10 @@ All notable changes to this project are documented here. The format is based on
 
 ### Fixed
 
+- SimTools could not start in the sim ("Unexpected identifier 'r'. Expected ')' to end an
+  'if' condition"): the minified bundle had `await` right after `!` / `||`, which the sim's
+  browser can't parse. The build now lowers `async` / `await` to generators (target
+  es2016).
 - Lighter on the sim: status badges pulse a few times instead of forever, the GS diamond
   no longer animates, and Takeoff / Flight plan read the sim less often (once a second).
 - The scrollbar sits evenly between the page and the panel edge, and starts level with the

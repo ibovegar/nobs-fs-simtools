@@ -31,7 +31,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     // The sim's embedded Coherent browser is not evergreen: keep syntax and CSS
     // conservative. See docs/coherent-compat.md.
-    target: 'es2017',
+    // es2016, not es2017: lowers async/await to generators. Coherent's parser rejects
+    // the minifier's `!await x` / `a||await x`, which stops the whole bundle loading.
+    target: 'es2016',
     cssTarget: 'chrome61',
     outDir: 'dist',
     emptyOutDir: true,

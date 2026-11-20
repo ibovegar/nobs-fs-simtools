@@ -222,7 +222,7 @@ itself.
 
 See `docs/coherent-compat.md`. In short: flexbox only (no CSS grid, **no flexbox `gap`**: space
 with child margins or `<Stack gap>`), only the sim's fonts (`SIM_FONTS`), no `color-mix()`, no
-`backdrop-filter`, no `inset` shorthand, derive alpha colours in TS. Build target is es2017,
+`backdrop-filter`, no `inset` shorthand, derive alpha colours in TS. Build target is es2016 (no `async` / `await` in the output),
 and pointer events have a mouse-event fallback.
 
 ## Sim performance first

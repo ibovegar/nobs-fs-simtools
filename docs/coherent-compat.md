@@ -8,7 +8,7 @@ Update this file as the in-sim checks confirm or rule things out.
 
 | Area | Rule | Why / where enforced |
 |---|---|---|
-| JS syntax | Build target `es2017` | `vite.config.ts`. The output has no `?.` / `??` |
+| JS syntax | Build target `es2016` | `vite.config.ts`. The output has no `?.` / `??`, and no `async` / `await`: they are lowered to generators. Coherent's parser rejects minified `await` after an operator (`if(!a\|\|!await b)` → "Unexpected identifier … Expected ')' to end an 'if' condition", confirmed in the sim), so the whole bundle failed to load |
 | JS built-ins | The build lowers *syntax* only, not built-in APIs, so avoid newer globals, above all at module load (one missing global stops the whole app): no `Intl`, no `Object.fromEntries`, `Array.prototype.flat/flatMap`, `at()`, `replaceAll`, `structuredClone` | grep `app/dist/simtools.js` after adding a dependency |
 | Modules | One classic IIFE script, fixed name | Vite library mode, `formats: ['iife']` |
 | CSS output | `cssTarget: 'chrome61'` | Stops the minifier emitting modern shorthands such as `inset` |
