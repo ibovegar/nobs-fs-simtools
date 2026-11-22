@@ -17,7 +17,12 @@ export interface AircraftSpeeds {
     power?: ClimbPowerInfo
   }
   cruiseKtas?: number
-  descent?: { kias: number; fpm?: number }
+  descent?: {
+    kias: number
+    fpm?: number
+    /** When the speed changes with altitude: each speed applies up to `upToFt`. */
+    schedule?: readonly { upToFt: number; speedKias: number }[]
+  }
   approach?: {
     kias: number
     /** The weight the speed is for (lb); undefined: at the reference (max landing) weight. */

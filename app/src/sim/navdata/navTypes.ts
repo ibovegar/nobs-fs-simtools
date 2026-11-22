@@ -40,6 +40,8 @@ export interface NavEnrouteLeg {
   bearing: number
   /** Nautical miles from the reference facility. */
   distance: number
+  /** The altitude set on this leg in the plan (feet, or a flight level); null when none. */
+  altitude?: { altitude: number; isFlightLevel: boolean } | null
 }
 
 /** The EFB / World Map flight plan ('JS_FlightPlanRoute', GET_EFB_ROUTE). */

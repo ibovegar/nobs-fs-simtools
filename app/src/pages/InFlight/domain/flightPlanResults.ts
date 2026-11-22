@@ -1,6 +1,8 @@
 // What the flight plan's results box shows in each phase of flight: the big answer and two
 // supporting values, and the "How is this planned?" text.
 import type { BadgeTone } from '@nobs/ui'
+import type { ClimbTarget } from './climbTarget'
+import type { DescentGuidance } from './descentGuidance'
 import type { FlightProgress } from './flightProgress'
 import { formatDistance, formatDuration, formatInteger } from './format'
 import type { ProfileBasis } from './profileAssumptions'
@@ -11,6 +13,9 @@ export interface ResultValue {
   unit?: string
   /** What the value means, behind a "?" (also keeps the row as tall as the calculator's). */
   help: string
+  tone?: BadgeTone
+  /** A short instruction under the value: a slowdown, or too high. */
+  caption?: string
 }
 
 export interface FlightPlanResults {
@@ -42,34 +47,72 @@ const distance = (label: string, nm: number, help: string): ResultValue => ({
   unit: 'nm',
 })
 
+const NO_CLIMB_SPEED_HELP = 'SimTools has no recommended climb speed for this aircraft.'
+const climbTargetHelp = (speedKias: number) =>
+  `The V/S that holds the recommended ${speedKias} kt with your present power, worked out from how your speed is changing. Set climb power first. It shows — for the first few seconds, or when you're more than 30 kt off that speed.`
+
+/** The V/S that holds the aircraft's climb speed. */
+function climbTargetValue(target: ClimbTarget | undefined): ResultValue {
+  if (!target) return verticalSpeed(undefined, NO_CLIMB_SPEED_HELP)
+  return verticalSpeed(target.rateFpm, climbTargetHelp(target.speedKias))
+}
+
 /**
- * Before TOC: distance to it, the time, and the planned climb rate. In flight the climb is
- * planned from the aircraft, so TOC is a prediction that moves with how you climb.
+ * Before TOC: distance to it, the time, and the climb speed with the V/S that holds it. In
+ * flight the climb is planned from the aircraft, so TOC moves with how you climb.
  */
-function climbResults(progress: FlightProgress): FlightPlanResults {
+function climbResults(
+  progress: FlightProgress,
+  climbTarget: ClimbTarget | undefined,
+): FlightPlanResults {
   return {
     main: { value: formatDistance(Math.max(0, progress.toTocNm)), unit: 'nm to TOC' },
     secondary: [
       time(progress.timeToTocSec, 'Time to TOC at your groundspeed.'),
-      verticalSpeed(
-        progress.climbRateToTocFpm,
-        "The planned climb at your groundspeed. TOC is worked out from where you are: climb slower and it moves further on, faster and it comes closer. It's fixed where you reach the cruise altitude.",
-      ),
+      climbTargetValue(climbTarget),
     ],
   }
 }
 
+/** The instruction under the descent V/S: too high first, it's the one that can't wait. */
+function descentCaption(guidance: DescentGuidance): string | undefined {
+  if (guidance.tooHighFor) return `Too high for ${guidance.tooHighFor}`
+  const { slowdown } = guidance
+  if (!slowdown) return undefined
+  const when = slowdown.inNm > 0 ? `in ${formatDistance(slowdown.inNm)} nm` : 'now'
+  return `Slow to ${slowdown.kt} kt ${when}`
+}
+
+/** A descent V/S with its instruction; the speed it's planned for is in the help. */
+function withDescentGuidance(rate: ResultValue, guidance: DescentGuidance | undefined) {
+  if (!guidance) return rate
+  const { speedKias, tooHighFor } = guidance
+  return {
+    ...rate,
+    help: speedKias === undefined ? rate.help : `${rate.help} Planned for ${speedKias} kt.`,
+    tone: tooHighFor ? ('danger' as const) : undefined,
+    caption: descentCaption(guidance),
+  }
+}
+
 /** In cruise: distance to TOD; hold (or regain) the cruise altitude, then the rate for TOD. */
-function cruiseResults(progress: FlightProgress, descentRateFpm: number): FlightPlanResults {
+function cruiseResults(
+  progress: FlightProgress,
+  descentRateFpm: number,
+  guidance: DescentGuidance | undefined,
+): FlightPlanResults {
   const approaching = progress.status === 'approaching'
   const rate = approaching
-    ? {
-        ...verticalSpeed(
-          -descentRateFpm,
-          'The descent rate to fly from TOD: the planned path angle at your groundspeed.',
-        ),
-        label: 'V/S at TOD',
-      }
+    ? withDescentGuidance(
+        {
+          ...verticalSpeed(
+            -descentRateFpm,
+            'The descent rate to fly from TOD: the planned path at your groundspeed.',
+          ),
+          label: 'V/S at TOD',
+        },
+        guidance,
+      )
     : verticalSpeed(
         progress.cruiseRateFpm,
         '0 at the cruise altitude. Off it: the rate that gets you back (the gap per minute, at most 1500 fpm).',
@@ -85,7 +128,11 @@ function cruiseResults(progress: FlightProgress, descentRateFpm: number): Flight
 }
 
 /** Past TOD: how far off the planned path. On it: a signed trend; off it: high / low. */
-function descentResults(progress: FlightProgress, descentRateFpm: number): FlightPlanResults {
+function descentResults(
+  progress: FlightProgress,
+  descentRateFpm: number,
+  guidance: DescentGuidance | undefined,
+): FlightPlanResults {
   const dev = progress.deviationFt ?? 0
   const rounded = Math.round(dev / 10) * 10
   const onPath = progress.status === 'on-path'
@@ -96,9 +143,12 @@ function descentResults(progress: FlightProgress, descentRateFpm: number): Fligh
     main: { value: `${sign}${formatInteger(Math.abs(rounded))}`, unit, tone },
     secondary: [
       distance('To go', progress.remainingNm, 'Distance left along the route to the runway.'),
-      verticalSpeed(
-        -descentRateFpm,
-        'The descent rate that holds the planned path angle at your groundspeed.',
+      withDescentGuidance(
+        verticalSpeed(
+          -(guidance?.rateFpm ?? descentRateFpm),
+          "The V/S to fly, worked out live to reach the next planned altitude from where you are, so it corrects for wind and for being high or low. 0 means hold your altitude until the path comes down to you. Too high: it can't be made at a normal descent rate.",
+        ),
+        guidance,
       ),
     ],
   }
@@ -108,15 +158,17 @@ function descentResults(progress: FlightProgress, descentRateFpm: number): Fligh
 export function flightPlanResults(
   progress: FlightProgress,
   descentRateFpm: number,
+  climbTarget?: ClimbTarget,
+  descentGuidance?: DescentGuidance,
 ): FlightPlanResults {
   const { status } = progress
   if ((status === 'standby' || status === 'climb') && progress.toTocNm > 0) {
-    return climbResults(progress)
+    return climbResults(progress, climbTarget)
   }
   if (status === 'standby' || status === 'cruise' || status === 'approaching') {
-    return cruiseResults(progress, descentRateFpm)
+    return cruiseResults(progress, descentRateFpm, descentGuidance)
   }
-  return descentResults(progress, descentRateFpm)
+  return descentResults(progress, descentRateFpm, descentGuidance)
 }
 
 /** "How is this planned?": the aircraft's own climb and descent, or the generic ones. */

@@ -13,8 +13,10 @@ function readAll<T extends SimVarMap>(bridge: SimBridge, vars: T): SimValues<T> 
   return out
 }
 
-function shallowEqual(a: Record<string, unknown>, b: Record<string, unknown>) {
-  return Object.keys(a).every((k) => Object.is(a[k], b[k]))
+/** Same keys and values: a map of variables that changed never counts as equal. */
+export function shallowEqual(a: Record<string, unknown>, b: Record<string, unknown>) {
+  const keys = Object.keys(a)
+  return keys.length === Object.keys(b).length && keys.every((k) => Object.is(a[k], b[k]))
 }
 
 /**

@@ -1,10 +1,9 @@
 // The TOD calculator's descent as a side view, for the Flight plan tab when there is no
 // flight plan. Pure and unit-tested.
 //
-// The calculator's distance is the descent at the glideslope, plus 1 nm per 10 kt of
-// slowing down (topOfDescent.ts). Drawn as: level at the start altitude, TOD, the descent
-// (rounding included), then the slow-down flown
-// level at the end altitude up to the target.
+// The calculator's distance is the descent at the glideslope plus the level-off distance the
+// pilot keeps (topOfDescent.ts). Drawn as: level at the start altitude, TOD, the descent,
+// then any level flight at the end altitude up to the target.
 
 import type { ChartWaypoint } from './profileChart'
 import type { TopOfDescentFields } from './topOfDescent'
@@ -24,12 +23,9 @@ export function calculatorProfile(
 ): CalculatorProfile {
   const startFt = fields.startAltitude
   const endFt = fields.endAltitude
-  const slowNm = Math.max(
-    0,
-    Math.min(distanceNm, Math.ceil((fields.startSpeed - fields.endSpeed) / 10)),
-  )
+  const levelOffNm = Math.max(0, Math.min(distanceNm, fields.levelOffNm))
   const todNm = leadNm(distanceNm)
-  const levelNm = todNm + distanceNm - slowNm
+  const levelNm = todNm + distanceNm - levelOffNm
   const totalNm = todNm + distanceNm
 
   const profile: VerticalProfile = {
@@ -48,8 +44,8 @@ export function calculatorProfile(
 
   const waypoints: ChartWaypoint[] = [
     { key: 'start', ident: '', distanceNm: 0, phase: 'enroute' },
-    ...(slowNm > 0
-      ? [{ key: 'slow', ident: 'SLOW', distanceNm: levelNm, phase: 'approach' as const }]
+    ...(levelOffNm > 0
+      ? [{ key: 'level', ident: 'LEVEL', distanceNm: levelNm, phase: 'approach' as const }]
       : []),
     { key: 'target', ident: 'TARGET', distanceNm: totalNm, phase: 'approach' },
   ]

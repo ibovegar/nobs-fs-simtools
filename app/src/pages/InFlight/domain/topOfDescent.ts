@@ -1,80 +1,75 @@
-// The TOD calculator's maths: a port of the rules-of-thumb calculator at descent.vercel.app
-// (github.com/epranka/descent-app). Kept identical on purpose, including the rounding and the
-// "+1 nm per 10 kt slowed down" allowance. Pure, no React.
+// The TOD calculator's maths. Pure, no React.
 //
-// One difference: both speeds are groundspeeds (what the fill button reads), so there is no
-// wind field: the wind is already in the speeds. The web app's "+1 nm per 10 kt of tailwind"
-// allowance goes with it.
-//
-// The web app works on typed text; here every value is a number set with steppers (VR), so
-// the inputs are always complete and only the rule checks below can fail.
+// At a fixed path angle the distance depends only on the altitude to lose, so one descent
+// speed is enough: it only sets the vertical speed. The descent reaches the end altitude at
+// the target, or `levelOffNm` before it when the pilot keeps some level flight to slow down.
 
-const FEET_PER_NM_EXACT = 6076.11549
-const DEG_TO_RAD = 0.0174532925
+import { FEET_PER_NM, MIN_GROUNDSPEED_KT, rateForAngle } from './descentMath'
 
-/** The calculator's six inputs. */
+const DEG_TO_RAD = Math.PI / 180
+const MIN_GLIDESLOPE_DEG = 0.5
+const MAX_GLIDESLOPE_DEG = 10
+
+/** The descent speed for an aircraft SimTools has no figure for. */
+export const DEFAULT_DESCENT_SPEED_KIAS = 250
+
+/** The calculator's inputs. */
 export interface TopOfDescentFields {
   startAltitude: number
   endAltitude: number
-  /** Groundspeed, kt. */
-  startSpeed: number
-  /** Groundspeed, kt. */
-  endSpeed: number
+  /** KIAS held in the descent; null: the aircraft's own. */
+  descentSpeed: number | null
   glideSlope: number
-  /** Negative: a descent rate, e.g. -1500 fpm, as on the VSI. */
-  verticalSpeed: number
+  /** Level flight kept at the end altitude before the target, nm. */
+  levelOffNm: number
 }
 
 export type TopOfDescentField = keyof TopOfDescentFields
 
 export interface TopOfDescentResult {
-  /** Distance before the target to start down, whole nm. Null when the inputs are invalid. */
+  /** Distance before the target to start down, nearest nm. Null when the inputs are invalid. */
   distanceNm: number | null
-  /** Estimated time of the descent, whole minutes. */
+  /** Estimated time from TOD to the target, whole minutes. */
   minutes: number | null
+  /** The V/S (negative, whole fpm) that holds the glideslope at the planned speed. */
+  plannedVerticalSpeedFpm: number
   /** Fields to mark as invalid. */
   errors: Partial<Record<TopOfDescentField, true>>
 }
 
-interface SpeedInputs {
-  startSpeed: number
-  endSpeed: number
-}
-
-const averageSpeed = (i: SpeedInputs) => (i.startSpeed + i.endSpeed) / 2
-
-/** Descent rate (whole fpm, positive) that holds `glideSlope` degrees at the average speed. */
-export function verticalSpeedForAngle(i: SpeedInputs & { glideSlope: number }): number {
-  return Math.round(
-    ((Math.tan(i.glideSlope * DEG_TO_RAD) * averageSpeed(i)) / 60) * FEET_PER_NM_EXACT,
-  )
-}
-
-/** Glideslope (one decimal) that a descent rate (positive fpm) gives at the average speed. */
-export function angleForVerticalSpeed(i: SpeedInputs & { verticalSpeed: number }): number {
-  const average = averageSpeed(i)
-  if (average <= 0) return 0
-  const slope = ((i.verticalSpeed / FEET_PER_NM_EXACT) * 60) / average
-  return Math.round(Math.atan(slope) * (1 / DEG_TO_RAD) * 10) / 10
-}
-
-const BASE_FIELDS = {
+export const DEFAULT_TOP_OF_DESCENT_FIELDS: TopOfDescentFields = {
   startAltitude: 30000,
   endAltitude: 10000,
-  startSpeed: 320,
-  endSpeed: 250,
+  descentSpeed: null,
   glideSlope: 3,
+  levelOffNm: 0,
 }
 
-/** The web app's example values (its placeholders), with the matching vertical speed. */
-export const DEFAULT_TOP_OF_DESCENT_FIELDS: TopOfDescentFields = {
-  ...BASE_FIELDS,
-  verticalSpeed: -verticalSpeedForAngle(BASE_FIELDS),
+/** The glideslope a descent rate (positive fpm) gives at a speed, within the stepper's range. */
+export function angleForVerticalSpeed(speedKt: number, verticalSpeedFpm: number): number {
+  if (speedKt <= 0) return MIN_GLIDESLOPE_DEG
+  const angle = Math.atan(verticalSpeedFpm / ((speedKt / 60) * FEET_PER_NM)) / DEG_TO_RAD
+  return Math.max(MIN_GLIDESLOPE_DEG, Math.min(MAX_GLIDESLOPE_DEG, angle))
 }
 
-/** Distance and time for the fields as they stand. */
-export function topOfDescent(fields: TopOfDescentFields): TopOfDescentResult {
-  const { startAltitude, endAltitude, startSpeed, endSpeed, glideSlope } = fields
+/**
+ * The V/S to fly (negative, to the nearest 50 fpm): the glideslope at the live groundspeed, so
+ * wind and a falling groundspeed are corrected. Without one, the planned V/S.
+ */
+export function liveVerticalSpeedFpm(
+  glideSlope: number,
+  groundSpeedKt: number | undefined,
+  plannedFpm: number,
+): number {
+  const moving = groundSpeedKt !== undefined && groundSpeedKt >= MIN_GROUNDSPEED_KT
+  const rate = moving ? -rateForAngle(groundSpeedKt, glideSlope) : plannedFpm
+  return Math.round(rate / 50) * 50
+}
+
+/** Distance, time and V/S for the fields, at the planned speed over the ground (kt). */
+export function topOfDescent(fields: TopOfDescentFields, speedKt: number): TopOfDescentResult {
+  const { startAltitude, endAltitude, glideSlope, levelOffNm } = fields
+  const plannedVerticalSpeedFpm = -Math.round(rateForAngle(speedKt, glideSlope))
 
   const errors: TopOfDescentResult['errors'] = {}
   const altitudeToLose = startAltitude - endAltitude
@@ -83,35 +78,16 @@ export function topOfDescent(fields: TopOfDescentFields): TopOfDescentResult {
     errors.endAltitude = true
   }
   if (!glideSlope) errors.glideSlope = true
-  const average = averageSpeed(fields)
-  if (average <= 0) {
-    errors.startSpeed = true
-    errors.endSpeed = true
+  if (speedKt <= 0) errors.descentSpeed = true
+  if (Object.keys(errors).length > 0) {
+    return { distanceNm: null, minutes: null, plannedVerticalSpeedFpm, errors }
   }
-  if (Object.keys(errors).length > 0) return { distanceNm: null, minutes: null, errors }
 
-  let distance = altitudeToLose / FEET_PER_NM_EXACT / Math.tan(glideSlope * DEG_TO_RAD)
-  distance += Math.ceil((startSpeed - endSpeed) / 10) // slowing down takes room
+  const distance = altitudeToLose / FEET_PER_NM / Math.tan(glideSlope * DEG_TO_RAD) + levelOffNm
   return {
-    distanceNm: Math.ceil(distance),
-    minutes: Math.round((distance / average) * 60),
+    distanceNm: Math.round(distance),
+    minutes: Math.round((distance / speedKt) * 60),
+    plannedVerticalSpeedFpm,
     errors,
   }
-}
-
-/**
- * The fields after the pilot changes one. Changing the glideslope recomputes the vertical
- * speed and the other way round; every other field recomputes the vertical speed from the
- * glideslope.
- */
-export function editTopOfDescent(
-  fields: TopOfDescentFields,
-  field: TopOfDescentField,
-  value: number,
-): TopOfDescentFields {
-  const next = { ...fields, [field]: value }
-  if (field === 'verticalSpeed') {
-    return { ...next, glideSlope: angleForVerticalSpeed({ ...next, verticalSpeed: -value }) }
-  }
-  return { ...next, verticalSpeed: -verticalSpeedForAngle(next) }
 }

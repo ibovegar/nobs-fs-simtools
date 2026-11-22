@@ -5,6 +5,7 @@ import {
   altitudeAt,
   altitudeScale,
   type ChartWaypoint,
+  canBeDescentReference,
   chartLabel,
   clipProfile,
   fixTooltip,
@@ -63,6 +64,10 @@ interface RouteProfileProps {
   nextIndex?: number
   /** Index of the fix the TOD is planned to: a flag above it. */
   referenceIndex?: number
+  /** The reference is the pilot's pick, not the default. */
+  referencePicked?: boolean
+  /** Pick a fix as the TOD reference (again: back to the default). Omitted: no button. */
+  onSelectReference?: (index: number) => void
 }
 
 /**
@@ -71,7 +76,17 @@ interface RouteProfileProps {
  * view counts distance to go; the others distance from departure.
  */
 export function RouteProfile(props: RouteProfileProps) {
-  const { profile, waypoints, view, showToc = true, aircraft, nextIndex, referenceIndex } = props
+  const {
+    profile,
+    waypoints,
+    view,
+    showToc = true,
+    aircraft,
+    nextIndex,
+    referenceIndex,
+    referencePicked = false,
+    onSelectReference,
+  } = props
 
   const ref = useRef<HTMLDivElement>(null)
   // The fix under the mouse (a ring: it can be clicked), and the one clicked or tapped,
@@ -228,13 +243,22 @@ export function RouteProfile(props: RouteProfileProps) {
       anchorEl: target.el,
       model: fixTooltip({
         waypoint: shown.waypoint,
-        plannedFt: shown.plannedFt,
         startNm,
         flownNm: aircraft?.distanceNm,
         groundSpeedKt: aircraft?.groundSpeedKt,
         isReference: target.index === referenceIndex,
+        isPickedReference: referencePicked,
+        canBeReference:
+          onSelectReference !== undefined &&
+          canBeDescentReference(
+            waypoints.map((w) => w.waypoint),
+            target.index,
+          ),
       }),
     }
+  // The tap also reaches the document, which closes the tooltip: the chart then shows the
+  // new TOD and the flag on the fix.
+  const selectTappedFix = target && onSelectReference && (() => onSelectReference(target.index))
   const tapFix = (fix: FixTarget) =>
     setPinned((current) => (current?.index === fix.index ? undefined : fix))
 
@@ -364,7 +388,13 @@ export function RouteProfile(props: RouteProfileProps) {
           ))}
         </svg>
       )}
-      {tooltip && <FixTooltip model={tooltip.model} anchorEl={tooltip.anchorEl} />}
+      {tooltip && (
+        <FixTooltip
+          model={tooltip.model}
+          anchorEl={tooltip.anchorEl}
+          onSelectReference={selectTappedFix}
+        />
+      )}
     </div>
   )
 }

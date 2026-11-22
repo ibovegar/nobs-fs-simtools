@@ -58,13 +58,13 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
           <ReadoutGroup divided>
             <Readout
               label="Vertical speed"
-              help="The rate to descend at to hold the glideslope, at your average speed."
+              help="The rate that holds the glideslope at your groundspeed. It updates as you fly, so it corrects for wind."
               value={String(Math.round(verticalSpeedFpm))}
               unit="fpm"
             />
             <Readout
               label="Time"
-              help="How long the descent takes to fly, at your average speed."
+              help="How long the descent takes to fly at the descent speed."
               value={minutes ?? '—'}
               unit={minutes !== null ? 'min' : undefined}
             />

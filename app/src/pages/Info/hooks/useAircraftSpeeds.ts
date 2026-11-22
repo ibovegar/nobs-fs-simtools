@@ -28,7 +28,11 @@ export function useAircraftSpeeds() {
       power: perf.climb.power,
     },
     cruiseKtas: perf.cruise?.speedKtas,
-    descent: perf.descent && { kias: perf.descent.speedKias, fpm: perf.descent.rateFpm },
+    descent: perf.descent && {
+      kias: perf.descent.speedKias,
+      fpm: perf.descent.rateFpm,
+      schedule: perf.descent.schedule,
+    },
     approach:
       perf.approach && approachKias !== undefined
         ? {

@@ -13,6 +13,8 @@ import {
 import type { ReactNode } from 'react'
 import {
   type AircraftOnRoute,
+  type ClimbTarget,
+  type DescentGuidance,
   type FlightPlanStatus,
   type FlightProgress,
   flightPlanResults,
@@ -54,6 +56,10 @@ interface FlightPlanOverviewProps {
   progress: FlightProgress
   /** Vertical speed that flies the planned descent at the current groundspeed. */
   descentRateFpm: number
+  /** The aircraft's climb speed and the V/S that holds it; omitted when it has none. */
+  climbTarget?: ClimbTarget
+  /** Near and past TOD: the speed and V/S to fly, and any slowdown cue. */
+  descentGuidance?: DescentGuidance
   /** The climb and descent the profile is planned with, for the explanation. */
   basis: ProfileBasis
   view: ProfileView
@@ -63,6 +69,9 @@ interface FlightPlanOverviewProps {
   nextIndex?: number
   /** The fix the TOD is planned to, flagged in the side view. */
   referenceIndex?: number
+  /** The reference is the pilot's pick, not the default. */
+  referencePicked?: boolean
+  onSelectReference?: (index: number) => void
 }
 
 /**
@@ -79,12 +88,16 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
     waypoints,
     progress,
     descentRateFpm,
+    climbTarget,
+    descentGuidance,
     basis,
     view,
     onViewChange,
     aircraft,
     nextIndex,
     referenceIndex,
+    referencePicked,
+    onSelectReference,
   } = props
   const badge = STATUS_BADGE[progress.status]
   const cruise = cruiseFromPlan ? formatAltitude(cruiseFt) : `${formatAltitude(cruiseFt)} assumed`
@@ -107,6 +120,8 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
             action={statusBadge}
             progress={progress}
             descentRateFpm={descentRateFpm}
+            climbTarget={climbTarget}
+            descentGuidance={descentGuidance}
             basis={basis}
           />
         </SectionContent>
@@ -120,6 +135,8 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
             aircraft={aircraft}
             nextIndex={nextIndex}
             referenceIndex={referenceIndex}
+            referencePicked={referencePicked}
+            onSelectReference={onSelectReference}
           />
         </SectionMedia>
         <SectionContent>
@@ -143,6 +160,8 @@ interface ResultsProps {
   action: ReactNode
   progress: FlightProgress
   descentRateFpm: number
+  climbTarget?: ClimbTarget
+  descentGuidance?: DescentGuidance
   basis: ProfileBasis
 }
 
@@ -151,8 +170,13 @@ interface ResultsProps {
  * a hairline. What the answer is follows the phase of flight.
  */
 function Results(props: ResultsProps) {
-  const { label, action, progress, descentRateFpm, basis } = props
-  const { main, secondary } = flightPlanResults(progress, descentRateFpm)
+  const { label, action, progress, descentRateFpm, climbTarget, descentGuidance, basis } = props
+  const { main, secondary } = flightPlanResults(
+    progress,
+    descentRateFpm,
+    climbTarget,
+    descentGuidance,
+  )
 
   return (
     <>
@@ -171,7 +195,15 @@ function Results(props: ResultsProps) {
         <Divider />
         <ReadoutGroup divided>
           {secondary.map((v) => (
-            <Readout key={v.label} label={v.label} help={v.help} value={v.value} unit={v.unit} />
+            <Readout
+              key={v.label}
+              label={v.label}
+              help={v.help}
+              value={v.value}
+              unit={v.unit}
+              tone={v.tone}
+              caption={v.caption}
+            />
           ))}
         </ReadoutGroup>
       </Stack>

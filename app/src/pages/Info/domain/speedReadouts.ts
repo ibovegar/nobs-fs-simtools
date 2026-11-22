@@ -36,6 +36,10 @@ const torqueText = (p: ClimbPowerInfo, torque: number) =>
 
 const altitudeText = (ft: number) => (ft === 0 ? 'Sea level' : `${n(ft)} ft`)
 
+/** A row of a speed schedule: "to 10,000 ft · 250 kt". */
+const scheduleRow = (s: { upToFt: number; speedKias: number }) =>
+  [`to ${n(s.upToFt)} ft`, `${s.speedKias} kt`] as const
+
 /** The highest climb torque in the table: what to set low down. */
 const maxTorque = (power: ClimbPowerInfo) => Math.max(...power.torque.map((r) => r.torque))
 
@@ -52,7 +56,7 @@ function climbReadout(climb: NonNullable<AircraftSpeeds['climb']>): SpeedReadout
   if (schedule) {
     tables.push({
       title: 'Speed',
-      rows: schedule.map((s) => [`to ${n(s.upToFt)} ft`, `${s.speedKias} kt`] as const),
+      rows: schedule.map(scheduleRow),
     })
   }
   if (power) {
@@ -100,6 +104,9 @@ function cruiseReadout(ktas: number): SpeedReadout {
 
 function descentReadout(descent: NonNullable<AircraftSpeeds['descent']>): SpeedReadout {
   const withRate = descent.fpm !== undefined
+  const tables: HelpTable[] = descent.schedule
+    ? [{ title: 'Speed', rows: descent.schedule.map(scheduleRow) }]
+    : []
   return {
     key: 'descent',
     label: 'Descent',
@@ -111,8 +118,8 @@ function descentReadout(descent: NonNullable<AircraftSpeeds['descent']>): SpeedR
       text: withRate
         ? 'The indicated airspeed to descend at, and the vertical speed that goes with it.'
         : 'The indicated airspeed to descend at.',
-      tables: [],
-      wide: false,
+      tables,
+      wide: tables.length > 0,
     },
   }
 }

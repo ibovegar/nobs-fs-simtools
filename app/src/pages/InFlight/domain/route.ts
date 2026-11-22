@@ -34,6 +34,14 @@ export interface PlanEnrouteLeg {
   referenceIcao: RouteIcao
   bearing: number
   distance: number
+  /** The altitude set on this leg in the plan; null or missing when none. */
+  altitude?: PlanAltitude | null
+}
+
+/** An altitude in the sim's route: feet, or a flight level. */
+export interface PlanAltitude {
+  altitude: number
+  isFlightLevel: boolean
 }
 
 export interface PlanRoute {
@@ -48,7 +56,7 @@ export interface PlanRoute {
   arrivalTransition: string
   approach: { type: string; runway: RouteRunwayId; suffix: string }
   approachTransition: string
-  cruiseAltitude: { altitude: number; isFlightLevel: boolean } | null
+  cruiseAltitude: PlanAltitude | null
 }
 
 export interface PlanLeg {
@@ -146,6 +154,8 @@ export interface RouteFix {
   runway?: string
   location: FixLocation
   altitude?: AltitudeConstraint
+  /** The altitude set on this fix in the flight plan. Shown only: it doesn't shape the profile. */
+  planAltitudeFt?: number
   speed?: SpeedConstraint
   /** Ground elevation, for the airport / runway ends of the route. */
   elevationFt?: number
@@ -343,6 +353,7 @@ export function collectRouteFixes(
         phase: fix.phase === 'enroute' ? last.phase : fix.phase,
         via: last.via ?? fix.via,
         altitude: fix.altitude ?? last.altitude,
+        planAltitudeFt: fix.planAltitudeFt ?? last.planAltitudeFt,
         speed: fix.speed ?? last.speed,
         elevationFt: last.elevationFt ?? fix.elevationFt,
         runway: last.runway ?? fix.runway,
@@ -443,12 +454,14 @@ export function collectRouteFixes(
   for (const leg of plan.enroute) {
     if (leg.isPpos) continue
     const via = leg.via || undefined
+    const planAltitudeFt = planAltitudeToFt(leg.altitude)
     if (leg.hasLatLon) {
       push({
         key: `LL|${leg.lat.toFixed(4)}|${leg.lon.toFixed(4)}`,
         ident: leg.fixIcao.ident || 'USER',
         phase: 'enroute',
         via,
+        planAltitudeFt,
         location: { kind: 'point', lat: leg.lat, lon: leg.lon },
       })
     } else if (leg.hasPointBearingDistance) {
@@ -457,6 +470,7 @@ export function collectRouteFixes(
         ident: leg.fixIcao.ident || `${leg.referenceIcao.ident}${Math.round(leg.bearing)}`,
         phase: 'enroute',
         via,
+        planAltitudeFt,
         location: {
           kind: 'bearingDistance',
           reference: leg.referenceIcao,
@@ -470,6 +484,7 @@ export function collectRouteFixes(
         ident: leg.fixIcao.ident,
         phase: 'enroute',
         via,
+        planAltitudeFt,
         location: { kind: 'icao', icao: leg.fixIcao },
       })
     }
@@ -585,12 +600,16 @@ export function isSamePlan(a: PlanRoute, b: PlanRoute): boolean {
   return JSON.stringify(a) === JSON.stringify(b)
 }
 
-/** The plan's cruise altitude in feet, or undefined when it has none. */
-export function planCruiseFt(plan: PlanRoute): number | undefined {
-  const alt = plan.cruiseAltitude
+/** A route altitude in feet, or undefined when there is none. */
+function planAltitudeToFt(alt: PlanAltitude | null | undefined): number | undefined {
   if (!alt || !(alt.altitude > 0)) return undefined
   // Flight levels may come as the level (350) or in feet (35000).
   return alt.isFlightLevel && alt.altitude < 1000 ? alt.altitude * 100 : alt.altitude
+}
+
+/** The plan's cruise altitude in feet, or undefined when it has none. */
+export function planCruiseFt(plan: PlanRoute): number | undefined {
+  return planAltitudeToFt(plan.cruiseAltitude)
 }
 
 const runwayLabel = (r: RouteRunwayId) =>

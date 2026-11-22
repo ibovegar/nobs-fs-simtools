@@ -45,6 +45,10 @@ export function useMockFlight() {
     bridge.set('INDICATED ALTITUDE', on ? state.altitudeFt : undefined)
     bridge.set('GROUND VELOCITY', on ? state.groundSpeedKt : undefined)
     bridge.set('VERTICAL SPEED', on ? state.verticalSpeedFpm : undefined)
+    // No wind in the mock: TAS is the groundspeed, IAS follows the air density.
+    const densityRoot = (1 - 6.875_59e-6 * state.altitudeFt) ** 2.128
+    bridge.set('AIRSPEED TRUE', on ? state.groundSpeedKt : undefined)
+    bridge.set('AIRSPEED INDICATED', on ? state.groundSpeedKt * densityRoot : undefined)
     bridge.set('GPS WP DISTANCE', on ? state.gpsDistanceNm : undefined)
     // Somewhere south of Oslo without a flight plan; on the route with one.
     const position = (path && pointAlong(path, state.routeProgressNm)) ?? {

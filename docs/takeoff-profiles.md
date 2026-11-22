@@ -57,7 +57,11 @@ types in [`types.ts`](../app/src/pages/Planning/domain/types.ts).
    ATC MODEL to the cases in `catalogue.test.ts`.
    Optionally give it `performance` (climb / cruise / descent tables and the approach speed
    at max landing weight, see `performance.ts`): the Info tab then shows its speeds to fly,
-   and the Flight plan profile plans TOC / TOD with its own climb and descent.
+   and the Flight plan profile plans TOC / TOD with its own climb and descent. For the
+   descent, `descent: { speedKias, rateFpm }` is enough (add `schedule` when the speed
+   changes with altitude, `table` for time and distance): the Info tab, the TOD calculator's
+   default speed and the Flight plan all read it from there. Cite the source in a comment,
+   and leave out a figure that has none.
 1. **Find data.** In order of preference: the aircraft's own documents (an add-on's
    performance manual or speed card is often the best public source), FCOM-style tables
    from a sister type with the same wing, or a few published points. You need, per takeoff

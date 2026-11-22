@@ -3,7 +3,6 @@ import {
   Card,
   Divider,
   Field,
-  HelpPopover,
   IconButton,
   Readout,
   ReadoutGroup,
@@ -24,15 +23,26 @@ const formatAngle = (deg: number) => deg.toFixed(1)
 const formatVerticalSpeed = (fpm: number) => String(Math.round(fpm))
 
 /**
- * The TOD calculator tab: the rules-of-thumb top-of-descent calculator from
- * descent.vercel.app, same inputs, same maths. The answer sits on top (where to start down,
- * the vertical speed to fly, the time it takes), the inputs are grouped below: altitude,
- * speed, descent angle or vertical speed (either one fills in the other). Every input is a
- * stepper: no typing in VR.
+ * The TOD calculator tab. The answer sits on top (where to start down, the vertical speed to
+ * fly, the time it takes), the inputs are grouped below: altitude, then one descent speed
+ * with the angle or vertical speed (either one fills in the other) and any level flight to
+ * keep before the target. Every input is a stepper: no typing in VR.
  */
 export function DescentCalculator() {
-  const { fields, edit, result, canFill, fillFromSim, copyStartSpeed, pinned, setPinned } =
-    useTopOfDescent()
+  const {
+    fields,
+    descentSpeedKias,
+    edit,
+    editVerticalSpeed,
+    result,
+    verticalSpeedFpm,
+    canFill,
+    hasAircraftSpeed,
+    useAircraftSpeed,
+    fillFromSim,
+    pinned,
+    setPinned,
+  } = useTopOfDescent()
   const problem = problemText(result.errors)
 
   const fillButton = (field: SimFillField, what: string) => (
@@ -68,13 +78,13 @@ export function DescentCalculator() {
               <ReadoutGroup divided>
                 <Readout
                   label="Vertical speed"
-                  help="The rate to descend at to hold the glideslope, at your average speed."
-                  value={formatVerticalSpeed(fields.verticalSpeed)}
+                  help="The rate that holds the glideslope at your groundspeed. It updates as you fly, so it corrects for wind."
+                  value={formatVerticalSpeed(verticalSpeedFpm)}
                   unit="fpm"
                 />
                 <Readout
                   label="Time"
-                  help="How long the descent takes to fly, at your average speed."
+                  help="How long the descent takes to fly at the descent speed."
                   value={result.minutes ?? '—'}
                   unit={result.minutes !== null ? 'min' : undefined}
                 />
@@ -115,49 +125,28 @@ export function DescentCalculator() {
         </Field>
       </Card>
 
-      <Card
-        title={
-          <Stack direction="row" align="center" gap={1} component="span">
-            Groundspeed
-            <HelpPopover label="How should I slow down?" size="lg">
-              An aircraft can't slow down much while it descends. It needs about 1 nm of level or
-              gentle flight for every 10 kt it slows, so the calculator adds that to the distance.
-              Tip: many airports want 250 kt or less below 10,000 ft.
-            </HelpPopover>
-          </Stack>
-        }
-      >
-        <Field label="Start">
+      <Card title="Descent">
+        <Field
+          label="Descent speed"
+          help="The indicated airspeed to hold all the way down. It starts as the aircraft's own descent speed."
+        >
           <Stepper
-            value={fields.startSpeed}
-            onChange={(v) => edit('startSpeed', v)}
-            endAdornment={fillButton('startSpeed', 'start speed')}
-            steps={[5, 50]}
-            min={0}
-            max={700}
-            unit="kt"
-          />
-        </Field>
-        <Field label="End">
-          <Stepper
-            value={fields.endSpeed}
-            onChange={(v) => edit('endSpeed', v)}
+            value={descentSpeedKias}
+            onChange={(v) => edit('descentSpeed', v)}
             endAdornment={
               <SimFillButton
-                what="end speed"
-                label="Same as the start speed"
-                onClick={copyStartSpeed}
+                what="descent speed"
+                label="Use the aircraft's descent speed"
+                disabled={!hasAircraftSpeed}
+                onClick={useAircraftSpeed}
               />
             }
             steps={[5, 50]}
-            min={0}
-            max={700}
+            min={50}
+            max={400}
             unit="kt"
           />
         </Field>
-      </Card>
-
-      <Card title="Descent">
         <Field label="Glideslope">
           <Stepper
             value={fields.glideSlope}
@@ -169,15 +158,31 @@ export function DescentCalculator() {
             format={formatAngle}
           />
         </Field>
-        <Field label="Vertical speed">
+        <Field
+          label="V/S at descent speed"
+          help="The planned rate, without wind. Changing it changes the glideslope."
+        >
           <Stepper
-            value={fields.verticalSpeed}
-            onChange={(v) => edit('verticalSpeed', v)}
+            value={result.plannedVerticalSpeedFpm}
+            onChange={editVerticalSpeed}
             steps={[50, 500]}
             min={-6000}
             max={-100}
             unit="fpm"
             format={formatVerticalSpeed}
+          />
+        </Field>
+        <Field
+          label="Level-off distance"
+          help="Miles to fly level at the end altitude before the target, for example to slow down. At 0 you reach the end altitude at the target."
+        >
+          <Stepper
+            value={fields.levelOffNm}
+            onChange={(v) => edit('levelOffNm', v)}
+            steps={[1, 5]}
+            min={0}
+            max={50}
+            unit="nm"
           />
         </Field>
       </Card>
@@ -188,6 +193,6 @@ export function DescentCalculator() {
 function problemText(errors: TopOfDescentResult['errors']): string | undefined {
   if (errors.startAltitude) return 'End altitude is above the start altitude.'
   if (errors.glideSlope) return 'Glideslope must be above 0°.'
-  if (errors.startSpeed) return 'Speed must be above 0 kt.'
+  if (errors.descentSpeed) return 'Speed must be above 0 kt.'
   return undefined
 }

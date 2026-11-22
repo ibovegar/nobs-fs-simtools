@@ -1,19 +1,36 @@
-import { Popover, Stack, Typography } from '@nobs/ui'
+import { Flag1Outlined, Flag1Solid } from '@lineiconshq/free-icons'
+import { Button, Popover, Stack, Typography } from '@nobs/ui'
 import type { FixTooltipModel } from '~/pages/InFlight/domain'
+import styles from './FixTooltip.module.css'
 
 interface FixTooltipProps {
   model: FixTooltipModel
   /** The fix's hit area: the tooltip sits above it. */
   anchorEl: Element
+  /** Picks this fix as the TOD reference, or undoes the pick. */
+  onSelectReference?: () => void
 }
 
 /**
- * A clicked fix's details above its dot: its limits, planned altitude and distance. Drawn
- * on the page (a Popover), so the card around the chart never cuts it off; it never takes
- * the mouse, so the fixes under it can still be hovered and clicked.
+ * A clicked fix's details above its dot: its charted limits and distance, and a button to
+ * plan the TOD to it. Drawn on the page (a Popover), so the card around the chart
+ * never cuts it off; apart from the button it never takes the mouse, so the fixes under it
+ * can still be hovered and clicked.
  */
 export function FixTooltip(props: FixTooltipProps) {
-  const { model, anchorEl } = props
+  const { model, anchorEl, onSelectReference } = props
+  const action = model.referenceAction
+  const referenceButton = action && (
+    <Button
+      className={styles.action}
+      variant="soft"
+      size="sm"
+      icon={action.isPicked ? Flag1Solid : Flag1Outlined}
+      onClick={onSelectReference}
+    >
+      {action.label}
+    </Button>
+  )
 
   return (
     <Popover
@@ -26,13 +43,16 @@ export function FixTooltip(props: FixTooltipProps) {
       size="lg"
     >
       <Stack gap={2}>
-        <Stack gap={0}>
-          <Typography mono color="bright">
-            {model.title}
-          </Typography>
-          <Typography variant="caption" color="dim">
-            {model.subtitle}
-          </Typography>
+        <Stack direction="row" justify="between" align="start" gap={2}>
+          <Stack gap={0}>
+            <Typography mono color="bright">
+              {model.title}
+            </Typography>
+            <Typography variant="caption" color="dim">
+              {model.subtitle}
+            </Typography>
+          </Stack>
+          {referenceButton}
         </Stack>
         <Stack gap={1}>
           {model.rows.map((row) => (

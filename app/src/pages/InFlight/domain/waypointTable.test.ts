@@ -67,6 +67,12 @@ describe('waypointRows', () => {
     expect(rwy?.limitLines).toEqual([])
   })
 
+  it('shows the flight plan altitude on a fix without a limit', () => {
+    const planned = [fix('ENR', 'enroute', 50, { planAltitudeFt: 9500 })]
+    const [row] = fixRows(waypointRows({ waypoints: planned, profile, reference }))
+    expect(row?.limitLines).toEqual(['9,500'])
+  })
+
   it('only offers fixes after the SID as the reference', () => {
     const rows = fixRows(waypointRows({ waypoints, profile, reference }))
     expect(rows.map((r) => r.flag !== undefined)).toEqual([false, false, true, true, true])

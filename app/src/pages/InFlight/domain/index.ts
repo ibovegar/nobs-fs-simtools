@@ -6,6 +6,13 @@ export {
   CRUISE_REACHED_FT,
   climbAnchor,
 } from './climbAnchor'
+export {
+  addClimbSample,
+  type ClimbSample,
+  type ClimbTarget,
+  climbRateToHold,
+} from './climbTarget'
+export { type DescentGuidance, descentGuidance } from './descentGuidance'
 export { advanceDistance, FEET_PER_NM, MIN_GROUNDSPEED_KT, rateForAngle } from './descentMath'
 export {
   canBeDescentReference,
@@ -137,13 +144,13 @@ export {
 } from './route'
 export {
   angleForVerticalSpeed,
+  DEFAULT_DESCENT_SPEED_KIAS,
   DEFAULT_TOP_OF_DESCENT_FIELDS,
-  editTopOfDescent,
+  liveVerticalSpeedFpm,
   type TopOfDescentField,
   type TopOfDescentFields,
   type TopOfDescentResult,
   topOfDescent,
-  verticalSpeedForAngle,
 } from './topOfDescent'
 export {
   altitudeAt,

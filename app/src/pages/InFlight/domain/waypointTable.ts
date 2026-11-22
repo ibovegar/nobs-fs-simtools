@@ -45,7 +45,10 @@ export interface WaypointRowModel {
   state: WaypointRowState
   /** Distance (to go while flying); empty once passed. */
   distance: string
-  /** The altitude limit, top line first: a "between" limit is the ceiling over the floor. */
+  /**
+   * The altitude limit, top line first (a "between" limit is the ceiling over the floor);
+   * without a limit, the altitude set on the fix in the flight plan.
+   */
   limitLines: readonly string[]
   speed: string
   /** Only on a fix that can be made the TOD reference. */
@@ -84,6 +87,8 @@ export function waypointRows(input: WaypointTableInput): WaypointRowModel[] {
     const { passed, distance } = progress(wp.distanceNm)
     const isReference = index === reference.index
     const live = flownNm !== undefined
+    const planAltitudeLines =
+      wp.planAltitudeFt === undefined ? [] : [formatAltitude(wp.planAltitudeFt)]
     return {
       distanceNm: wp.distanceNm,
       row: {
@@ -95,7 +100,9 @@ export function waypointRows(input: WaypointTableInput): WaypointRowModel[] {
         isReference,
         state: passed ? 'passed' : live && index === nextIndex ? 'next' : 'upcoming',
         distance,
-        limitLines: wp.altitude ? formatAltitudeLimit(wp.altitude).split(' ').reverse() : [],
+        limitLines: wp.altitude
+          ? formatAltitudeLimit(wp.altitude).split(' ').reverse()
+          : planAltitudeLines,
         speed: wp.speed ? formatSpeedLimit(wp.speed) : '',
         flag: canBeDescentReference(routeWaypoints, index)
           ? {

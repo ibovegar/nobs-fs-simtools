@@ -62,19 +62,6 @@ describe('flightProgress', () => {
     expect(p.timeToTocSec).toBeCloseTo(450, 6)
   })
 
-  it('gives the V/S that reaches cruise at TOC', () => {
-    // 15,000 ft to climb in 50 nm at 400 kt (7.5 min): 2,000 fpm.
-    expect(at(50, 15000).climbRateToTocFpm).toBeCloseTo(2000, 6)
-    // Behind the plan: more is needed.
-    expect(at(50, 10000).climbRateToTocFpm).toBeCloseTo(2666.7, 1)
-  })
-
-  it('has no climb V/S once level or past TOC', () => {
-    expect(at(80, 30000).climbRateToTocFpm).toBeUndefined()
-    expect(at(150, 28000).climbRateToTocFpm).toBeUndefined()
-    expect(at(50, 15000, 0).climbRateToTocFpm).toBeUndefined()
-  })
-
   it('is cruise between TOC and TOD', () => {
     const p = at(200, 30000)
     expect(p.status).toBe('cruise')

@@ -6,6 +6,33 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **In flight › Flight plan**: tap a fix in the side view to plan the TOD to it.
+
+### Changed
+
+- **In flight › Flight plan**: in the climb, shows the vertical speed that holds the aircraft's
+  recommended climb speed with your present power.
+- **In flight › Flight plan**: in the descent, shows a live vertical speed to the TOD
+  reference that corrects for wind and being high or low, with a cue when a
+  speed limit ahead needs slowing down and a warning when you're too high.
+
+- **In flight › TOD calculator**: one descent speed (the aircraft's by default) replaces the
+  start and end speeds, the vertical speed follows your groundspeed live, and an optional
+  level-off distance keeps room to slow down. Your saved calculator inputs are reset.
+
+- **Info**: the 737-600 shows its descent speeds (280 kt, 250 kt below 10,000 ft), also used
+  by the TOD calculator and the Flight plan.
+
+### Fixed
+
+- **In flight › TOD calculator**: you no longer reach the end altitude miles before the target.
+- **In flight › Flight plan**: the TOD uses the aircraft's descent figures from cruise to the
+  TOD reference, not all the way to sea level.
+- **In flight › Flight plan**: fixes show the altitude set in the EFB flight plan and their
+  exact charted limit, with no rounding and no calculated "planned" altitude.
+
 ## [0.6.0] - 2026-11-22
 
 ### Added

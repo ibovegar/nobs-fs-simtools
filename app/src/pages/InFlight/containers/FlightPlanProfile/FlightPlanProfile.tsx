@@ -16,8 +16,17 @@ interface FlightPlanProfileProps {
  */
 export function FlightPlanProfile(props: FlightPlanProfileProps) {
   const { onOpenCalculator } = props
-  const { state, reload, plan, view, setView, waypointsOpen, setWaypointsOpen, selectReference } =
-    useFlightPlanProfile()
+  const {
+    state,
+    reload,
+    plan,
+    climbTarget,
+    view,
+    setView,
+    waypointsOpen,
+    setWaypointsOpen,
+    selectReference,
+  } = useFlightPlanProfile()
 
   if (!plan || state.status !== 'ready') {
     const status = state.status === 'ready' ? 'loading' : state.status
@@ -44,12 +53,16 @@ export function FlightPlanProfile(props: FlightPlanProfileProps) {
         waypoints={plan.waypoints}
         progress={plan.progress}
         descentRateFpm={plan.descentRateFpm}
+        climbTarget={climbTarget}
+        descentGuidance={plan.descentGuidance}
         basis={plan.basis}
         view={view}
         onViewChange={setView}
         aircraft={plan.aircraft}
         nextIndex={flying ? plan.progress.nextIndex : undefined}
         referenceIndex={plan.reference.index}
+        referencePicked={plan.reference.source === 'selected'}
+        onSelectReference={selectReference}
       />
       <WaypointList
         waypoints={plan.waypoints}

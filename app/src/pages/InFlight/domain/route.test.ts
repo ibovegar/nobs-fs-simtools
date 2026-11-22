@@ -206,6 +206,25 @@ describe('collectRouteFixes', () => {
     expect(byIdent.FOXTR?.altitude).toEqual({ kind: 'at', lowerFt: 3000, upperFt: 3000 })
   })
 
+  it('reads the altitude set on an enroute leg, in feet or as a flight level', () => {
+    const altitudes = [
+      { altitude: 9500, isFlightLevel: false },
+      { altitude: 240, isFlightLevel: true },
+      null,
+    ]
+    const withAltitudes = {
+      ...plan,
+      enroute: plan.enroute.map((l, i) => ({ ...l, altitude: altitudes[i] })),
+    }
+    const read = collectRouteFixes(withAltitudes, departure, destination).fixes
+    const at = (ident: string) => read.find((f) => f.ident === ident)
+    expect(at('BRAVO')?.planAltitudeFt).toBe(9500)
+    expect(at('CHARLIE')?.planAltitudeFt).toBe(24_000)
+    expect(at('DELTA')?.planAltitudeFt).toBeUndefined()
+    // It's shown, but stays out of the limits the profile is planned with.
+    expect(at('CHARLIE')?.altitude).toBeUndefined()
+  })
+
   it('tags each fix with its phase; a shared fix takes the procedure', () => {
     expect(fixes.map((f) => f.phase)).toEqual([
       'departure',

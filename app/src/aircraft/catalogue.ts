@@ -209,6 +209,21 @@ const DASH8_300_PERFORMANCE: AircraftPerformance = {
 }
 
 /**
+ * Boeing 737-600: the 737 FCOM's descent at .78/280/250 (a 737-8 copy of the manual; same
+ * family, so an assumption for the -600): 280 KIAS, 250 below 10,000 ft. High up the aircraft
+ * flies M.78, a little under 280 KIAS. No published rate, so the profile stays at 3°.
+ */
+const B737_600_PERFORMANCE: AircraftPerformance = {
+  descent: {
+    speedKias: 280,
+    schedule: [
+      { upToFt: 10_000, speedKias: 250 },
+      { upToFt: 41_000, speedKias: 280 },
+    ],
+  },
+}
+
+/**
  * Detection tries these in order against the sim's TITLE and ATC MODEL, so put more
  * specific patterns first.
  */
@@ -275,6 +290,7 @@ export const AIRCRAFT: readonly Aircraft[] = [
     name: 'Boeing 737-600',
     shortName: '737-600',
     match: /737[\s-]?6\d\d|\bB736\b/i,
+    performance: B737_600_PERFORMANCE,
   },
 ]
 

@@ -21,8 +21,8 @@ export interface ClimbPower {
   ittLimitC?: number
 }
 
-/** A climb speed that changes with altitude: each speed applies up to `upToFt`. */
-export interface ClimbSpeedStep {
+/** A climb or descent speed that changes with altitude: each applies up to `upToFt`. */
+export interface SpeedStep {
   upToFt: number
   speedKias: number
 }
@@ -32,7 +32,7 @@ export interface AircraftPerformance {
     /** Climb speed (KIAS) low down; the one the table is flown at. */
     speedKias: number
     /** When the speed changes on the way up (ascending). */
-    schedule?: readonly ClimbSpeedStep[]
+    schedule?: readonly SpeedStep[]
     power?: ClimbPower
     /** Time and distance to climb from sea level, ascending by altitude. */
     table?: readonly ClimbRow[]
@@ -42,7 +42,10 @@ export interface AircraftPerformance {
     speedKtas: number
   }
   descent?: {
+    /** Descent speed (KIAS); the one shown when there is a schedule. */
     speedKias: number
+    /** When the speed changes with altitude (ascending). */
+    schedule?: readonly SpeedStep[]
     rateFpm?: number
     /** Time and distance to descend to sea level, ascending by altitude. */
     table?: readonly ClimbRow[]
@@ -92,6 +95,26 @@ export function climbRateFpm(perf: AircraftPerformance, altitudeFt: number) {
   return row && row.timeMin > 0 ? altitudeFt / row.timeMin : undefined
 }
 
+/** The recommended climb speed (KIAS) at an altitude; undefined without a climb speed. */
+export function climbSpeedKias(perf: AircraftPerformance, altitudeFt: number) {
+  return perf.climb && speedAt(perf.climb, altitudeFt)
+}
+
+/** The recommended descent speed (KIAS) at an altitude; undefined without a descent speed. */
+export function descentSpeedKias(perf: AircraftPerformance, altitudeFt: number) {
+  return perf.descent && speedAt(perf.descent, altitudeFt)
+}
+
+/** A phase's speed at an altitude: its schedule's step, or its one speed. */
+function speedAt(
+  phase: { speedKias: number; schedule?: readonly SpeedStep[] },
+  altitudeFt: number,
+) {
+  const schedule = phase.schedule ?? []
+  const step = schedule.find((s) => altitudeFt <= s.upToFt) ?? schedule[schedule.length - 1]
+  return step?.speedKias ?? phase.speedKias
+}
+
 /**
  * True airspeed (kt) for an indicated (calibrated) airspeed at a pressure altitude, in the
  * standard atmosphere, compressibility included.
@@ -106,16 +129,25 @@ export function trueAirspeedKt(casKt: number, altitudeFt: number): number {
 }
 
 /**
- * Average descent gradient (ft per nm, still air) from `altitudeFt` down to sea level: from
- * the descent table, or else from the descent speed and vertical speed (at the true airspeed
- * halfway down). Undefined without either.
+ * Average descent gradient (ft per nm, still air) from `altitudeFt` down to `toAltitudeFt`
+ * (default sea level): from the descent table, or else from the descent speed and vertical
+ * speed (at the true airspeed halfway down). Undefined without either.
  */
-export function descentGradientFtPerNm(perf: AircraftPerformance, altitudeFt: number) {
+export function descentGradientFtPerNm(
+  perf: AircraftPerformance,
+  altitudeFt: number,
+  toAltitudeFt = 0,
+) {
+  const toFt = toAltitudeFt > 0 && toAltitudeFt < altitudeFt ? toAltitudeFt : 0
   const row = rowAt(perf.descent?.table, altitudeFt)
-  if (row) return row.distanceNm > 0 ? altitudeFt / row.distanceNm : undefined
+  if (row) {
+    const distanceNm = row.distanceNm - (rowAt(perf.descent?.table, toFt)?.distanceNm ?? 0)
+    return distanceNm > 0 ? (altitudeFt - toFt) / distanceNm : undefined
+  }
   const descent = perf.descent
   if (!descent?.rateFpm || altitudeFt <= 0) return undefined
-  const tasKt = trueAirspeedKt(descent.speedKias, altitudeFt / 2)
+  const midFt = (altitudeFt + toFt) / 2
+  const tasKt = trueAirspeedKt(speedAt(descent, midFt), midFt)
   return descent.rateFpm / (tasKt / 60)
 }
 

@@ -151,6 +151,8 @@ export interface ChartWaypoint extends ProfileWaypoint {
   runway?: string
   /** Airway flown to the fix (its tooltip). */
   via?: string
+  /** The altitude set on the fix in the flight plan (its tooltip). */
+  planAltitudeFt?: number
   /** The sim's speed limit at the fix (its tooltip). */
   speed?: SpeedConstraint
 }

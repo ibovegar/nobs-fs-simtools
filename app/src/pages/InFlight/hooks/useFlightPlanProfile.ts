@@ -4,6 +4,7 @@ import {
   climbGradientFtPerNm,
   climbRateFpm,
   descentGradientFtPerNm,
+  descentSpeedKias,
   useSimAircraft,
 } from '~/aircraft'
 import {
@@ -11,7 +12,9 @@ import {
   angleForGradientDeg,
   climbAnchor,
   computeVerticalProfile,
+  type DescentGuidance,
   type DescentReference,
+  descentGuidance,
   descentTarget,
   type FlightProgress,
   flightProgress,
@@ -35,6 +38,7 @@ import {
 import { useSimVars } from '~/sim'
 import { usePersistentState } from '~/storage'
 import { FLIGHT_PLAN_SIM_VARS } from './inFlightSimVars'
+import { useClimbTarget } from './useClimbTarget'
 import { type LoadedRoute, useFlightPlanRoute } from './useFlightPlanRoute'
 
 export interface FlightPlanView {
@@ -53,7 +57,16 @@ export interface FlightPlanView {
   aircraft: AircraftOnRoute | undefined
   /** Vertical speed that flies the planned descent at the current groundspeed. */
   descentRateFpm: number
+  /** Near and past TOD: the speed and V/S to fly, and any slowdown cue. */
+  descentGuidance: DescentGuidance | undefined
 }
+
+const GUIDED_STATUSES: readonly FlightProgress['status'][] = [
+  'approaching',
+  'descend',
+  'on-path',
+  'below-path',
+]
 
 /**
  * State behind the (read-only) Flight plan tab: the sim's flight plan as a route, the
@@ -150,8 +163,29 @@ export function useFlightPlanProfile() {
         sim.groundSpeed ?? PROFILE_ASSUMPTIONS.climbSpeedKt,
         plan.basis.descentAngleDeg,
       ),
+      descentGuidance: GUIDED_STATUSES.includes(progress.status)
+        ? descentGuidance({
+            waypoints,
+            referenceIndex: plan.reference.index,
+            flownNm: position?.distanceNm,
+            altitudeFt: sim.altitude,
+            groundSpeedKt: sim.groundSpeed,
+            iasKt: sim.indicatedSpeed,
+            descentFtPerNm: plan.basis.descentFtPerNm,
+            descentSpeedKias:
+              simAircraft?.performance && sim.altitude !== undefined
+                ? descentSpeedKias(simAircraft.performance, sim.altitude)
+                : undefined,
+          })
+        : undefined,
     }
   }
+
+  const climbTarget = useClimbTarget(
+    simAircraft?.performance,
+    live?.progress.status === 'climb',
+    sim.altitude,
+  )
 
   // Remember the TOC once cruise is reached (a single write; nothing while climbing).
   const routeKey = plan?.routeKey
@@ -178,6 +212,7 @@ export function useFlightPlanProfile() {
     state,
     reload,
     plan: live,
+    climbTarget,
     view,
     setView,
     waypointsOpen,
@@ -196,15 +231,16 @@ function planView(
   referenceKey: string | undefined,
 ) {
   const cruiseFt = route.cruiseFt ?? PROFILE_ASSUMPTIONS.fallbackCruiseFt
-  const basis = profileBasis(aircraft, cruiseFt)
   const first = route.waypoints[0]
   const last = route.waypoints[route.waypoints.length - 1]
   const reference = resolveDescentReference(route.waypoints, referenceKey)
+  const endFt = (last?.elevationFt ?? 0) + (last?.runway ? THRESHOLD_HEIGHT_FT : 0)
+  const basis = profileBasis(aircraft, cruiseFt, reference.altitudeFt ?? endFt)
   const inputs: ProfileInputs = {
     reference: descentTarget(reference),
     waypoints: route.waypoints,
     startFt: first?.elevationFt ?? 0,
-    endFt: (last?.elevationFt ?? 0) + (last?.runway ? THRESHOLD_HEIGHT_FT : 0),
+    endFt,
     cruiseFt,
     climbFtPerNm: basis.climbFtPerNm,
     descentFtPerNm: basis.descentFtPerNm,
@@ -228,9 +264,14 @@ function planView(
 /**
  * The climb and descent to and from the cruise altitude: each the aircraft's own when
  * ~/aircraft has figures for it (climb: its climb table; descent: its table, or its descent
- * speed and vertical speed), the generic figures otherwise.
+ * speed and vertical speed, from cruise to the altitude the descent is planned to), the
+ * generic figures otherwise.
  */
-function profileBasis(aircraft: Aircraft | undefined, cruiseFt: number): ProfileBasis {
+function profileBasis(
+  aircraft: Aircraft | undefined,
+  cruiseFt: number,
+  descentToFt: number,
+): ProfileBasis {
   const generic = GENERIC_PROFILE_BASIS
   const perf = aircraft?.performance
   if (!aircraft || !perf) return generic
@@ -241,7 +282,7 @@ function profileBasis(aircraft: Aircraft | undefined, cruiseFt: number): Profile
     perf.climb && climbGradient !== undefined && climbRate !== undefined
       ? { ftPerNm: climbGradient, rateFpm: climbRate, speedKt: perf.climb.speedKias }
       : undefined
-  const descentGradient = descentGradientFtPerNm(perf, cruiseFt)
+  const descentGradient = descentGradientFtPerNm(perf, cruiseFt, descentToFt)
   const descentFtPerNm = descentGradient ?? generic.descentFtPerNm
 
   return {

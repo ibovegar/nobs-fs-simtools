@@ -1,5 +1,5 @@
-// What the side view's tooltip says about a fix: its limits from the sim, the planned
-// altitude, and how far (and how long) to go. Pure and unit-tested.
+// What the side view's tooltip says about a fix: its exact charted limits from the sim, and
+// how far (and how long) to go. Pure and unit-tested.
 import { formatAltitude, formatDistance, formatDuration } from './format'
 import { type ChartWaypoint, chartLabel } from './profileChart'
 import type { AltitudeConstraint, SpeedConstraint } from './route'
@@ -10,8 +10,6 @@ const MIN_ETE_GROUNDSPEED_KT = 40
 
 export interface FixTooltipInput {
   waypoint: ChartWaypoint
-  /** The planned profile's altitude at the fix. */
-  plannedFt: number
   /** Distance of the route's first fix (distances are counted from there). */
   startNm: number
   /** Distance flown along the route; omitted without a live position. */
@@ -19,6 +17,10 @@ export interface FixTooltipInput {
   groundSpeedKt?: number
   /** The fix the TOD is planned to. */
   isReference?: boolean
+  /** The reference is the pilot's pick, not the default. */
+  isPickedReference?: boolean
+  /** The pilot can make this fix the TOD reference from the tooltip. */
+  canBeReference?: boolean
 }
 
 export interface FixTooltipModel {
@@ -26,10 +28,13 @@ export interface FixTooltipModel {
   /** How it's reached (RW01L, an airway, SID / STAR / APP), and "TOD reference". */
   subtitle: string
   rows: { label: string; value: string }[]
+  /** The button that picks this fix, or undoes the pick; none on the default reference. */
+  referenceAction?: { label: string; isPicked: boolean }
 }
 
+// Exactly as charted: a limit of 2,350 ft must not read 2,400.
 const altitudeText = (ft: number) => {
-  const text = formatAltitude(Math.round(ft / 100) * 100)
+  const text = formatAltitude(ft)
   return text.startsWith('FL') ? text : `${text} ft`
 }
 
@@ -60,7 +65,15 @@ export function speedLimitText(limit: SpeedConstraint | undefined): string {
 
 /** The tooltip of a fix on the side view. */
 export function fixTooltip(input: FixTooltipInput): FixTooltipModel {
-  const { waypoint, plannedFt, startNm, flownNm, groundSpeedKt, isReference = false } = input
+  const {
+    waypoint,
+    startNm,
+    flownNm,
+    groundSpeedKt,
+    isReference = false,
+    isPickedReference = false,
+    canBeReference = false,
+  } = input
 
   const live = flownNm !== undefined
   const toGoNm = live ? waypoint.distanceNm - flownNm : undefined
@@ -82,14 +95,27 @@ export function fixTooltip(input: FixTooltipInput): FixTooltipModel {
   const rows = [
     { label: 'Altitude limit', value: altitudeLimitText(waypoint.altitude) },
     { label: 'Speed limit', value: speedLimitText(waypoint.speed) },
-    { label: 'Planned altitude', value: altitudeText(plannedFt) },
     { label: 'Distance', value: distance },
   ]
+  if (waypoint.planAltitudeFt !== undefined) {
+    rows.unshift({ label: 'Flight plan altitude', value: altitudeText(waypoint.planAltitudeFt) })
+  }
   if (ete) rows.push({ label: 'Time to fix', value: ete })
 
+  const title = chartLabel(waypoint)
+  const picked = isReference && isPickedReference
+  const referenceAction =
+    !canBeReference || (isReference && !picked)
+      ? undefined
+      : {
+          label: `Plan TOD to ${title}`,
+          isPicked: picked,
+        }
+
   return {
-    title: chartLabel(waypoint),
+    title,
     subtitle: [viaLabel(waypoint), isReference && 'TOD reference'].filter(Boolean).join('  ·  '),
     rows,
+    referenceAction,
   }
 }

@@ -148,6 +148,7 @@ pages/
     hooks/          useInFlightTool (TOD calculator / Flight plan / GS tab), useTopOfDescent,
                     useFlightPlanRoute (loads the sim's flight plan + facilities once / on
                     change), useFlightPlanProfile (profile, TOC / TOD, live progress),
+                    useClimbTarget (climb speed + V/S to hold it, polled only in the climb),
                     useGlideslope, useManualDistanceCountdown, inFlightSimVars
     containers/     the three tabs: DescentCalculator, FlightPlanProfile
                     (+ CalculatorTod: the calculator's descent when there's no flight plan),
@@ -158,15 +159,17 @@ pages/
                     TableCell), FlightPlanMessage, CalculatorTodCard.
                     GS: GlideslopeCard (GlideslopeProfile side view + GlideslopeScale dots),
                     GlidepathCard (V/S for the angle), RunwayCard. Shared: SimValueField
-    domain/         topOfDescent (the calculator, ported from descent.vercel.app),
+    domain/         topOfDescent (the calculator: one descent speed, live V/S),
                     descentMath, glidepath (V/S + path angle), glideslope (position and
                     deviation vs a runway), format, glideslopeSetup. Flight plan: geo
                     (great circles), route (EFB route + procedures → waypoints with
                     limits), verticalProfile (climb / descent passes, TOC / TOD),
                     climbAnchor (in flight the climb ahead is planned from the
                     aircraft; TOC stays where cruise was reached),
+                    climbTarget (the V/S that holds the climb speed, from live energy),
                     descentReference (the fix the TOD is planned to: first approach
                     fix with an altitude, or the pilot's pick),
+                    descentGuidance (speed to hold, live V/S to the reference, slowdown cue),
                     flightProgress (position on route, phase, path deviation),
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
                     descent), calculatorProfile (the calculator's descent as a side view),

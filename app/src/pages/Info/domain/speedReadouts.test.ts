@@ -72,6 +72,25 @@ describe('speedReadoutRows', () => {
     expect(climb?.help.tables).toEqual([])
   })
 
+  it('descent with a schedule: a speed table in the help', () => {
+    const schedule = [
+      { upToFt: 10000, speedKias: 250 },
+      { upToFt: 41000, speedKias: 280 },
+    ]
+    const descent = speedReadoutRows({ descent: { kias: 280, schedule } })[0]?.[0]
+    expect(descent?.value).toBe(280)
+    expect(descent?.help.wide).toBe(true)
+    expect(descent?.help.tables).toEqual([
+      {
+        title: 'Speed',
+        rows: [
+          ['to 10,000 ft', '250 kt'],
+          ['to 41,000 ft', '280 kt'],
+        ],
+      },
+    ])
+  })
+
   it('descent and approach captions', () => {
     const [descent, approach] = speedReadoutRows(full)[1] ?? []
     expect(descent?.caption).toBe('2,000 fpm down')

@@ -100,11 +100,6 @@ export interface FlightProgress {
   toTodNm: number
   /** Undefined without groundspeed or once passed. */
   timeToTocSec: number | undefined
-  /**
-   * Vertical speed that reaches the top altitude exactly at TOC from where the aircraft is
-   * now. Undefined without groundspeed / altitude, at or above the top, or past TOC.
-   */
-  climbRateToTocFpm: number | undefined
   /** V/S that holds or regains the cruise altitude (see cruiseRateFpm); undefined without altitude. */
   cruiseRateFpm: number | undefined
   timeToTodSec: number | undefined
@@ -159,10 +154,6 @@ export function flightProgress(i: ProgressInputs): FlightProgress {
     toTocNm,
     toTodNm,
     timeToTocSec,
-    climbRateToTocFpm:
-      timeToTocSec !== undefined && altitudeFt !== undefined && altitudeFt < profile.topFt
-        ? (profile.topFt - altitudeFt) / (timeToTocSec / 60)
-        : undefined,
     cruiseRateFpm: altitudeFt === undefined ? undefined : cruiseRateFpm(altitudeFt, profile.topFt),
     timeToTodSec,
     timeRemainingSec: timeFor(remainingNm, groundSpeedKt),

@@ -6,9 +6,11 @@ export {
   approachSpeedKias,
   type ClimbPower,
   type ClimbRow,
-  type ClimbSpeedStep,
   climbGradientFtPerNm,
   climbRateFpm,
+  climbSpeedKias,
   descentGradientFtPerNm,
+  descentSpeedKias,
+  type SpeedStep,
   trueAirspeedKt,
 } from './performance'

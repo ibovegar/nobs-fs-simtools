@@ -8,11 +8,11 @@ interface CalculatorTodProps {
 
 /**
  * The Flight plan tab's fallback without a flight plan: the TOD calculator's descent (its
- * saved inputs), drawn from the side. Reads nothing from the sim.
+ * saved inputs), drawn from the side.
  */
 export function CalculatorTod(props: CalculatorTodProps) {
   const { onOpenCalculator } = props
-  const { fields, result } = useTopOfDescent()
+  const { fields, result, verticalSpeedFpm } = useTopOfDescent()
 
   return (
     <CalculatorTodCard
@@ -20,7 +20,7 @@ export function CalculatorTod(props: CalculatorTodProps) {
       endAltitudeFt={fields.endAltitude}
       distanceNm={result.distanceNm}
       minutes={result.minutes}
-      verticalSpeedFpm={fields.verticalSpeed}
+      verticalSpeedFpm={verticalSpeedFpm}
       chart={result.distanceNm === null ? undefined : calculatorProfile(fields, result.distanceNm)}
       onOpenCalculator={onOpenCalculator}
     />
