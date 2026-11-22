@@ -4,7 +4,7 @@ import { DEFAULT_TOP_OF_DESCENT_FIELDS, topOfDescent } from './topOfDescent'
 import { altitudeAt } from './verticalProfile'
 
 describe('calculatorProfile', () => {
-  // FL300 → 10,000 ft at 3°, 320 → 250 kt, no wind: 70 nm (62.8 descent + 7 slowing down).
+  // FL300 → 10,000 ft at 3°, 320 → 250 kt: 70 nm (62.8 descent + 7 slowing down).
   const fields = DEFAULT_TOP_OF_DESCENT_FIELDS
   const distance = topOfDescent(fields).distanceNm ?? 0
   const { profile, waypoints } = calculatorProfile(fields, distance)

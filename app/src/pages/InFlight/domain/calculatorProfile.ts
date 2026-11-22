@@ -2,8 +2,8 @@
 // flight plan. Pure and unit-tested.
 //
 // The calculator's distance is the descent at the glideslope, plus 1 nm per 10 kt of
-// slowing down, plus 1 nm per 10 kt of tailwind (topOfDescent.ts). Drawn as: level at the
-// start altitude, TOD, the descent (wind and rounding included), then the slow-down flown
+// slowing down (topOfDescent.ts). Drawn as: level at the start altitude, TOD, the descent
+// (rounding included), then the slow-down flown
 // level at the end altitude up to the target.
 
 import type { ChartWaypoint } from './profileChart'

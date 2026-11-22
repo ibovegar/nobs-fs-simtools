@@ -19,7 +19,6 @@ import { formatInteger, type TopOfDescentResult } from '~/pages/InFlight/domain'
 import { type SimFillField, useTopOfDescent } from '~/pages/InFlight/hooks'
 import styles from './DescentCalculator.module.css'
 
-const formatWind = (kt: number) => (kt > 0 ? `+${kt}` : String(kt))
 const formatAngle = (deg: number) => deg.toFixed(1)
 // No thousands separator: "-1,513" reads like a decimal on a vertical speed.
 const formatVerticalSpeed = (fpm: number) => String(Math.round(fpm))
@@ -32,7 +31,8 @@ const formatVerticalSpeed = (fpm: number) => String(Math.round(fpm))
  * stepper: no typing in VR.
  */
 export function DescentCalculator() {
-  const { fields, edit, result, canFill, fillFromSim, pinned, setPinned } = useTopOfDescent()
+  const { fields, edit, result, canFill, fillFromSim, copyStartSpeed, pinned, setPinned } =
+    useTopOfDescent()
   const problem = problemText(result.errors)
 
   const fillButton = (field: SimFillField, what: string) => (
@@ -131,7 +131,7 @@ export function DescentCalculator() {
       <Card
         title={
           <Stack direction="row" align="center" gap={1} component="span">
-            Speed
+            Groundspeed
             <HelpPopover label="How should I slow down?" size="lg">
               An aircraft can't slow down much while it descends. It needs about 1 nm of level or
               gentle flight for every 10 kt it slows, so the calculator adds that to the distance.
@@ -155,21 +155,17 @@ export function DescentCalculator() {
           <Stepper
             value={fields.endSpeed}
             onChange={(v) => edit('endSpeed', v)}
+            endAdornment={
+              <SimFillButton
+                what="end speed"
+                label="Same as the start speed"
+                onClick={copyStartSpeed}
+              />
+            }
             steps={[5, 50]}
             min={0}
             max={700}
             unit="kt"
-          />
-        </Field>
-        <Field label="Wind" hint="+ tailwind, − headwind">
-          <Stepper
-            value={fields.wind}
-            onChange={(v) => edit('wind', v)}
-            steps={[5, 20]}
-            min={-200}
-            max={200}
-            unit="kt"
-            format={formatWind}
           />
         </Field>
       </Card>
@@ -205,6 +201,6 @@ export function DescentCalculator() {
 function problemText(errors: TopOfDescentResult['errors']): string | undefined {
   if (errors.startAltitude) return 'End altitude is above the start altitude.'
   if (errors.glideSlope) return 'Glideslope must be above 0°.'
-  if (errors.wind) return 'Headwind is stronger than the speed.'
+  if (errors.startSpeed) return 'Speed must be above 0 kt.'
   return undefined
 }

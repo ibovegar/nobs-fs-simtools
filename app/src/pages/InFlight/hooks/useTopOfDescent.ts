@@ -8,12 +8,12 @@ import { useSim } from '~/providers'
 import { usePersistentState } from '~/storage'
 
 /**
- * What the start fields' "fill from sim" buttons read. True airspeed, not groundspeed: the
- * wind is its own field in the calculator and is added to this speed.
+ * What the start fields' "fill from sim" buttons read. Groundspeed, not airspeed: both of the
+ * calculator's speeds are groundspeeds (the wind is already in them).
  */
 const FILL_VARS = {
   startAltitude: { name: 'INDICATED ALTITUDE', unit: 'feet' },
-  startSpeed: { name: 'AIRSPEED TRUE', unit: 'knots' },
+  startSpeed: { name: 'GROUND VELOCITY', unit: 'knots' },
 }
 
 /** The calculator fields that can be filled from the sim. */
@@ -23,7 +23,7 @@ export type SimFillField = keyof typeof FILL_VARS
 const FILL_ROUNDING: Record<SimFillField, number> = { startAltitude: 100, startSpeed: 5 }
 
 /**
- * State behind the TOD calculator: the seven inputs (remembered between visits) and the
+ * State behind the TOD calculator: the six inputs (remembered between visits) and the
  * distance / time they give. `fillFromSim` copies the aircraft's current altitude or speed
  * into that start field once; after that it is an ordinary value to step.
  *
@@ -32,7 +32,7 @@ const FILL_ROUNDING: Record<SimFillField, number> = { startAltitude: 100, startS
  * See domain/topOfDescent.ts.
  */
 export function useTopOfDescent() {
-  const [fields, setFields] = usePersistentState('inflight.calc.v4', DEFAULT_TOP_OF_DESCENT_FIELDS)
+  const [fields, setFields] = usePersistentState('inflight.calc.v5', DEFAULT_TOP_OF_DESCENT_FIELDS)
   // Whether the results stay at the top while scrolling; saved at once, like navigation state.
   const [pinned, setPinned] = usePersistentState('inflight.calc.pinned.v1', false, {
     debounceMs: 0,
@@ -48,6 +48,8 @@ export function useTopOfDescent() {
     setPinned,
     /** Whether there is a sim to fill from; the value itself is read on tap. */
     canFill: bridge.source !== 'offline',
+    /** Sets the end speed to the start speed (the end speed's refresh button). */
+    copyStartSpeed: () => setFields((prev) => editTopOfDescent(prev, 'endSpeed', prev.startSpeed)),
     fillFromSim: (field: SimFillField) => {
       const value = bridge.read(FILL_VARS[field])
       if (value === undefined) return

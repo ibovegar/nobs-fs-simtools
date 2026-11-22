@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+
+- **In flight › TOD calculator**: both speeds (start and end) are now groundspeed, and the
+  start speed's "fill from sim" button reads groundspeed instead of true airspeed.
+
+### Added
+
+- **In flight › TOD calculator**: a refresh button on the end speed that copies the start
+  speed.
+
+### Removed
+
+- **In flight › TOD calculator**: the Wind field and its "+1 nm per 10 kt of tailwind"
+  allowance. Groundspeed already includes the wind. Saved calculator inputs reset once.
+
 ## [0.3.0] - 2026-11-20
 
 ### Added

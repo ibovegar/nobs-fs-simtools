@@ -1,21 +1,25 @@
 // The TOD calculator's maths: a port of the rules-of-thumb calculator at descent.vercel.app
 // (github.com/epranka/descent-app). Kept identical on purpose, including the rounding and the
-// "+1 nm per 10 kt slowed down / per 10 kt of tailwind" allowances. Pure, no React.
+// "+1 nm per 10 kt slowed down" allowance. Pure, no React.
+//
+// One difference: both speeds are groundspeeds (what the fill button reads), so there is no
+// wind field: the wind is already in the speeds. The web app's "+1 nm per 10 kt of tailwind"
+// allowance goes with it.
 //
 // The web app works on typed text; here every value is a number set with steppers (VR), so
-// the inputs are always complete and only the two rule checks below can fail.
+// the inputs are always complete and only the rule checks below can fail.
 
 const FEET_PER_NM_EXACT = 6076.11549
 const DEG_TO_RAD = 0.0174532925
 
-/** The calculator's seven inputs. */
+/** The calculator's six inputs. */
 export interface TopOfDescentFields {
   startAltitude: number
   endAltitude: number
+  /** Groundspeed, kt. */
   startSpeed: number
+  /** Groundspeed, kt. */
   endSpeed: number
-  /** Positive = tailwind, negative = headwind. */
-  wind: number
   glideSlope: number
   /** Negative: a descent rate, e.g. -1500 fpm, as on the VSI. */
   verticalSpeed: number
@@ -35,10 +39,9 @@ export interface TopOfDescentResult {
 interface SpeedInputs {
   startSpeed: number
   endSpeed: number
-  wind: number
 }
 
-const averageSpeed = (i: SpeedInputs) => (i.startSpeed + i.endSpeed) / 2 + i.wind
+const averageSpeed = (i: SpeedInputs) => (i.startSpeed + i.endSpeed) / 2
 
 /** Descent rate (whole fpm, positive) that holds `glideSlope` degrees at the average speed. */
 export function verticalSpeedForAngle(i: SpeedInputs & { glideSlope: number }): number {
@@ -60,7 +63,6 @@ const BASE_FIELDS = {
   endAltitude: 10000,
   startSpeed: 320,
   endSpeed: 250,
-  wind: 0,
   glideSlope: 3,
 }
 
@@ -72,7 +74,7 @@ export const DEFAULT_TOP_OF_DESCENT_FIELDS: TopOfDescentFields = {
 
 /** Distance and time for the fields as they stand. */
 export function topOfDescent(fields: TopOfDescentFields): TopOfDescentResult {
-  const { startAltitude, endAltitude, startSpeed, endSpeed, wind, glideSlope } = fields
+  const { startAltitude, endAltitude, startSpeed, endSpeed, glideSlope } = fields
 
   const errors: TopOfDescentResult['errors'] = {}
   const altitudeToLose = startAltitude - endAltitude
@@ -82,12 +84,14 @@ export function topOfDescent(fields: TopOfDescentFields): TopOfDescentResult {
   }
   if (!glideSlope) errors.glideSlope = true
   const average = averageSpeed(fields)
-  if (average <= 0) errors.wind = true
+  if (average <= 0) {
+    errors.startSpeed = true
+    errors.endSpeed = true
+  }
   if (Object.keys(errors).length > 0) return { distanceNm: null, minutes: null, errors }
 
   let distance = altitudeToLose / FEET_PER_NM_EXACT / Math.tan(glideSlope * DEG_TO_RAD)
   distance += Math.ceil((startSpeed - endSpeed) / 10) // slowing down takes room
-  distance += Math.ceil(wind / 10) // so does a tailwind
   return {
     distanceNm: Math.ceil(distance),
     minutes: Math.round((distance / average) * 60),

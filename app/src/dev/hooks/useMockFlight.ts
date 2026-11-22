@@ -44,7 +44,6 @@ export function useMockFlight() {
     const on = state.connected
     bridge.set('INDICATED ALTITUDE', on ? state.altitudeFt : undefined)
     bridge.set('GROUND VELOCITY', on ? state.groundSpeedKt : undefined)
-    bridge.set('AIRSPEED TRUE', on ? state.groundSpeedKt : undefined)
     bridge.set('VERTICAL SPEED', on ? state.verticalSpeedFpm : undefined)
     bridge.set('GPS WP DISTANCE', on ? state.gpsDistanceNm : undefined)
     // Somewhere south of Oslo without a flight plan; on the route with one.
