@@ -224,12 +224,13 @@ function resultValues(progress: FlightProgress, descentRateFpm: number): ResultV
       unit: onPath ? 'ft on path' : dev > 0 ? 'ft above path' : 'ft below path',
       tone: onPath ? 'success' : status === 'descend' ? 'danger' : 'warning',
     }
+    // Vertical speed stays on the right in every phase, so it doesn't jump sides at TOD.
     secondary = [
+      distance('To go', progress.remainingNm, 'Distance left along the route to the runway.'),
       verticalSpeed(
         -descentRateFpm,
         'The descent rate that holds the planned path angle at your groundspeed.',
       ),
-      distance('To go', progress.remainingNm, 'Distance left along the route to the runway.'),
     ]
   }
 

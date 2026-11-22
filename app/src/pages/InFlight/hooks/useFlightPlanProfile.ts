@@ -10,6 +10,8 @@ import {
   type AircraftOnRoute,
   angleForGradientDeg,
   computeVerticalProfile,
+  type DescentReference,
+  descentTarget,
   type FlightProgress,
   flightProgress,
   GENERIC_PROFILE_BASIS,
@@ -24,6 +26,7 @@ import {
   positionOnRoute,
   type RouteWaypoint,
   rateForAngle,
+  resolveDescentReference,
   THRESHOLD_HEIGHT_FT,
   type VerticalProfile,
 } from '~/pages/InFlight/domain'
@@ -36,6 +39,8 @@ export interface FlightPlanView {
   route: LoadedRoute
   waypoints: PlannedWaypoint<RouteWaypoint>[]
   profile: VerticalProfile
+  /** The fix the descent from cruise (TOD) is planned to. */
+  reference: DescentReference
   cruiseFt: number
   /** False when the plan has no cruise altitude and the fallback is assumed. */
   cruiseFromPlan: boolean
@@ -63,10 +68,25 @@ export function useFlightPlanProfile() {
   // Whether the waypoint list is unfolded. Not saved: it starts unfolded every time the
   // tab opens.
   const [waypointsOpen, setWaypointsOpen] = useState(true)
+  // The fix picked as the TOD reference (its route key); '' for the default. A key that is
+  // no longer on the route (another flight plan) falls back to the default.
+  const [referenceKey, setReferenceKey] = usePersistentState('inflight.plan.todRef.v1', '', {
+    debounceMs: 0,
+  })
   const sim = useSimVars(FLIGHT_PLAN_SIM_VARS, 1)
   const { aircraft: simAircraft } = useSimAircraft()
 
-  const plan = state.status === 'ready' ? planView(state.route, simAircraft) : undefined
+  const plan =
+    state.status === 'ready'
+      ? planView(state.route, simAircraft, referenceKey || undefined)
+      : undefined
+
+  /** Pick a fix as the TOD reference; picking the current pick again returns to the default. */
+  const selectReference = (index: number | undefined) => {
+    const key = index === undefined ? undefined : plan?.route.waypoints[index]?.key
+    const isPicked = plan?.reference.source === 'selected' && plan.reference.index === index
+    setReferenceKey(key === undefined || isPicked ? '' : key)
+  }
 
   let live: FlightPlanView | undefined
   if (plan) {
@@ -126,6 +146,7 @@ export function useFlightPlanProfile() {
     setView,
     waypointsOpen,
     setWaypointsOpen,
+    selectReference,
   }
 }
 
@@ -133,12 +154,18 @@ export function useFlightPlanProfile() {
  * The planned profile for a route and aircraft (no live data: recomputed only when either
  * changes).
  */
-function planView(route: LoadedRoute, aircraft: Aircraft | undefined) {
+function planView(
+  route: LoadedRoute,
+  aircraft: Aircraft | undefined,
+  referenceKey: string | undefined,
+) {
   const cruiseFt = route.cruiseFt ?? PROFILE_ASSUMPTIONS.fallbackCruiseFt
   const basis = profileBasis(aircraft, cruiseFt)
   const first = route.waypoints[0]
   const last = route.waypoints[route.waypoints.length - 1]
+  const reference = resolveDescentReference(route.waypoints, referenceKey)
   const profile = computeVerticalProfile({
+    reference: descentTarget(reference),
     waypoints: route.waypoints,
     startFt: first?.elevationFt ?? 0,
     endFt: (last?.elevationFt ?? 0) + (last?.runway ? THRESHOLD_HEIGHT_FT : 0),
@@ -150,6 +177,7 @@ function planView(route: LoadedRoute, aircraft: Aircraft | undefined) {
     route,
     waypoints: planWaypoints(route.waypoints, profile),
     profile,
+    reference,
     cruiseFt,
     cruiseFromPlan: route.cruiseFt !== undefined,
     basis,

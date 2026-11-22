@@ -5,8 +5,10 @@
 // Like a simple FMS VNAV: the climb is worked out forwards at the climb gradient (levelling
 // off below SID "at or below" limits), the descent backwards from the runway at the
 // descent gradient (respecting STAR / approach limits, so the latest descent that meets
-// them). The profile is the lower of the two; TOC and TOD are where it reaches and leaves
-// its highest altitude.
+// them). An optional reference fix is crossed at exactly its altitude, so the descent from
+// cruise is planned to it (by default the first approach fix, see descentReference). The
+// profile is the lower of the two; TOC and TOD are where it reaches and leaves its highest
+// altitude.
 
 import type { AltitudeConstraint, RoutePhase } from './route'
 
@@ -27,6 +29,24 @@ export interface ProfileInputs {
   climbFtPerNm: number
   /** Feet lost per nautical mile in the descent. */
   descentFtPerNm: number
+  /**
+   * The fix the descent from cruise is planned to, crossed at exactly this altitude (level
+   * at it before the fix when the path from the runway gets there earlier, and after it
+   * when the runway path is still higher). Omitted: straight down to the runway.
+   */
+  reference?: DescentTarget
+}
+
+export interface DescentTarget {
+  /** Index into `waypoints`. */
+  index: number
+  altitudeFt: number
+  /**
+   * The pilot's own pick: the descent from cruise runs straight to this fix, ignoring the
+   * altitude limits of the fixes before it (they show as missed). Otherwise they still
+   * shape the path, as on an FMS.
+   */
+  overridesEarlierLimits?: boolean
 }
 
 export interface ProfilePoint {
@@ -97,18 +117,27 @@ function climbPass(i: ProfileInputs): ProfilePoint[] {
 /**
  * Backwards from the runway: the latest descent at the gradient. Approaching an "at or
  * below" limit it levels at the limit (descend to it earlier); an "at or above" limit
- * raises the path at that fix (a steeper segment after it).
+ * raises the path at that fix (a steeper segment after it). The reference fix, if any, is
+ * an "at" limit whatever its phase; a picked one also clears the limits before it.
  */
 function descentPass(i: ProfileInputs): ProfilePoint[] {
   const wps = i.waypoints
   const last = wps[wps.length - 1] as ProfileWaypoint
-  const reversed: ProfilePoint[] = [{ distanceNm: last.distanceNm, altitudeFt: i.endFt }]
+  let reversed: ProfilePoint[] = [{ distanceNm: last.distanceNm, altitudeFt: i.endFt }]
   let alt = i.endFt
   let d = last.distanceNm
 
   for (let k = wps.length - 2; k >= 0; k--) {
     const wp = wps[k] as ProfileWaypoint
-    const limits = descentPhase(wp.phase) ? wp.altitude : undefined
+    const ref = i.reference
+    const target = ref?.index === k ? ref.altitudeFt : undefined
+    const cleared = ref?.overridesEarlierLimits === true && k < ref.index
+    const limits =
+      target !== undefined
+        ? { lowerFt: target, upperFt: target }
+        : descentPhase(wp.phase) && !cleared
+          ? wp.altitude
+          : undefined
     const upper = limits?.upperFt
     const cap = upper === undefined ? i.cruiseFt : Math.min(i.cruiseFt, upper)
     const start = wp.distanceNm
@@ -123,10 +152,34 @@ function descentPass(i: ProfileInputs): ProfilePoint[] {
     }
     const lower = limits?.lowerFt
     if (lower !== undefined && alt < lower) alt = Math.min(lower, i.cruiseFt)
+    // The reference is crossed at its altitude even when the path from the runway is still
+    // higher there: hold that altitude after the fix until the runway path comes down to it.
+    if (target !== undefined && alt > cap) {
+      reversed = clampBelow(reversed, cap)
+      alt = cap
+    }
     reversed.push({ distanceNm: start, altitudeFt: alt })
     d = start
   }
   return reversed.reverse()
+}
+
+/** A backwards path (rising as it goes) held at or below an altitude, plus where it gets there. */
+function clampBelow(reversed: readonly ProfilePoint[], ft: number): ProfilePoint[] {
+  const out: ProfilePoint[] = []
+  for (let j = 0; j < reversed.length; j++) {
+    const p = reversed[j] as ProfilePoint
+    const prev = reversed[j - 1]
+    if (prev && prev.altitudeFt < ft && p.altitudeFt > ft) {
+      const t = (ft - prev.altitudeFt) / (p.altitudeFt - prev.altitudeFt)
+      out.push({
+        distanceNm: prev.distanceNm + t * (p.distanceNm - prev.distanceNm),
+        altitudeFt: ft,
+      })
+    }
+    out.push({ distanceNm: p.distanceNm, altitudeFt: Math.min(p.altitudeFt, ft) })
+  }
+  return out
 }
 
 /** Pointwise minimum of two polylines over the same span, with their crossings. */

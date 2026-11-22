@@ -117,6 +117,79 @@ describe('computeVerticalProfile', () => {
   })
 })
 
+describe('computeVerticalProfile with a reference fix', () => {
+  it('plans the descent from cruise to the fix, level from there until the runway path', () => {
+    const waypoints = [at(0, 'departure'), at(200), at(350, 'approach'), at(400, 'approach')]
+    const p = computeVerticalProfile({
+      ...base,
+      waypoints,
+      reference: { index: 2, altitudeFt: 3000 },
+    })
+    expect(p.todNm).toBeCloseTo(350 - 27000 / 300, 6)
+    expect(altitudeAt(p.points, 350)).toBeCloseTo(3000, 6)
+    expect(altitudeAt(p.points, 370)).toBeCloseTo(3000, 6)
+    expect(altitudeAt(p.points, 390)).toBeCloseTo(3000, 6)
+    expect(altitudeAt(p.points, 400)).toBe(0)
+    // Without it, the descent runs straight to the runway.
+    expect(computeVerticalProfile({ ...base, waypoints }).todNm).toBeCloseTo(300, 6)
+  })
+
+  it('runs straight to a picked fix, past the limits before it', () => {
+    const waypoints = [
+      at(0, 'departure'),
+      at(200),
+      at(350, 'approach', { altitude: { kind: 'atOrBelow', upperFt: 7000 } }),
+      at(380, 'approach'),
+      at(400, 'approach'),
+    ]
+    const honoured = computeVerticalProfile({
+      ...base,
+      waypoints,
+      reference: { index: 3, altitudeFt: 4000 },
+    })
+    expect(honoured.todNm).toBeCloseTo(350 - 23000 / 300, 6)
+    expect(altitudeAt(honoured.points, 350)).toBeCloseTo(7000, 6)
+
+    const picked = computeVerticalProfile({
+      ...base,
+      waypoints,
+      reference: { index: 3, altitudeFt: 4000, overridesEarlierLimits: true },
+    })
+    expect(picked.todNm).toBeCloseTo(380 - 26000 / 300, 6)
+    expect(altitudeAt(picked.points, 350)).toBeCloseTo(13000, 6)
+    expect(altitudeAt(picked.points, 380)).toBeCloseTo(4000, 6)
+  })
+
+  it('applies in any phase', () => {
+    const p = computeVerticalProfile({
+      ...base,
+      waypoints: [at(0, 'departure'), at(200), at(300), at(400, 'approach')],
+      reference: { index: 2, altitudeFt: 10000 },
+    })
+    expect(altitudeAt(p.points, 300)).toBeCloseTo(10000, 6)
+    expect(p.todNm).toBeCloseTo(300 - 20000 / 300, 6)
+  })
+
+  it('crosses the fix at its altitude even below the path from the runway', () => {
+    const p = computeVerticalProfile({
+      ...base,
+      waypoints: [
+        at(0, 'departure'),
+        at(200),
+        at(300),
+        at(350, 'approach', { altitude: { kind: 'atOrAbove', lowerFt: 20000 } }),
+        at(400, 'approach'),
+      ],
+      reference: { index: 2, altitudeFt: 5000 },
+    })
+    expect(altitudeAt(p.points, 300)).toBeCloseTo(5000, 6)
+    expect(altitudeAt(p.points, 350)).toBeCloseTo(5000, 6)
+    expect(altitudeAt(p.points, 387.5)).toBeCloseTo(5000, 6)
+    expect(altitudeAt(p.points, 400)).toBe(0)
+    expect(p.todNm).toBeCloseTo(300 - 25000 / 300, 6)
+  })
+})
+
 describe('meetsConstraint', () => {
   it('checks lower and upper limits with a tolerance', () => {
     expect(meetsConstraint({ kind: 'atOrAbove', lowerFt: 5000 }, 4950)).toBe(true)

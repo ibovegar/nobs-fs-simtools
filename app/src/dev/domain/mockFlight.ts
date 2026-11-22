@@ -14,7 +14,7 @@ export interface MockFlightState {
   gpsDistanceNm: number
   /**
    * Autopilot selected altitude: climbing or descending through it levels off there
-   * (vertical speed back to 0), like an ALT capture.
+   * (vertical speed back to 0), like an ALT capture. Level at it, a vertical speed leaves it.
    */
   selectedAltitudeFt: number
   /** The mock flight plan the sim reports ('none' = no flight plan). */
@@ -74,9 +74,11 @@ export function advanceFlight(
   let altitudeFt = state.altitudeFt + (state.verticalSpeedFpm * dt) / 60
   let verticalSpeedFpm = state.verticalSpeedFpm
   const selected = state.selectedAltitudeFt
+  // Only when arriving from below / above: level at the selected altitude, a new vertical
+  // speed leaves it (otherwise the first tick would cancel it).
   const crossed =
-    (verticalSpeedFpm > 0 && state.altitudeFt <= selected && altitudeFt >= selected) ||
-    (verticalSpeedFpm < 0 && state.altitudeFt >= selected && altitudeFt <= selected)
+    (verticalSpeedFpm > 0 && state.altitudeFt < selected && altitudeFt >= selected) ||
+    (verticalSpeedFpm < 0 && state.altitudeFt > selected && altitudeFt <= selected)
   if (crossed) {
     altitudeFt = selected
     verticalSpeedFpm = 0

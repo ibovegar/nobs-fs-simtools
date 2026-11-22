@@ -39,7 +39,7 @@ export function AircraftStateCard(props: AircraftStateCardProps) {
         <Stepper
           value={state.verticalSpeedFpm}
           onChange={(verticalSpeedFpm) => onChange({ verticalSpeedFpm })}
-          steps={[100, 500]}
+          steps={[50, 500]}
           min={-6000}
           max={6000}
           unit="fpm"

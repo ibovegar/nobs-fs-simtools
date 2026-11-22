@@ -19,9 +19,24 @@ All notable changes to this project are documented here. The format is based on
   object (`fonts`, `scale`, `textScale`) instead of a `fonts` argument.
 - **In flight › TOD calculator**: a refresh button on the end speed that copies the start
   speed.
+- **In flight › Flight plan**: a flag button at the right of a waypoint row (shown on hover,
+  or when the row is tapped) plans the TOD to that fix (at its altitude limit, straight
+  from cruise: limits at fixes before it are ignored and show as missed); its flag again
+  goes back to the default. The reference fix is marked "TOD REF" with a filled flag, and a
+  line above the list says what the TOD is planned to. The choice is saved.
 
 ### Changed
 
+- **In flight › Flight plan**: the TOD is now planned to the first approach fix with an
+  altitude limit (usually the IAF), crossed at that altitude, instead of straight down to
+  the runway. Without such a fix (no approach in the plan), it still plans to the runway.
+- **Dev harness**: the vertical speed steps by 50 and 500 fpm (was 100 and 500).
+- **In flight › Flight plan**: past TOD, the vertical speed stays on the right (with the
+  distance to go on the left), as in every other phase, instead of swapping sides.
+- **In flight › Flight plan**: tidier waypoint rows. Two-line cells (ident over via, a
+  "between" limit as ceiling over floor) are centred with equal room above and below, every
+  row has the same height, and the columns are narrower so 5-letter idents fit on the
+  narrow panel.
 - **In flight › TOD calculator**: both speeds (start and end) are now groundspeed, and the
   start speed's "fill from sim" button reads groundspeed instead of true airspeed.
 
@@ -35,6 +50,8 @@ All notable changes to this project are documented here. The format is based on
 
 ### Fixed
 
+- **Dev harness**: a vertical speed set while level at the selected altitude (as the
+  harness starts) no longer snaps back to 0 on the next tick; the aircraft now leaves it.
 - **Settings are kept when the sim restarts.** SimTools started before the sim's storage
   was ready, so theme, UI scale, text size and drag direction always loaded
   as the defaults. It now waits for the storage (up to 4 s, then remounts once it is

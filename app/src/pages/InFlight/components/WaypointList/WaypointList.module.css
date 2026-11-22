@@ -3,6 +3,9 @@
   flex-direction: column;
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
+  /* Tight, explicit line boxes: a two-line cell (ident + via, or a "between" limit) is then
+     exactly its lines tall, so centring it in the row centres the text. */
+  line-height: 1.2;
 }
 
 .head,
@@ -13,12 +16,9 @@
 .topPassed {
   display: flex;
   align-items: center;
-  /* Fits a two-line fix (ident + via) with breathing room, so every row is the same height
-     and the text never touches the row lines. 1px less padding on top than below: the
-     sim's RobotoMono leaves more room above capitals than below the baseline, so this
-     centres the ink rather than the line boxes. */
-  min-height: calc(44px * var(--ui-scale));
-  padding: calc(var(--sp-1) - 1px) var(--sp-4) calc(var(--sp-1) + 1px);
+  /* One height for every row, fitting two lines with equal room above and below. */
+  height: calc(44px * var(--ui-scale));
+  padding: 0 var(--sp-4);
   border-bottom: 1px solid var(--border);
 }
 
@@ -28,10 +28,11 @@
 }
 
 .head {
-  min-height: calc(24px * var(--ui-scale));
+  height: calc(28px * var(--ui-scale));
   color: var(--text-dim);
   font-family: var(--font-sans);
   font-size: var(--font-size-label);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -58,20 +59,40 @@
   font-weight: 600;
 }
 
-.fixCol {
+/* A cell of one or two stacked lines (fix: ident over via; limit: "between" as two). */
+.fixCol,
+.limitCol {
   display: flex;
-  flex: 1 1 0;
   flex-direction: column;
+  justify-content: center;
+}
+
+.fixCol {
+  flex: 1 1 0;
   min-width: 0;
+}
+
+.fixCol > *,
+.limitCol > * {
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .ident {
   font-weight: 600;
 }
 
-.sub {
+.sub,
+.refSub {
+  margin-top: 2px;
   font-size: var(--font-size-label);
   color: var(--text-dim);
+}
+
+/* The TOD reference's tag, in place of its via / phase. */
+.refSub {
+  font-weight: 600;
+  color: var(--accent);
 }
 
 /* Fixed-width, right-aligned columns, each with a gutter so values never run together. */
@@ -81,17 +102,25 @@
 .limitCol,
 .speedCol {
   flex: none;
-  margin-left: var(--sp-3);
+  margin-left: var(--sp-2);
   text-align: right;
 }
 
+.limitCol {
+  align-items: flex-end;
+}
+
+.limitCol > * + * {
+  margin-top: 2px;
+}
+
 .dist {
-  width: calc(48px * var(--ui-scale));
+  width: calc(42px * var(--ui-scale));
 }
 
 .num,
 .numMissed {
-  width: calc(56px * var(--ui-scale));
+  width: calc(52px * var(--ui-scale));
 }
 
 .numMissed {
@@ -99,11 +128,41 @@
 }
 
 .limitCol {
-  width: calc(72px * var(--ui-scale));
+  width: calc(60px * var(--ui-scale));
 }
 
 .speedCol {
-  width: calc(48px * var(--ui-scale));
+  width: calc(36px * var(--ui-scale));
+}
+
+/* The flag column: room for one small icon button, empty on rows that can't be picked so
+   the other columns stay aligned. */
+.actionCol {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  width: calc(24px * var(--ui-scale));
+  margin-left: var(--sp-1);
+}
+
+/* A fix that can be the TOD reference: its flag shows on hover, or once the row is tapped
+   (VR lasers have no hover). The reference's own flag is always shown (filled). */
+.flag {
+  visibility: hidden;
+}
+
+.selectable:hover .flag,
+.revealed .flag {
+  visibility: visible;
+}
+
+.selectable:hover {
+  background: var(--bg-card-hi);
+}
+
+/* The next fix keeps its highlight on hover. */
+.selectable.next:hover {
+  background: var(--accent-dim);
 }
 
 /* The Disclosure has no gutters (the table runs edge to edge, its cells padded by --sp-4

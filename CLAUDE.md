@@ -139,6 +139,8 @@ pages/
                     deviation vs a runway), format, glideslopeSetup. Flight plan: geo
                     (great circles), route (EFB route + procedures → waypoints with
                     limits), verticalProfile (climb / descent passes, TOC / TOD),
+                    descentReference (the fix the TOD is planned to: first approach
+                    fix with an altitude, or the pilot's pick),
                     flightProgress (position on route, phase, path deviation),
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
                     descent), calculatorProfile (the calculator's descent as a side view)

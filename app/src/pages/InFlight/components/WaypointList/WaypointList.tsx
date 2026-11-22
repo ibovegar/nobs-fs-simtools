@@ -1,5 +1,9 @@
-import { Button, Disclosure, Typography } from '@nobs/ui'
+import { Flag1Outlined, Flag1Solid } from '@lineiconshq/free-icons'
+import { Button, cx, Disclosure, IconButton, Typography } from '@nobs/ui'
+import { useState } from 'react'
 import {
+  canBeDescentReference,
+  type DescentReference,
   formatAltitude,
   formatAltitudeLimit,
   formatDistance,
@@ -25,6 +29,10 @@ type Row =
 interface WaypointListProps {
   waypoints: readonly PlannedWaypoint<RouteWaypoint>[]
   profile: VerticalProfile
+  /** The fix the TOD is planned to. */
+  reference: DescentReference
+  /** A fix was tapped: make it the TOD reference (if it already is: back to the default). */
+  onSelectReference: (index: number) => void
   /** Distance flown along the route; omitted without a live position. */
   flownNm?: number
   nextIndex?: number
@@ -35,16 +43,49 @@ interface WaypointListProps {
   onOpenChange: (open: boolean) => void
 }
 
+const altitudeText = (ft: number) => {
+  const text = formatAltitude(Math.round(ft / 100) * 100)
+  return text.startsWith('FL') ? text : `${text} ft`
+}
+
+/** One line on what the TOD is planned to, and how to change it. */
+function referenceNote(
+  reference: DescentReference,
+  waypoints: readonly PlannedWaypoint<RouteWaypoint>[],
+  topFt: number,
+): string {
+  const wp = waypoints[reference.index]?.waypoint
+  const name = wp?.runway ? `runway ${wp.runway}` : (wp?.ident ?? 'the runway')
+  const at = reference.altitudeFt !== undefined ? ` at ${altitudeText(reference.altitudeFt)}` : ''
+  switch (reference.source) {
+    case 'default':
+      return `TOD planned to ${name}${at}, the first approach fix with an altitude. Tap a fix's flag to plan to it instead.`
+    case 'runway':
+      return `TOD planned to the runway: no approach fix has an altitude. Tap a fix's flag to plan to it instead.`
+    case 'selected':
+      if (reference.altitudeFt !== undefined && reference.altitudeFt >= topFt - 0.5) {
+        return `${name}'s limit${at} is at or above the cruise altitude, so it doesn't move the TOD. Tap its flag again for the default.`
+      }
+      return reference.altitudeFt !== undefined || wp?.runway
+        ? `TOD planned to ${name}${at}, your pick. Tap its flag again for the default.`
+        : `${name} has no altitude limit, so the descent passes it on the way to the runway. Tap its flag again for the default.`
+  }
+}
+
 /**
  * Every fix on the route in order, with TOC and TOD slotted in: the distance (to go while
  * flying), the planned altitude, and the procedure's altitude and speed limits. Fixes
- * already flown are dimmed and the next one is highlighted. Folds away (collapsed by
- * default); the header still counts the fixes and warns about any that are missing.
+ * already flown are dimmed and the next one is highlighted. A fix after the SID shows a
+ * flag button on the right when hovered, or when its row is tapped (VR lasers don't hover);
+ * the flag makes it the TOD reference, marked "TOD REF" with the flag kept filled. Folds
+ * away; the header still counts the fixes and warns about any that are missing.
  */
 export function WaypointList(props: WaypointListProps) {
   const {
     waypoints,
     profile,
+    reference,
+    onSelectReference,
     flownNm,
     nextIndex,
     missingFixes,
@@ -53,6 +94,8 @@ export function WaypointList(props: WaypointListProps) {
     open,
     onOpenChange,
   } = props
+  // The row whose flag button a tap revealed (UI only: hover reveals it with a mouse).
+  const [revealed, setRevealed] = useState<number | undefined>(undefined)
 
   const rows: Row[] = waypoints.map((planned, index) => ({
     kind: 'fix',
@@ -77,6 +120,7 @@ export function WaypointList(props: WaypointListProps) {
     missingProcedures.length > 0 && `Not in the database: ${missingProcedures.join(', ')}.`,
     missingFixes.length > 0 && `Fixes not found (left out): ${missingFixes.join(', ')}.`,
   ].filter(Boolean)
+  const routeWaypoints = waypoints.map((p) => p.waypoint)
 
   return (
     <Disclosure
@@ -97,6 +141,9 @@ export function WaypointList(props: WaypointListProps) {
           {notes.join(' ')}
         </Typography>
       )}
+      <Typography variant="caption" color="dim" className={styles.gutters}>
+        {referenceNote(reference, waypoints, profile.topFt)}
+      </Typography>
       <div className={styles.table}>
         <div className={styles.head}>
           <span className={styles.fixCol}>Fix</span>
@@ -104,6 +151,7 @@ export function WaypointList(props: WaypointListProps) {
           <span className={styles.num}>Plan</span>
           <span className={styles.limitCol}>Limit</span>
           <span className={styles.speedCol}>Speed</span>
+          <span className={styles.actionCol} />
         </div>
         {rows.map((row) => {
           const passed = live && row.distanceNm < flownNm - 0.05
@@ -120,32 +168,83 @@ export function WaypointList(props: WaypointListProps) {
                 </span>
                 <span className={styles.limitCol} />
                 <span className={styles.speedCol} />
+                <span className={styles.actionCol} />
               </div>
             )
           }
 
           const { planned, index } = row
           const wp = planned.waypoint
-          const sub = wp.runway ? `RWY ${wp.runway}` : (wp.via ?? PHASE_LABEL[wp.phase])
+          const isReference = index === reference.index
+          const sub = isReference
+            ? 'TOD REF'
+            : wp.runway
+              ? `RWY ${wp.runway}`
+              : (wp.via ?? PHASE_LABEL[wp.phase])
           const rowClass = passed
             ? styles.passed
             : live && index === nextIndex
               ? styles.next
               : styles.row
-          return (
-            <div key={`${wp.key}-${index}`} className={rowClass}>
+          const cells = (
+            <>
               <span className={styles.fixCol}>
                 <span className={styles.ident}>{wp.ident}</span>
-                <span className={styles.sub}>{sub}</span>
+                <span className={isReference ? styles.refSub : styles.sub}>{sub}</span>
               </span>
               <span className={styles.dist}>{dist}</span>
               <span className={planned.meetsLimit ? styles.num : styles.numMissed}>
                 {formatAltitude(Math.round(planned.plannedFt / 100) * 100)}
               </span>
               <span className={styles.limitCol}>
-                {wp.altitude ? formatAltitudeLimit(wp.altitude) : ''}
+                {/* A "between" limit ('5000A 7000B') as two lines, floor below the ceiling. */}
+                {wp.altitude &&
+                  formatAltitudeLimit(wp.altitude)
+                    .split(' ')
+                    .reverse()
+                    .map((part) => <span key={part}>{part}</span>)}
               </span>
               <span className={styles.speedCol}>{wp.speed ? formatSpeedLimit(wp.speed) : ''}</span>
+            </>
+          )
+          const key = `${wp.key}-${index}`
+          if (!canBeDescentReference(routeWaypoints, index)) {
+            return (
+              <div key={key} className={rowClass}>
+                {cells}
+                <span className={styles.actionCol} />
+              </div>
+            )
+          }
+          return (
+            // A tap on the row only reveals the flag (pointer convenience for VR); the flag
+            // itself is the real, keyboard-reachable control.
+            // biome-ignore lint/a11y/useKeyWithClickEvents: the IconButton inside is focusable
+            // biome-ignore lint/a11y/noStaticElementInteractions: see above
+            <div
+              key={key}
+              className={cx(rowClass, styles.selectable, revealed === index && styles.revealed)}
+              onClick={() => setRevealed(index)}
+            >
+              {cells}
+              <span className={styles.actionCol}>
+                <IconButton
+                  icon={isReference ? Flag1Solid : Flag1Outlined}
+                  // The picked reference's flag goes back to the default; the default's
+                  // (filled too) makes it an explicit pick.
+                  label={
+                    isReference && reference.source === 'selected'
+                      ? 'Back to the default TOD reference'
+                      : `Plan the TOD to ${wp.ident}`
+                  }
+                  size="sm"
+                  variant={isReference ? 'solid' : 'simple'}
+                  color="accent"
+                  aria-pressed={isReference}
+                  className={isReference ? undefined : styles.flag}
+                  onClick={() => onSelectReference(index)}
+                />
+              </span>
             </div>
           )
         })}

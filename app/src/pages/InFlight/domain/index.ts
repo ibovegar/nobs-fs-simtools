@@ -2,6 +2,14 @@
 export { type CalculatorProfile, calculatorProfile } from './calculatorProfile'
 export { advanceDistance, FEET_PER_NM, MIN_GROUNDSPEED_KT, rateForAngle } from './descentMath'
 export {
+  canBeDescentReference,
+  type DescentReference,
+  type DescentReferenceSource,
+  descentTarget,
+  referenceAltitudeFt,
+  resolveDescentReference,
+} from './descentReference'
+export {
   CRUISE_TOLERANCE_FT,
   cruiseRateFpm,
   type FlightPlanStatus,
@@ -111,6 +119,7 @@ export {
 export {
   altitudeAt,
   computeVerticalProfile,
+  type DescentTarget,
   meetsConstraint,
   type PlannedWaypoint,
   type ProfilePoint,
