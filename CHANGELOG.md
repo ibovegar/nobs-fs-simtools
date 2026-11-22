@@ -50,6 +50,10 @@ All notable changes to this project are documented here. The format is based on
 
 ### Fixed
 
+- **In flight › Flight plan**: a plan sent from the EFB to the avionics (or filed with
+  ATC) now shows even when the EFB's saved route is empty. SimTools reads the avionics'
+  route first, then the EFB's, then the one filed with ATC, and follows "Send to avionics"
+  live. The Coherent debugger's console says which route was used.
 - **Dev harness**: a vertical speed set while level at the selected altitude (as the
   harness starts) no longer snaps back to 0 on the next tick; the aircraft now leaves it.
 - **Settings are kept when the sim restarts.** SimTools started before the sim's storage

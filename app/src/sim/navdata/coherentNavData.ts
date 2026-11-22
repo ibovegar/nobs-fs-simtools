@@ -3,9 +3,16 @@ import { facilityIcao, icaoKey, isEmptyRoute } from './icao'
 import type { NavData, NavDataSession } from './NavData'
 import type { NavAirport, NavFacility, NavFlightPlanRoute, NavIcao } from './navTypes'
 
-// MSFS 2024 SDK: JS_LISTENER_PLANNEDROUTE (GET_EFB_ROUTE, EfbRouteUpdated) and
-// JS_LISTENER_FACILITY (LOAD_*_FROM_STRUCT, answered by a Send* event). Mirrors how
-// Microsoft's msfs-avionics-mirror FlightPlanRouteManager and FacilityLoader use them.
+// MSFS 2024 SDK: JS_LISTENER_PLANNEDROUTE and JS_LISTENER_FACILITY (LOAD_*_FROM_STRUCT,
+// answered by a Send* event). Mirrors how Microsoft's msfs-avionics-mirror
+// FlightPlanRouteManager and FacilityLoader use them.
+//
+// The sim keeps several routes. The EFB's saved route (GET_EFB_ROUTE / EfbRouteUpdated) can
+// be empty while the avionics have a plan: the EFB's "Send to avionics" goes to them
+// directly (AvionicsRouteSync), and "Send to ATC" files a separate ATC route
+// (GET_ATC_ROUTE). So the plan is read from the avionics first (REQUEST_AVIONICS_ROUTE,
+// answered by AvionicsRouteRequestResponse when an avionics package replies), then the
+// EFB, then ATC.
 
 /** Airport data to load: approaches | departures | arrivals | runways (SDK flags). */
 const AIRPORT_DATA_FLAGS = 1 | 2 | 4 | 64
@@ -20,6 +27,9 @@ const FACILITY_EVENTS = ['SendAirport', 'SendIntersection', 'SendVor', 'SendNdb'
 
 /** Give up on a sim answer after this long (missing facility, listener never bound). */
 const TIMEOUT_MS = 8000
+
+/** Wait this long for the avionics to answer a route request (they may never). */
+const AVIONICS_TIMEOUT_MS = 1500
 
 interface Bound {
   listener: SimViewListener
@@ -48,9 +58,9 @@ function bind(name: string): Bound | undefined {
   }
 }
 
-function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, fallback: T, ms = TIMEOUT_MS): Promise<T> {
   return new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(fallback), TIMEOUT_MS)
+    const timer = setTimeout(() => resolve(fallback), ms)
     promise.then(
       (value) => {
         clearTimeout(timer)
@@ -81,9 +91,72 @@ export function createCoherentNavData(): NavData {
   const pending = new Map<string, Pending>()
   const cache = new Map<string, Promise<NavFacility | null>>()
 
+  // Avionics route requests waiting for their answer, by request id.
+  const routeRequests = new Map<unknown, (route: NavFlightPlanRoute | null) => void>()
+
   const onRouteUpdated = (next: NavFlightPlanRoute) => {
-    const value = isEmptyRoute(next) ? null : next
-    for (const subscriber of routeSubscribers) subscriber(value)
+    // An empty EFB route doesn't clear a plan the avionics may still have: read again.
+    if (isEmptyRoute(next)) {
+      void readFlightPlan().then((plan) => {
+        for (const subscriber of routeSubscribers) subscriber(plan)
+      })
+      return
+    }
+    for (const subscriber of routeSubscribers) subscriber(next)
+  }
+
+  const onAvionicsRouteResponse = (next: NavFlightPlanRoute, requestId: unknown) => {
+    const resolve = routeRequests.get(requestId)
+    if (!resolve) return
+    routeRequests.delete(requestId)
+    resolve(next)
+  }
+
+  /** The avionics' current route, if a package answers the request in time. */
+  const requestAvionicsRoute = async (bound: Bound): Promise<NavFlightPlanRoute | null> => {
+    try {
+      const requestId = await bound.listener.call('REQUEST_AVIONICS_ROUTE')
+      const answer = new Promise<NavFlightPlanRoute | null>((resolve) => {
+        routeRequests.set(requestId, resolve)
+      })
+      const route = await withTimeout(answer, null, AVIONICS_TIMEOUT_MS)
+      routeRequests.delete(requestId)
+      return route
+    } catch {
+      return null
+    }
+  }
+
+  const readRoute = async (bound: Bound, call: string) => {
+    try {
+      return await withTimeout(
+        bound.listener.call(call) as Promise<NavFlightPlanRoute | null>,
+        null,
+      )
+    } catch {
+      return null
+    }
+  }
+
+  /** The first non-empty route of: the avionics', the EFB's, the one filed with ATC. */
+  const readFlightPlan = async (): Promise<NavFlightPlanRoute | null> => {
+    const bound = route
+    if (!bound || !(await bound.ready)) return null
+    const sources: [string, () => Promise<NavFlightPlanRoute | null>][] = [
+      ['avionics', () => requestAvionicsRoute(bound)],
+      ['EFB', () => readRoute(bound, 'GET_EFB_ROUTE')],
+      ['ATC', () => readRoute(bound, 'GET_ATC_ROUTE')],
+    ]
+    for (const [source, read] of sources) {
+      const plan = await read()
+      if (!isEmptyRoute(plan)) {
+        // One line per read, for the Coherent debugger when a plan doesn't show.
+        console.info(`[SimTools] flight plan from the ${source} route`)
+        return plan
+      }
+    }
+    console.info('[SimTools] no flight plan: avionics, EFB and ATC routes are empty')
+    return null
   }
 
   const onFacility = (received: NavFacility & { loadedDataFlags?: number }) => {
@@ -121,6 +194,8 @@ export function createCoherentNavData(): NavData {
   const connect = () => {
     route = bind('JS_LISTENER_PLANNEDROUTE')
     route?.listener.on('EfbRouteUpdated', onRouteUpdated)
+    route?.listener.on('AvionicsRouteSync', onRouteUpdated)
+    route?.listener.on('AvionicsRouteRequestResponse', onAvionicsRouteResponse)
     facility = bind('JS_LISTENER_FACILITY')
     for (const event of FACILITY_EVENTS) facility?.listener.on(event, onFacility)
   }
@@ -128,6 +203,8 @@ export function createCoherentNavData(): NavData {
   const disconnect = () => {
     try {
       route?.listener.off('EfbRouteUpdated', onRouteUpdated)
+      route?.listener.off('AvionicsRouteSync', onRouteUpdated)
+      route?.listener.off('AvionicsRouteRequestResponse', onAvionicsRouteResponse)
       route?.listener.unregister()
       for (const event of FACILITY_EVENTS) facility?.listener.off(event, onFacility)
       facility?.listener.unregister()
@@ -141,6 +218,8 @@ export function createCoherentNavData(): NavData {
       waiting.resolve(null)
     }
     pending.clear()
+    for (const resolve of routeRequests.values()) resolve(null)
+    routeRequests.clear()
     cache.clear()
     routeSubscribers.clear()
   }
@@ -188,15 +267,7 @@ export function createCoherentNavData(): NavData {
       let closed = false
 
       return {
-        async getFlightPlan() {
-          const bound = route
-          if (!bound || !(await bound.ready)) return null
-          const result = await withTimeout(
-            bound.listener.call('GET_EFB_ROUTE') as Promise<NavFlightPlanRoute | null>,
-            null,
-          )
-          return isEmptyRoute(result) ? null : result
-        },
+        getFlightPlan: readFlightPlan,
         onFlightPlanChanged(callback) {
           routeSubscribers.add(callback)
           mine.add(callback)
