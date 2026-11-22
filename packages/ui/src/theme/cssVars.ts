@@ -61,19 +61,28 @@ function colorVars(t: ThemeTokens): Record<string, string> {
   }
 }
 
-function densityVars(d: DensityTokens): Record<string, string> {
+/**
+ * Multiply a px length ('18px') by the UI scale, rounded to a tenth of a pixel so text and
+ * edges stay crisp.
+ */
+const scalePx = (value: string, scale: number) =>
+  scale === 1 ? value : `${Math.round(Number.parseFloat(value) * scale * 10) / 10}px`
+
+function densityVars(d: DensityTokens, scale: number, textScale: number): Record<string, string> {
+  const px = (value: string) => scalePx(value, scale)
+  const font = (value: string) => scalePx(value, scale * textScale)
   return {
-    '--control-h': d.controlHeight,
-    '--control-h-lg': d.controlHeightLg,
-    '--font-size': d.fontSize,
-    '--font-size-sm': d.fontSizeSm,
-    '--font-size-lg': d.fontSizeLg,
-    '--font-size-label': d.fontSizeLabel,
-    '--font-size-readout': d.fontSizeReadout,
-    '--radius': d.radius,
-    '--radius-sm': d.radiusSm,
-    '--icon-size': d.iconSize,
-    '--scrollbar-w': d.scrollbarWidth,
+    '--control-h': px(d.controlHeight),
+    '--control-h-lg': px(d.controlHeightLg),
+    '--font-size': font(d.fontSize),
+    '--font-size-sm': font(d.fontSizeSm),
+    '--font-size-lg': font(d.fontSizeLg),
+    '--font-size-label': font(d.fontSizeLabel),
+    '--font-size-readout': font(d.fontSizeReadout),
+    '--radius': px(d.radius),
+    '--radius-sm': px(d.radiusSm),
+    '--icon-size': px(d.iconSize),
+    '--scrollbar-w': px(d.scrollbarWidth),
   }
 }
 
@@ -90,13 +99,12 @@ const staticVars: Record<string, string> = {
 
   '--font-sans': '"Segoe UI", system-ui, Roboto, sans-serif',
   '--font-mono': 'Consolas, "Roboto Mono", "Courier New", monospace',
-  ...spacingVars(),
 }
 
 // A plain loop rather than Object.fromEntries (ES2019), which older embedded browsers lack.
-function spacingVars(): Record<string, string> {
+function spacingVars(scale: number): Record<string, string> {
   const vars: Record<string, string> = {}
-  for (const [key, value] of Object.entries(spacing)) vars[`--sp-${key}`] = value
+  for (const [key, value] of Object.entries(spacing)) vars[`--sp-${key}`] = scalePx(value, scale)
   return vars
 }
 
@@ -115,16 +123,35 @@ export interface ThemeFonts {
   mono?: string
 }
 
-/** Every CSS custom property for a theme + density combination. */
+export interface CssVarsOptions {
+  /** Font stacks, see ThemeFonts. */
+  fonts?: ThemeFonts
+  /**
+   * Multiplies every size (density tokens and the spacing scale), e.g. 1.5 for a
+   * high-resolution VR headset where the UI otherwise renders small. Default 1.
+   */
+  scale?: number
+  /** Multiplies the font sizes only, on top of `scale`. Default 1. */
+  textScale?: number
+}
+
+/**
+ * Every CSS custom property for a theme + density combination. Component CSS scales its
+ * own fixed sizes with `calc(24px * var(--ui-scale))` (text: `var(--text-scale)` too).
+ */
 export function buildCssVars(
   theme: ResolvedTheme,
   density: Density,
-  fonts: ThemeFonts = {},
+  options: CssVarsOptions = {},
 ): Record<string, string> {
-  const vars = {
+  const { fonts = {}, scale = 1, textScale = 1 } = options
+  const vars: Record<string, string> = {
     ...staticVars,
     ...colorVarsByTheme[theme],
-    ...densityVars(densityTokens[density]),
+    ...densityVars(densityTokens[density], scale, textScale),
+    ...spacingVars(scale),
+    '--ui-scale': String(scale),
+    '--text-scale': String(textScale),
   }
   if (fonts.sans) vars['--font-sans'] = fonts.sans
   if (fonts.mono) vars['--font-mono'] = fonts.mono
@@ -136,10 +163,10 @@ export function applyCssVars(
   theme: ResolvedTheme,
   density: Density,
   target: HTMLElement = document.documentElement,
-  fonts: ThemeFonts = {},
+  options: CssVarsOptions = {},
 ) {
   target.style.colorScheme = theme
-  for (const [key, value] of Object.entries(buildCssVars(theme, density, fonts))) {
+  for (const [key, value] of Object.entries(buildCssVars(theme, density, options))) {
     target.style.setProperty(key, value)
   }
 }

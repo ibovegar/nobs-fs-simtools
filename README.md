@@ -8,7 +8,7 @@ work in VR and on a monitor.
 - **Info**: your callsign, set once on an on-screen keypad and kept when you close the sim.
 - **Notes**: freehand ink (write with the VR controller laser or the mouse), ATC quick entry
   with an on-screen keypad (frequency, squawk, runway, altitude…), and free text typed on an
-  on-screen keyboard (shown by default in VR-sized Comfort mode) or a physical keyboard.
+  on-screen keyboard (shown by default) or a physical keyboard.
 - **Planning**: V1 / VR / V2, flaps and takeoff trim for the Caravan 208B (incl. Black Square's
   Caravan Professional), TBM 850 (Black Square), King Air 350, Dash 8-100/200/300/400 and Boeing 737-400/600, from live weight, CG, temperature and
   pressure altitude (or manual values). The aircraft is read from the sim (no picker); an
@@ -23,7 +23,8 @@ work in VR and on a monitor.
   - **Flight plan**: the sim's flight plan (EFB / World Map, SimBrief) as a climb / cruise /
     descent profile with TOC and TOD, the number that matters now (to TOC, to TOD, or the
     path deviation), and the waypoints with planned altitudes and procedure limits.
-- **Settings**: dark/light theme, and Comfort (VR) or Compact (monitor) control size.
+- **Settings**: dark/light theme, UI scale and text size (for high-resolution VR headsets),
+  and drag-to-scroll direction.
 
 ## Install
 

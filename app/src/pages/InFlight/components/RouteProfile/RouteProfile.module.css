@@ -1,7 +1,7 @@
 .profile {
   position: relative;
   width: 100%;
-  height: 280px;
+  height: calc(280px * var(--ui-scale));
 }
 
 .svg {
@@ -18,7 +18,7 @@
 .distLabel {
   fill: var(--text-dim);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: calc(10px * var(--text-scale));
 }
 
 .ground {
@@ -59,7 +59,7 @@
 .fixLabel,
 .fixLabelNext {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: calc(10px * var(--text-scale));
 }
 
 .fixLabel {
@@ -99,7 +99,7 @@
 .topLabel {
   fill: var(--accent);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: calc(10px * var(--text-scale));
   font-weight: 600;
 }
 

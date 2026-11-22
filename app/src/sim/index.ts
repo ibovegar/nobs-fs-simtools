@@ -35,4 +35,9 @@ export {
 export { createPanelVisibility, type PanelVisibility, registerPanelElement } from './panel'
 export type { SimBridge, SimSource, SimVarSpec } from './SimBridge'
 export { SIM_FONTS } from './simFonts'
-export { getSimDataStorage, isInSim } from './simGlobals'
+export {
+  getSimDataStorage,
+  isInSim,
+  isSimDataStorageReady,
+  onSimDataStorageReady,
+} from './simGlobals'

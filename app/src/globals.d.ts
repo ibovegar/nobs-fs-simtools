@@ -28,6 +28,8 @@ declare global {
   /** Registers a named view listener; `onReady` runs once the sim has bound it. */
   function RegisterViewListener(name: string, onReady?: () => void): SimViewListener
 
+  /** The sim's DataStorage object; null until it is ready, throws before dataStorage.js binds it. */
+  function GetDataStorage(): unknown
   function GetStoredData(key: string): string | null
   function SetStoredData(key: string, value: string): void
   function DeleteStoredData(key: string): void

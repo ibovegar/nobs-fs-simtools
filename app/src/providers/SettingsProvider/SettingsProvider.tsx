@@ -1,11 +1,16 @@
-import { type Density, type ThemeFonts, type ThemeMode, ThemeProvider } from '@nobs/ui'
+import { type ThemeFonts, type ThemeMode, ThemeProvider } from '@nobs/ui'
 import { createContext, type ReactNode, use } from 'react'
 import { usePersistentState } from '~/storage'
 
 export interface SimToolsSettings {
   themeMode: ThemeMode
-  /** comfort = VR-sized controls, compact = monitor-sized. */
-  density: Density
+  /**
+   * Size of everything (text, controls, spacing), in percent. High-resolution VR headsets
+   * render the sim's UI small, so pilots enlarge it here.
+   */
+  uiScale: number
+  /** Text size in percent, on top of uiScale (text only, controls keep their size). */
+  textScale: number
   /** Id of the open page (tab), see ~/pages/pageRegistry.ts. */
   activePage: string
   /**
@@ -16,9 +21,10 @@ export interface SimToolsSettings {
 }
 
 // VR is the primary target, so default to the big, laser-friendly controls.
-const DEFAULT_SETTINGS: SimToolsSettings = {
+export const DEFAULT_SETTINGS: SimToolsSettings = {
   themeMode: 'dark',
-  density: 'comfort',
+  uiScale: 100,
+  textScale: 100,
   activePage: 'notes',
   naturalScroll: true,
 }
@@ -37,7 +43,8 @@ interface SettingsProviderProps {
 }
 
 /**
- * Persists the user's preferences and applies theme + density through ThemeProvider.
+ * Persists the user's preferences and applies the theme and sizes through ThemeProvider,
+ * always at Comfort density (VR-sized controls; the UI scale enlarges or shrinks them).
  * Must sit inside <StorageProvider>.
  */
 export function SettingsProvider(props: SettingsProviderProps) {
@@ -56,7 +63,13 @@ export function SettingsProvider(props: SettingsProviderProps) {
 
   return (
     <SettingsContext value={{ settings, updateSettings }}>
-      <ThemeProvider mode={settings.themeMode} density={settings.density} fonts={fonts}>
+      <ThemeProvider
+        mode={settings.themeMode}
+        density="comfort"
+        scale={settings.uiScale / 100}
+        textScale={settings.textScale / 100}
+        fonts={fonts}
+      >
         {children}
       </ThemeProvider>
     </SettingsContext>

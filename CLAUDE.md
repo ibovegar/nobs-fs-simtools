@@ -44,6 +44,10 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
 
   Applies to `@nobs/ui` too. Use `rest` (not `props`) for a rest element.
 - **One CSS Module per component**. All colours/sizes via `var(--token)`; never hardcoded hex.
+  A size that isn't a token scales with the UI scale setting: `calc(24px * var(--ui-scale))`
+  (hairline borders excepted). SVG charts sized in px draw in unscaled units under a
+  `viewBox` and multiply by `useTheme().scale` (see RouteProfile); their text sizes use
+  `calc(10px * var(--text-scale))` (the viewBox already applies the UI scale).
 - **Never hardcode a colour.** Only use the design system's colour tokens (`var(--accent)`,
   `var(--text-dim)`, `var(--bg-card-hi)`…), in CSS and in TS alike: no hex, `rgb()`/`rgba()`
   or named colours. If no token fits (e.g. a stronger hover tint), add one to the toolkit
@@ -85,7 +89,8 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
 
 ```
 main.tsx            in-sim entry: registers <nobs-simtools-panel>, mounts
-                    <AppProviders><App /></AppProviders> with the real sim + sim storage
+                    <AppProviders><App /></AppProviders> with the real sim + sim storage,
+                    once the sim's DataStorage is ready (before it, reads return nothing)
 dev/                browser dev harness (`pnpm dev`): same tree with a mock sim +
                     localStorage, in a panel-size frame. Never in the sim bundle. Laid out
                     like a page: DevHarness.tsx (+ main.tsx entry), MockSimBridge.ts,
@@ -152,7 +157,9 @@ pages/
                     which to show), runway (diagram geometry), types, setup, format,
                     profiles/ (takeoff data per aircraft id, takeoffProfile(id);
                     docs/takeoff-profiles.md)
-  Settings/         Settings.tsx
+  Settings/         Settings.tsx: theme, Size (UI scale + text size), drag
+                    direction. + resetIcon (Lineicons has no undo / reset)
+    components/     ResetButton ("reset to default" inside a Stepper)
 aircraft/           the aircraft SimTools recognises in the sim (no picker, anywhere):
                     catalogue.ts (AIRCRAFT: id, name, match on TITLE / ATC MODEL,
                     optional performance; detectAircraft), performance.ts (climb /
@@ -162,7 +169,7 @@ aircraft/           the aircraft SimTools recognises in the sim (no picker, anyw
 components/         views shared by 2+ pages: SimValueField (live sim value or manual entry),
                     SimFillButton (the "fill from the sim" button in a Stepper: read on tap)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
-                    SettingsProvider (useSettings: theme / density / active page /
+                    SettingsProvider (useSettings: theme / UI scale / text size / active page /
                     drag-scroll direction),
                     SimProvider (useSim: bridge + panel visibility), and AppProviders, which
                     nests them in dependency order: Storage → Settings (+ ThemeProvider) → Sim
@@ -262,7 +269,7 @@ must be fully usable with either, and without a physical keyboard:
   needs an on-screen way in (`VirtualKeyboard`, ink).
 - **Prefer reading the sim over asking.** Fill values from the sim when it has them (live, or
   a one-tap fill button), with a manual fallback.
-- **Big hit targets** (Comfort density); small controls (24px `size="sm"` buttons) only as
+- **Big hit targets** (the app always uses Comfort density); small controls (24px `size="sm"` buttons) only as
   secondary actions next to a label, never as the only way to do something important.
 - **Buttons are `variant="soft"`**: the tinted blue of the `Stepper`'s −/+. It's the
   app's button: use it for every action (Change, Reload, Open calculator…). Exceptions:

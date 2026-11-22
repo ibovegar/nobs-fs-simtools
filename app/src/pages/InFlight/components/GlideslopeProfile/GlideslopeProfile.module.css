@@ -2,7 +2,7 @@
   position: relative;
   flex: 1 1 0;
   min-width: 0;
-  height: 190px;
+  height: calc(190px * var(--ui-scale));
 }
 
 .svg {
@@ -39,7 +39,7 @@
 .tickLabel {
   fill: var(--text-dim);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: calc(11px * var(--text-scale));
 }
 
 /* Aircraft colour follows the slope state; neutral without one. */

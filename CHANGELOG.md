@@ -6,20 +6,39 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Settings › Size**: a UI scale (60–250%) that enlarges all text, controls, spacing and
+  charts, for high-resolution VR headsets (e.g. Pimax) where the sim renders SimTools
+  small, and a separate text size (80–150%) that enlarges only the text. Each has a reset
+  button in its field.
+- **@nobs/ui**: `ThemeProvider` takes a `scale` that multiplies every size token and the
+  spacing scale, and a `textScale` that multiplies the font sizes on top of it. They set
+  `--ui-scale` / `--text-scale` for components' own fixed sizes and are exposed by
+  `useTheme()` for px-based drawings. `buildCssVars` / `applyCssVars` take an options
+  object (`fonts`, `scale`, `textScale`) instead of a `fonts` argument.
+- **In flight › TOD calculator**: a refresh button on the end speed that copies the start
+  speed.
+
 ### Changed
 
 - **In flight › TOD calculator**: both speeds (start and end) are now groundspeed, and the
   start speed's "fill from sim" button reads groundspeed instead of true airspeed.
 
-### Added
-
-- **In flight › TOD calculator**: a refresh button on the end speed that copies the start
-  speed.
-
 ### Removed
 
+- **Settings › Control size** (Comfort / Compact): SimTools always uses the VR-sized
+  Comfort controls; Settings › Size enlarges or shrinks everything instead. Notes' on-screen
+  keyboard is shown until you hide it (it used to follow the control size).
 - **In flight › TOD calculator**: the Wind field and its "+1 nm per 10 kt of tailwind"
   allowance. Groundspeed already includes the wind. Saved calculator inputs reset once.
+
+### Fixed
+
+- **Settings are kept when the sim restarts.** SimTools started before the sim's storage
+  was ready, so theme, UI scale, text size and drag direction always loaded
+  as the defaults. It now waits for the storage (up to 4 s, then remounts once it is
+  ready).
 
 ## [0.3.0] - 2026-11-20
 

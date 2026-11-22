@@ -1,4 +1,4 @@
-import { useElementSize } from '@nobs/ui'
+import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import {
   aimPointOffsetNm,
@@ -33,7 +33,11 @@ export function GlideslopeProfile(props: GlideslopeProfileProps) {
   const { position, state, degrees, distanceNm } = props
 
   const ref = useRef<HTMLDivElement>(null)
-  const { width, height } = useElementSize(ref)
+  const { scale } = useTheme()
+  const size = useElementSize(ref)
+  // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
+  const width = size.width / scale
+  const height = size.height / scale
 
   const rangeNm = profileRangeNm(distanceNm)
   const aimNm = aimPointOffsetNm(degrees)
@@ -57,7 +61,13 @@ export function GlideslopeProfile(props: GlideslopeProfileProps) {
   return (
     <div ref={ref} className={styles.profile}>
       {width > 0 && (
-        <svg width={width} height={height} className={styles.svg} aria-hidden="true">
+        <svg
+          width={size.width}
+          height={size.height}
+          viewBox={`0 0 ${width} ${height}`}
+          className={styles.svg}
+          aria-hidden="true"
+        >
           {/* ±1 dot band: a wedge from the aim point. */}
           <polygon
             className={styles.band}

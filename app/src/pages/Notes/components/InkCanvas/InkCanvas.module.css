@@ -3,7 +3,7 @@
 .canvasWrap {
   position: relative;
   flex: 1 1 0;
-  min-height: 280px;
+  min-height: calc(280px * var(--ui-scale));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);

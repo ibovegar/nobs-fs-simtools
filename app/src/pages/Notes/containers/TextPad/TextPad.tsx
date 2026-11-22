@@ -1,12 +1,11 @@
 import { KeyboardOutlined, Trash3Outlined } from '@lineiconshq/free-icons'
 import { Button, Stack, TextArea, VirtualKeyboard } from '@nobs/ui'
 import { useRef } from 'react'
-import { useSettings } from '~/providers'
 import { useSimKeyboardCapture } from '~/sim'
 import { usePersistentState } from '~/storage'
 import styles from './TextPad.module.css'
 
-/** 'auto' shows the on-screen keyboard in Comfort (VR) density and hides it in Compact. */
+/** 'auto' (never toggled) shows the on-screen keyboard: VR first. */
 type KeyboardPreference = 'auto' | 'shown' | 'hidden'
 
 /**
@@ -20,12 +19,10 @@ export function TextPad() {
     'auto',
     { debounceMs: 0 },
   )
-  const { settings } = useSettings()
   const keyboardCapture = useSimKeyboardCapture()
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
-  const showKeyboard =
-    keyboardPref === 'auto' ? settings.density === 'comfort' : keyboardPref === 'shown'
+  const showKeyboard = keyboardPref !== 'hidden'
 
   return (
     <Stack gap={2} grow>

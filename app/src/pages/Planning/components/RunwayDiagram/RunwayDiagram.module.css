@@ -33,7 +33,7 @@
 .number {
   fill: var(--bar-text-bright);
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: calc(15px * var(--text-scale));
   font-weight: 700;
 }
 
@@ -49,13 +49,13 @@
 
 .speedLabel {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: calc(12px * var(--text-scale));
   font-weight: 700;
 }
 
 .distance {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: calc(11px * var(--text-scale));
   fill: var(--text-dim);
 }
 

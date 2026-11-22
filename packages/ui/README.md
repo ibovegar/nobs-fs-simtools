@@ -47,6 +47,11 @@ import {
   with margins. Use `<Stack gap>` (margin-based) rather than `gap` in your own CSS.
 - **Density**: `comfort` gives large hit targets for VR and touch, `compact` suits a mouse.
   Every component sizes itself from the density tokens (`--control-h`, `--font-size`, …).
+- **Scale**: `<ThemeProvider scale={1.5}>` multiplies every size (density tokens and `--sp-*`),
+  e.g. for high-resolution VR headsets; `textScale` multiplies the font sizes on top of it.
+  A fixed size in your own CSS scales with `calc(24px * var(--ui-scale))` (a font size:
+  `calc(11px * var(--text-scale))`, inside a scaled SVG); an SVG drawn in px reads `useTheme().scale` and draws in
+  unscaled units under a `viewBox`.
 - **Tokens**: `--bg`, `--bg-card`, `--accent`, `--danger`, `--green`, `--warning`, `--text-*`,
   `--border*`, `--sp-*` (4px scale), `--bar-*` (the header bar, dark in both themes),
   `--scrollbar-w` (per density).

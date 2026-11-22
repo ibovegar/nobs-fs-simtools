@@ -1,4 +1,4 @@
-import { useElementSize } from '@nobs/ui'
+import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import {
   type AircraftOnRoute,
@@ -54,7 +54,11 @@ export function RouteProfile(props: RouteProfileProps) {
   const { profile, waypoints, view, showToc = true, aircraft, nextIndex } = props
 
   const ref = useRef<HTMLDivElement>(null)
-  const { width, height } = useElementSize(ref)
+  const { scale } = useTheme()
+  const size = useElementSize(ref)
+  // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
+  const width = size.width / scale
+  const height = size.height / scale
 
   const startNm = waypoints[0]?.waypoint.distanceNm ?? 0
   const endNm = startNm + profile.totalNm
@@ -129,7 +133,13 @@ export function RouteProfile(props: RouteProfileProps) {
   return (
     <div ref={ref} className={styles.profile}>
       {width > 0 && (
-        <svg width={width} height={height} className={styles.svg} aria-hidden="true">
+        <svg
+          width={size.width}
+          height={size.height}
+          viewBox={`0 0 ${width} ${height}`}
+          className={styles.svg}
+          aria-hidden="true"
+        >
           {altTicks.map((ft) => (
             <g key={ft}>
               <line

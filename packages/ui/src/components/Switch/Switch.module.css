@@ -39,11 +39,11 @@
 .track {
   position: relative;
   flex: 0 0 auto;
-  width: 44px;
-  height: 24px;
+  width: calc(44px * var(--ui-scale));
+  height: calc(24px * var(--ui-scale));
   margin-left: var(--sp-3);
   border: 1px solid var(--border-mid);
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-scale));
   background: var(--bg-darker);
   transition: background 0.15s;
 }
@@ -55,15 +55,15 @@
 
 .thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
+  top: calc(2px * var(--ui-scale));
+  left: calc(2px * var(--ui-scale));
+  width: calc(18px * var(--ui-scale));
+  height: calc(18px * var(--ui-scale));
   border-radius: 50%;
   background: var(--text-bright);
   transition: left 0.15s;
 }
 
 .on .thumb {
-  left: 22px;
+  left: calc(22px * var(--ui-scale));
 }

@@ -4,14 +4,16 @@ import {
   type BadgeTone,
   Card,
   Container,
-  type Density,
+  Field,
   Readout,
   SegmentedControl,
   type SegmentOption,
   Stack,
+  Stepper,
   type ThemeMode,
 } from '@nobs/ui'
-import { useSettings, useSim } from '~/providers'
+import { ResetButton } from '~/pages/Settings/components'
+import { DEFAULT_SETTINGS, useSettings, useSim } from '~/providers'
 import type { SimSource } from '~/sim'
 
 const THEMES = [
@@ -19,10 +21,15 @@ const THEMES = [
   { value: 'light', label: 'Light', icon: Sun1Outlined },
 ] as const satisfies readonly SegmentOption<ThemeMode>[]
 
-const DENSITIES = [
-  { value: 'comfort', label: 'Comfort', hint: 'VR / controller' },
-  { value: 'compact', label: 'Compact', hint: 'Monitor / mouse' },
-] as const satisfies readonly SegmentOption<Density>[]
+/** UI scale range, percent: down to about the old Compact size on a monitor, up to 2.5× for
+ * very high-resolution headsets. */
+const UI_SCALE_MIN = 60
+const UI_SCALE_MAX = 250
+/** Text size range, percent: past 150% text outgrows the controls it sits in. */
+const TEXT_SCALE_MIN = 80
+const TEXT_SCALE_MAX = 150
+
+const percent = (v: number) => `${v}%`
 
 type ScrollDirection = 'natural' | 'standard'
 
@@ -38,8 +45,8 @@ const SOURCE_BADGE: Record<SimSource, { tone: BadgeTone; label: string }> = {
 }
 
 /**
- * Settings page: theme, control size and drag-to-scroll direction, plus version and sim
- * connection status.
+ * Settings page: theme, UI scale and text size, drag-to-scroll direction, plus version and
+ * sim connection status.
  */
 export function Settings() {
   const { settings, updateSettings } = useSettings()
@@ -58,15 +65,45 @@ export function Settings() {
       </Card>
 
       <Card
-        title="Control size"
-        hint="Comfort gives big targets for a VR controller; Compact fits more on a monitor."
+        title="Size"
+        hint="Raise the UI scale if SimTools looks small in a high-resolution VR headset; it enlarges everything. Text size enlarges only the text."
       >
-        <SegmentedControl
-          label="Control size"
-          options={DENSITIES}
-          value={settings.density}
-          onChange={(density) => updateSettings({ density })}
-        />
+        <Stack gap={4}>
+          <Field label="UI scale">
+            <Stepper
+              value={settings.uiScale}
+              onChange={(uiScale) => updateSettings({ uiScale })}
+              steps={[10]}
+              min={UI_SCALE_MIN}
+              max={UI_SCALE_MAX}
+              format={percent}
+              endAdornment={
+                <ResetButton
+                  what="UI scale"
+                  disabled={settings.uiScale === DEFAULT_SETTINGS.uiScale}
+                  onClick={() => updateSettings({ uiScale: DEFAULT_SETTINGS.uiScale })}
+                />
+              }
+            />
+          </Field>
+          <Field label="Text size">
+            <Stepper
+              value={settings.textScale}
+              onChange={(textScale) => updateSettings({ textScale })}
+              steps={[10]}
+              min={TEXT_SCALE_MIN}
+              max={TEXT_SCALE_MAX}
+              format={percent}
+              endAdornment={
+                <ResetButton
+                  what="text size"
+                  disabled={settings.textScale === DEFAULT_SETTINGS.textScale}
+                  onClick={() => updateSettings({ textScale: DEFAULT_SETTINGS.textScale })}
+                />
+              }
+            />
+          </Field>
+        </Stack>
       </Card>
 
       <Card

@@ -53,6 +53,7 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    // @nobs/ui has no test runner of its own; its tests run here.
+    include: ['src/**/*.test.ts', '../packages/ui/src/**/*.test.ts'],
   },
 }))

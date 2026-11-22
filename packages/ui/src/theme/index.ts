@@ -1,4 +1,10 @@
-export { applyCssVars, buildCssVars, type ResolvedTheme, type ThemeFonts } from './cssVars'
+export {
+  applyCssVars,
+  buildCssVars,
+  type CssVarsOptions,
+  type ResolvedTheme,
+  type ThemeFonts,
+} from './cssVars'
 export { type Palette, palette } from './palette'
 export { type SpacingKey, type SpacingValue, spacing } from './spacing'
 export {

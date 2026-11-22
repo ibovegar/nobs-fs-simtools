@@ -1,4 +1,4 @@
-import { useElementSize } from '@nobs/ui'
+import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import { type AircraftProfile, formatTrim } from '~/pages/Planning/domain'
 import styles from './TakeoffConfig.module.css'
@@ -36,7 +36,9 @@ export function TakeoffConfig(props: TakeoffConfigProps) {
   const { profile, flapLabel, flapAngleDeg, trim } = props
 
   const ref = useRef<HTMLDivElement>(null)
-  const { width } = useElementSize(ref)
+  const { scale: uiScale } = useTheme()
+  // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
+  const width = useElementSize(ref).width / uiScale
   const panelW = Math.max(0, (width - GAP) / 2)
 
   const computed = profile.trim.kind === 'computed' ? profile.trim : undefined
@@ -49,7 +51,13 @@ export function TakeoffConfig(props: TakeoffConfigProps) {
   return (
     <div ref={ref} className={styles.config}>
       {width > 0 && (
-        <svg width={width} height={HEIGHT} className={styles.svg} aria-hidden="true">
+        <svg
+          width={width * uiScale}
+          height={HEIGHT * uiScale}
+          viewBox={`0 0 ${width} ${HEIGHT}`}
+          className={styles.svg}
+          aria-hidden="true"
+        >
           <WingPanel x={0} w={panelW} label={flapLabel} angleDeg={flapAngleDeg} />
           <TailPanel
             x={panelW + GAP}

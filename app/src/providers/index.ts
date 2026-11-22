@@ -6,6 +6,11 @@
 // (`~/providers/SimProvider`) rather than this barrel: this barrel also pulls in
 // SettingsProvider, which depends on ~/storage, and that would form an import cycle.
 export { AppProviders } from './AppProviders'
-export { SettingsProvider, type SimToolsSettings, useSettings } from './SettingsProvider'
+export {
+  DEFAULT_SETTINGS,
+  SettingsProvider,
+  type SimToolsSettings,
+  useSettings,
+} from './SettingsProvider'
 export { SimProvider, useSim } from './SimProvider'
 export { StorageProvider, useStorage } from './StorageProvider'

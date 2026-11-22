@@ -1,1 +1,6 @@
-export { SettingsProvider, type SimToolsSettings, useSettings } from './SettingsProvider'
+export {
+  DEFAULT_SETTINGS,
+  SettingsProvider,
+  type SimToolsSettings,
+  useSettings,
+} from './SettingsProvider'

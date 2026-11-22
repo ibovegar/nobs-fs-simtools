@@ -20,7 +20,7 @@ Update this file as the in-sim checks confirm or rule things out.
 | `matchMedia` | May be missing; guarded | `supportsSystemTheme()`. Settings offers dark/light only |
 | Pointer input | Pointer events, with a mouse-event fallback | `InkCanvas` |
 | Resize | `ResizeObserver`, with a window `resize` fallback | `useElementSize` (@nobs/ui) |
-| Storage | Sim `DataStorage` (`GetStoredData`/`SetStoredData`), not `localStorage` | `~/storage` |
+| Storage | Sim `DataStorage` (`GetStoredData`/`SetStoredData`), not `localStorage`. Only after the sim's `dataStorageReady` event: before it, reads return null and writes are dropped, so `main.tsx` mounts once it is ready | `~/storage`, `main.tsx` |
 | Sim globals | `typeof` guards; never `window.X` (some are bare declarations) | `~/sim/simGlobals.ts` |
 | Keyboard | `Coherent.trigger('FOCUS_INPUT_FIELD' / 'UNFOCUS_INPUT_FIELD')` while typing | `useSimKeyboardCapture` |
 | Toolbar icon | The sim inlines the SVG and recolours it with `icon-element:not(.original-color) svg.icon path/polygon/rect/circle { fill: var(--iconColor) }` (fs-base-ui `SCSS/common.css`). Set every colour as inline `style="fill: …; stroke: …"` (beats that rule); a unique gradient id (all icons share one document). Size it like the sim's icons: `viewBox="0 0 64 64"` with the artwork centred in about the middle half. The toolbar (`Templates/ToolBarButton`) draws the icon box 164 units on a 144 button, so artwork near the box edge is clipped | `msfs/html_ui/icons/toolbar/ICON_TOOLBAR_NOBS_SIMTOOLS.svg` |

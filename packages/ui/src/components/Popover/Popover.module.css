@@ -22,7 +22,7 @@
   overflow: auto;
   padding: var(--sp-3);
   border: 1px solid var(--border-mid);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-scale));
   background: var(--bg-card-hi);
   color: var(--text);
   font-family: var(--font-sans, inherit);
@@ -33,13 +33,13 @@
 
 /* Widths (the screen's width minus the margins caps them, see Popover.tsx). */
 .sm {
-  width: 200px;
+  width: calc(200px * var(--ui-scale));
 }
 
 .md {
-  width: 260px;
+  width: calc(260px * var(--ui-scale));
 }
 
 .lg {
-  width: 340px;
+  width: calc(340px * var(--ui-scale));
 }

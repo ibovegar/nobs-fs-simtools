@@ -9,6 +9,10 @@ interface ThemeContextValue {
   mode: ThemeMode
   resolved: ResolvedTheme
   density: Density
+  /** UI scale (1 = 100%). Drawings sized in px (SVG charts) multiply by it. */
+  scale: number
+  /** Text size on top of `scale` (1 = 100%). */
+  textScale: number
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -40,6 +44,13 @@ function useSystemTheme(enabled: boolean): ResolvedTheme {
 interface ThemeProviderProps {
   mode?: ThemeMode
   density?: Density
+  /**
+   * Multiplies every size (fonts, controls, spacing), e.g. 1.5 when a high-resolution VR
+   * headset renders the UI small. Default 1.
+   */
+  scale?: number
+  /** Multiplies the font sizes only, on top of `scale`. Default 1. */
+  textScale?: number
   /** Override the sans / mono font stacks, e.g. with fonts only the host provides. */
   fonts?: ThemeFonts
   children: ReactNode
@@ -51,7 +62,7 @@ interface ThemeProviderProps {
  * is the host app's job, so the toolkit stays storage-agnostic.
  */
 export function ThemeProvider(props: ThemeProviderProps) {
-  const { mode = 'dark', density = 'compact', fonts, children } = props
+  const { mode = 'dark', density = 'compact', scale = 1, textScale = 1, fonts, children } = props
 
   const system = useSystemTheme(mode === 'system')
   const resolved: ResolvedTheme = mode === 'system' ? system : mode
@@ -59,10 +70,17 @@ export function ThemeProvider(props: ThemeProviderProps) {
   const fontMono = fonts?.mono
 
   useLayoutEffect(() => {
-    applyCssVars(resolved, density, document.documentElement, { sans: fontSans, mono: fontMono })
-  }, [resolved, density, fontSans, fontMono])
+    applyCssVars(resolved, density, document.documentElement, {
+      fonts: { sans: fontSans, mono: fontMono },
+      scale,
+      textScale,
+    })
+  }, [resolved, density, fontSans, fontMono, scale, textScale])
 
-  const value = useMemo(() => ({ mode, resolved, density }), [mode, resolved, density])
+  const value = useMemo(
+    () => ({ mode, resolved, density, scale, textScale }),
+    [mode, resolved, density, scale, textScale],
+  )
   return <ThemeContext value={value}>{children}</ThemeContext>
 }
 

@@ -8,7 +8,7 @@
 .item {
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-scale));
   font-weight: 600;
 }
 

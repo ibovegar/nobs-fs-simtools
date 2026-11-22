@@ -46,8 +46,8 @@
 }
 
 .dot {
-  width: 7px;
-  height: 7px;
+  width: calc(7px * var(--ui-scale));
+  height: calc(7px * var(--ui-scale));
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;

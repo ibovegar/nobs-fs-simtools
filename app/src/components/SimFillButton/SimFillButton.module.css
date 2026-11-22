@@ -4,7 +4,7 @@
   height: calc(var(--control-h) * 0.6);
   min-width: calc(var(--control-h) * 0.6);
   min-height: calc(var(--control-h) * 0.6);
-  margin-right: calc(var(--sp-2) - 10px);
+  margin-right: calc(var(--sp-2) - 10px * var(--ui-scale));
 }
 
 .button > svg {

@@ -1,4 +1,4 @@
-import { useElementSize } from '@nobs/ui'
+import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import {
   formatInteger,
@@ -55,7 +55,9 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
   const { marks, speeds, runwayNumber, single } = props
 
   const ref = useRef<HTMLDivElement>(null)
-  const { width } = useElementSize(ref)
+  const { scale } = useTheme()
+  // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
+  const width = useElementSize(ref).width / scale
 
   const lines: SpeedLine[] = [
     ...(speeds.v1 !== undefined && marks.v1M !== undefined
@@ -96,7 +98,13 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
   return (
     <div ref={ref} className={styles.diagram}>
       {width > 0 && (
-        <svg width={width} height={height} className={styles.svg} aria-hidden="true">
+        <svg
+          width={width * scale}
+          height={height * scale}
+          viewBox={`0 0 ${width} ${height}`}
+          className={styles.svg}
+          aria-hidden="true"
+        >
           <rect
             className={styles.runway}
             x={startX}
