@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+
+- A page that crashes shows the error and what SimTools did just before, instead of a blank
+  panel.
+
+### Fixed
+
+- **In flight › Flight plan**: opening it could crash the sim, or leave the panel blank.
+- **In flight › Flight plan**: the airports and fixes of the plan sometimes never loaded.
+
 ## [0.5.0] - 2026-11-22
 
 ### Added

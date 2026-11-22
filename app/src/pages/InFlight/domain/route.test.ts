@@ -193,8 +193,8 @@ describe('collectRouteFixes', () => {
   it('keeps the runways and their elevation at the ends', () => {
     expect(fixes[0]?.runway).toBe('01L')
     expect(fixes[0]?.elevationFt).toBeCloseTo(656.2, 0)
-    expect(fixes.at(-1)?.runway).toBe('17')
-    expect(fixes.at(-1)?.phase).toBe('approach')
+    expect(fixes.slice(-1)[0]?.runway).toBe('17')
+    expect(fixes.slice(-1)[0]?.phase).toBe('approach')
   })
 
   it('converts altitude and speed limits', () => {
@@ -234,7 +234,7 @@ describe('collectRouteFixes', () => {
     )
     expect(r.fixes[0]?.runway).toBeUndefined()
     expect(r.fixes[0]?.location).toEqual({ kind: 'point', lat: 60, lon: 11 })
-    expect(r.fixes.at(-1)?.location.kind).toBe('icao')
+    expect(r.fixes.slice(-1)[0]?.location.kind).toBe('icao')
   })
 })
 
@@ -276,7 +276,7 @@ describe('fixesToLoad / buildRoute', () => {
     expect(b?.legNm).toBeCloseTo(greatCircleNm(a as never, b as never), 6)
     const sum = built.waypoints.reduce((s, w) => s + w.legNm, 0)
     expect(built.totalNm).toBeCloseTo(sum, 6)
-    expect(built.waypoints.at(-1)?.distanceNm).toBeCloseTo(sum, 6)
+    expect(built.waypoints.slice(-1)[0]?.distanceNm).toBeCloseTo(sum, 6)
   })
 })
 

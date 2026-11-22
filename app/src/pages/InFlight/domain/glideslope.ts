@@ -101,6 +101,8 @@ export function distanceTicks(rangeNm: number): DistanceTick[] {
   const step = rangeNm <= 10 ? 1 : 5
   const labelEvery = rangeNm <= 6 ? 1 : rangeNm <= 10 ? 2 : 5
   const ticks: DistanceTick[] = []
-  for (let nm = 0; nm <= rangeNm; nm += step) ticks.push({ nm, label: nm % labelEvery === 0 })
+  // Capped: a bad range must never loop (it would freeze the sim).
+  const lastNm = Math.min(rangeNm, 500)
+  for (let nm = 0; nm <= lastNm; nm += step) ticks.push({ nm, label: nm % labelEvery === 0 })
   return ticks
 }

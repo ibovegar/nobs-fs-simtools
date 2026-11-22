@@ -46,7 +46,7 @@ describe('pointAlong', () => {
   })
 
   it('clamps to the ends', () => {
-    const end = path.waypoints.at(-1)
+    const end = path.waypoints.slice(-1)[0]
     const p = pointAlong(path, path.totalNm + 50)
     if (!p || !end) throw new Error('no point')
     expect(greatCircleNm(p, end)).toBeCloseTo(0, 6)

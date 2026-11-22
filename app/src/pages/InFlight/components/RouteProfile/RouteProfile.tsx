@@ -11,6 +11,7 @@ import {
   formatInteger,
   labelWidthPx,
   niceStep,
+  type PlacedName,
   type PlannedWaypoint,
   type ProfilePoint,
   type ProfileView,
@@ -135,13 +136,15 @@ export function RouteProfile(props: RouteProfileProps) {
     .sort((a, b) => b.rank - a.rank || a.i - b.i)
   const nameTexts = byImportance.map(({ planned }) => chartLabel(planned.waypoint))
   // Names keep off the aircraft and the runways; a runway's own name sits above it.
-  const obstacles = visible.flatMap(({ planned }) => {
-    if (!planned.waypoint.runway) return []
-    const rx = x(planned.waypoint.distanceNm)
-    const ry = y(planned.plannedFt)
-    const left = planned.waypoint.phase === 'departure' ? rx - RUNWAY_PX : rx
-    return [{ left, top: ry - 3, right: left + RUNWAY_PX, bottom: ry + 3 }]
-  })
+  // (No flatMap: the sim's browser doesn't have it.)
+  const obstacles = visible
+    .filter(({ planned }) => planned.waypoint.runway !== undefined)
+    .map(({ planned }) => {
+      const rx = x(planned.waypoint.distanceNm)
+      const ry = y(planned.plannedFt)
+      const left = planned.waypoint.phase === 'departure' ? rx - RUNWAY_PX : rx
+      return { left, top: ry - 3, right: left + RUNWAY_PX, bottom: ry + 3 }
+    })
   const reference = visible.find(({ index }) => index === referenceIndex)?.planned
   const referenceFlag = reference && {
     x: x(reference.waypoint.distanceNm),
@@ -181,12 +184,11 @@ export function RouteProfile(props: RouteProfileProps) {
       obstacles,
     },
   )
-  const nameAt = new Map(
-    byImportance.flatMap(({ i, isNext }, k) => {
-      const spot = placed[k]
-      return spot ? [[i, { name: nameTexts[k] ?? '', isNext, ...spot }] as const] : []
-    }),
-  )
+  const nameAt = new Map<number, { name: string; isNext: boolean } & PlacedName>()
+  byImportance.forEach(({ i, isNext }, k) => {
+    const spot = placed[k]
+    if (spot) nameAt.set(i, { name: nameTexts[k] ?? '', isNext, ...spot })
+  })
 
   // Distance axis: to go in the descent view, from departure otherwise.
   const toGo = view === 'arrival'

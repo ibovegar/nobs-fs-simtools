@@ -1,3 +1,4 @@
+import { logLine } from '~/diagnostics'
 import { getRegisterViewListener } from '../simGlobals'
 import { facilityIcao, icaoKey, isEmptyRoute } from './icao'
 import type { NavData, NavDataSession } from './NavData'
@@ -31,6 +32,9 @@ const TIMEOUT_MS = 8000
 /** Wait this long for the avionics to answer a route request (they may never). */
 const AVIONICS_TIMEOUT_MS = 1500
 
+/** After an empty route event made us read again, ignore further ones for this long. */
+const REREAD_PAUSE_MS = 5000
+
 interface Bound {
   listener: SimViewListener
   ready: Promise<boolean>
@@ -42,7 +46,18 @@ interface Pending {
   timer: ReturnType<typeof setTimeout>
 }
 
-function bind(name: string): Bound | undefined {
+interface BindOptions {
+  /** Share one listener of this name per view. */
+  singleton?: boolean
+  /**
+   * Wait this long after the sim says the listener is bound before using it. Microsoft's
+   * FacilityLoader waits 2 s for JS_LISTENER_FACILITY: requests sent sooner get no answer.
+   */
+  settleMs?: number
+}
+
+function bind(name: string, options: BindOptions = {}): Bound | undefined {
+  const { singleton = false, settleMs = 0 } = options
   const register = getRegisterViewListener()
   if (!register) return undefined
   try {
@@ -50,8 +65,16 @@ function bind(name: string): Bound | undefined {
     const ready = new Promise<boolean>((resolve) => {
       onReady = resolve
     })
-    const listener = register(name, () => onReady(true))
-    setTimeout(() => onReady(false), TIMEOUT_MS)
+    const started = Date.now()
+    const listener = register(
+      name,
+      () => {
+        logLine(`${name} bound (${Date.now() - started} ms)`)
+        setTimeout(() => onReady(true), settleMs)
+      },
+      singleton,
+    )
+    setTimeout(() => onReady(false), TIMEOUT_MS + settleMs)
     return { listener, ready }
   } catch {
     return undefined
@@ -74,17 +97,48 @@ function withTimeout<T>(promise: Promise<T>, fallback: T, ms = TIMEOUT_MS): Prom
   })
 }
 
-/** Same facility, ignoring the airport field (terminal fixes may come back without it). */
-function looseMatch(a: NavIcao, b: NavIcao) {
-  return a.type === b.type && a.region === b.region && a.ident === b.ident
+function describeIcao(icao: NavIcao) {
+  return `${icao.type} ${icao.ident}${icao.airport ? ` (${icao.airport})` : ''}`
+}
+
+/** One line about a route for the log: what came back from the sim. */
+function describeRoute(plan: NavFlightPlanRoute | null) {
+  if (!plan) return 'none'
+  const dep = plan.departureAirport?.ident || '?'
+  const dest = plan.destinationAirport?.ident || '?'
+  const procedures = [plan.departure, plan.arrival, plan.approach?.type].filter(Boolean)
+  const named = procedures.length > 0 ? `, ${procedures.join(' / ')}` : ''
+  return `${dep} → ${dest}, ${plan.enroute?.length ?? 0} enroute legs${named}`
 }
 
 /**
+ * Same facility, ignoring the airport field (terminal fixes may come back without it). An
+ * airport's ident is unique on its own: the route names it without a region, and the
+ * answer may come back with one.
+ */
+function looseMatch(a: NavIcao, b: NavIcao) {
+  if (a.type !== b.type || a.ident.trim() !== b.ident.trim()) return false
+  return a.type === 'A' || a.region === b.region
+}
+
+let instance: NavData | undefined
+
+/**
  * Reads the flight plan and navigation database through the sim's Coherent listeners.
- * Listeners are registered on the first `open()` and unregistered on the last `close()`.
+ *
+ * One instance per panel (the app may remount, e.g. once the sim's storage is ready). The
+ * listeners are registered on the first `open()` and then kept, as Microsoft's own
+ * FlightPlanRouteManager and FacilityLoader do: never unregistered. Unregistering a
+ * listener while the sim still owes it an answer (a route or facility request in flight)
+ * crashed the sim. A registered listener costs nothing while nobody calls it, so the
+ * last `close()` only drops the subscribers.
  */
 export function createCoherentNavData(): NavData {
-  let sessions = 0
+  instance ??= buildCoherentNavData()
+  return instance
+}
+
+function buildCoherentNavData(): NavData {
   let route: Bound | undefined
   let facility: Bound | undefined
   const routeSubscribers = new Set<(route: NavFlightPlanRoute | null) => void>()
@@ -94,10 +148,25 @@ export function createCoherentNavData(): NavData {
   // Avionics route requests waiting for their answer, by request id.
   const routeRequests = new Map<unknown, (route: NavFlightPlanRoute | null) => void>()
 
+  // When an empty route event last made us read again. Reading asks the avionics for their
+  // route, which may itself send a route event: without a pause the two could keep
+  // triggering each other and flood the sim.
+  let rereadAt = Number.NEGATIVE_INFINITY
+  let rereading = false
+
   const onRouteUpdated = (next: NavFlightPlanRoute) => {
+    logLine(`route changed in the sim: ${describeRoute(next)}`)
     // An empty EFB route doesn't clear a plan the avionics may still have: read again.
     if (isEmptyRoute(next)) {
-      void readFlightPlan().then((plan) => {
+      const now = Date.now()
+      if (rereading || now - rereadAt < REREAD_PAUSE_MS) {
+        logLine('empty route event ignored (read again moments ago)')
+        return
+      }
+      rereading = true
+      rereadAt = now
+      void readFlightPlanOnce().then((plan) => {
+        rereading = false
         for (const subscriber of routeSubscribers) subscriber(plan)
       })
       return
@@ -115,6 +184,7 @@ export function createCoherentNavData(): NavData {
   /** The avionics' current route, if a package answers the request in time. */
   const requestAvionicsRoute = async (bound: Bound): Promise<NavFlightPlanRoute | null> => {
     try {
+      logLine('calling REQUEST_AVIONICS_ROUTE')
       const requestId = await bound.listener.call('REQUEST_AVIONICS_ROUTE')
       const answer = new Promise<NavFlightPlanRoute | null>((resolve) => {
         routeRequests.set(requestId, resolve)
@@ -129,6 +199,7 @@ export function createCoherentNavData(): NavData {
 
   const readRoute = async (bound: Bound, call: string) => {
     try {
+      logLine(`calling ${call}`)
       return await withTimeout(
         bound.listener.call(call) as Promise<NavFlightPlanRoute | null>,
         null,
@@ -141,22 +212,44 @@ export function createCoherentNavData(): NavData {
   /** The first non-empty route of: the avionics', the EFB's, the one filed with ATC. */
   const readFlightPlan = async (): Promise<NavFlightPlanRoute | null> => {
     const bound = route
-    if (!bound || !(await bound.ready)) return null
+    if (!bound || !(await bound.ready)) {
+      logLine('flight plan listener not ready')
+      return null
+    }
     const sources: [string, () => Promise<NavFlightPlanRoute | null>][] = [
       ['avionics', () => requestAvionicsRoute(bound)],
       ['EFB', () => readRoute(bound, 'GET_EFB_ROUTE')],
       ['ATC', () => readRoute(bound, 'GET_ATC_ROUTE')],
     ]
     for (const [source, read] of sources) {
+      const started = Date.now()
       const plan = await read()
+      const took = Date.now() - started
       if (!isEmptyRoute(plan)) {
-        // One line per read, for the Coherent debugger when a plan doesn't show.
-        console.info(`[SimTools] flight plan from the ${source} route`)
+        logLine(`flight plan from the ${source} route (${took} ms): ${describeRoute(plan)}`)
         return plan
       }
+      logLine(`${source} route empty (${took} ms)`)
     }
-    console.info('[SimTools] no flight plan: avionics, EFB and ATC routes are empty')
+    logLine('no flight plan: avionics, EFB and ATC routes are empty')
     return null
+  }
+
+  // A read in progress: callers at the same moment (e.g. a remount) share it, so the sim
+  // gets one set of requests.
+  let reading: Promise<NavFlightPlanRoute | null> | undefined
+  const readFlightPlanOnce = () => {
+    reading ??= readFlightPlan().then(
+      (plan) => {
+        reading = undefined
+        return plan
+      },
+      () => {
+        reading = undefined
+        return null
+      },
+    )
+    return reading
   }
 
   const onFacility = (received: NavFacility & { loadedDataFlags?: number }) => {
@@ -171,13 +264,17 @@ export function createCoherentNavData(): NavData {
         }
       }
     }
-    if (!pending.has(key)) return
+    if (!pending.has(key)) {
+      logLine(`facility answer not asked for: ${describeIcao(icao)}`)
+      return
+    }
     // An airport answer without the procedures we asked for belongs to someone else.
     if (
       icao.type === 'A' &&
       received.loadedDataFlags !== undefined &&
       (received.loadedDataFlags & AIRPORT_DATA_FLAGS) !== AIRPORT_DATA_FLAGS
     ) {
+      logLine(`${describeIcao(icao)} answered without the procedures (${received.loadedDataFlags})`)
       return
     }
     settle(key, received)
@@ -191,60 +288,59 @@ export function createCoherentNavData(): NavData {
     waiting.resolve(value)
   }
 
+  let connected = false
   const connect = () => {
+    if (connected) return
+    connected = true
+    logLine('registering the flight plan and facility listeners')
     route = bind('JS_LISTENER_PLANNEDROUTE')
     route?.listener.on('EfbRouteUpdated', onRouteUpdated)
     route?.listener.on('AvionicsRouteSync', onRouteUpdated)
     route?.listener.on('AvionicsRouteRequestResponse', onAvionicsRouteResponse)
-    facility = bind('JS_LISTENER_FACILITY')
+    facility = bind('JS_LISTENER_FACILITY', { singleton: true, settleMs: 2000 })
     for (const event of FACILITY_EVENTS) facility?.listener.on(event, onFacility)
-  }
-
-  const disconnect = () => {
-    try {
-      route?.listener.off('EfbRouteUpdated', onRouteUpdated)
-      route?.listener.off('AvionicsRouteSync', onRouteUpdated)
-      route?.listener.off('AvionicsRouteRequestResponse', onAvionicsRouteResponse)
-      route?.listener.unregister()
-      for (const event of FACILITY_EVENTS) facility?.listener.off(event, onFacility)
-      facility?.listener.unregister()
-    } catch {
-      // Already gone with the view.
-    }
-    route = undefined
-    facility = undefined
-    for (const waiting of pending.values()) {
-      clearTimeout(waiting.timer)
-      waiting.resolve(null)
-    }
-    pending.clear()
-    for (const resolve of routeRequests.values()) resolve(null)
-    routeRequests.clear()
-    cache.clear()
-    routeSubscribers.clear()
   }
 
   const request = async (icao: NavIcao): Promise<NavFacility | null> => {
     const call = LOAD_CALLS[icao.type]
     const bound = facility
-    if (!call || !bound || !(await bound.ready)) return null
+    if (!call || !bound) return null
+    if (!(await bound.ready)) {
+      logLine(`facility listener not ready: ${describeIcao(icao)} not loaded`)
+      return null
+    }
 
     const key = icaoKey(icao)
     const answer = new Promise<NavFacility | null>((resolve) => {
-      const timer = setTimeout(() => settle(key, null), TIMEOUT_MS)
+      const timer = setTimeout(() => {
+        logLine(`no answer for ${describeIcao(icao)} after ${TIMEOUT_MS / 1000} s`)
+        settle(key, null)
+      }, TIMEOUT_MS)
       pending.set(key, { icao, resolve, timer })
     })
 
     try {
-      // The sim's bindings expect the struct tagged with its C++ type.
-      const struct = { __Type: 'JS_ICAO', ...icao }
+      // The sim's bindings expect exactly the C++ struct: tagged with its type, four strings
+      // (never undefined or extra fields copied from whatever object the icao came from).
+      const struct = {
+        __Type: 'JS_ICAO',
+        type: String(icao.type ?? ''),
+        region: String(icao.region ?? ''),
+        airport: String(icao.airport ?? ''),
+        ident: String(icao.ident ?? ''),
+      }
+      logLine(`calling ${call} ${JSON.stringify(struct)}`)
       const found =
         icao.type === 'A'
           ? await bound.listener.call(call, struct, AIRPORT_DATA_FLAGS)
           : await bound.listener.call(call, struct)
       // false = not in the database; the Send* event never comes.
-      if (found === false) settle(key, null)
-    } catch {
+      if (found === false) {
+        logLine(`${describeIcao(icao)} not in the database`)
+        settle(key, null)
+      }
+    } catch (error) {
+      logLine(`loading ${describeIcao(icao)} failed: ${String(error)}`)
       settle(key, null)
     }
     return answer
@@ -256,18 +352,22 @@ export function createCoherentNavData(): NavData {
     if (!promise) {
       promise = request(icao)
       cache.set(key, promise)
+      // Only found facilities stay cached: a miss (e.g. a timeout) is asked again next time.
+      void promise.then((found) => {
+        if (!found) cache.delete(key)
+      })
     }
     return promise
   }
 
   return {
     open(): NavDataSession {
-      if (sessions++ === 0) connect()
+      connect()
       const mine = new Set<(route: NavFlightPlanRoute | null) => void>()
       let closed = false
 
       return {
-        getFlightPlan: readFlightPlan,
+        getFlightPlan: readFlightPlanOnce,
         onFlightPlanChanged(callback) {
           routeSubscribers.add(callback)
           mine.add(callback)
@@ -282,7 +382,6 @@ export function createCoherentNavData(): NavData {
           if (closed) return
           closed = true
           for (const callback of mine) routeSubscribers.delete(callback)
-          if (--sessions === 0) disconnect()
         },
       }
     },

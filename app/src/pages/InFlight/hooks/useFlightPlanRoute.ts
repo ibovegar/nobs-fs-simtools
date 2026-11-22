@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { errorMessage, logLine } from '~/diagnostics'
 import {
   buildRoute,
   collectRouteFixes,
@@ -25,6 +26,7 @@ export type RouteState =
   | { status: 'unavailable' } // no sim: nothing to read the flight plan from
   | { status: 'loading' }
   | { status: 'none' } // the sim has no flight plan
+  | { status: 'unresolved' } // a plan, but the sim gave too few of its airports and fixes
   | { status: 'ready'; route: LoadedRoute }
 
 /** Loads the airports and fixes a plan needs from the sim and builds the route. */
@@ -32,19 +34,31 @@ async function resolveRoute(
   session: NavDataSession,
   plan: NavFlightPlanRoute,
 ): Promise<LoadedRoute> {
+  let started = Date.now()
   const [departure, destination] = await Promise.all([
-    plan.departureAirport.ident ? session.loadAirport(plan.departureAirport) : null,
-    plan.destinationAirport.ident ? session.loadAirport(plan.destinationAirport) : null,
+    plan.departureAirport?.ident ? session.loadAirport(plan.departureAirport) : null,
+    plan.destinationAirport?.ident ? session.loadAirport(plan.destinationAirport) : null,
   ])
+  logLine(
+    `airports loaded (${Date.now() - started} ms): departure ${departure ? 'ok' : 'missing'}, destination ${destination ? 'ok' : 'missing'}`,
+  )
   const { fixes, missingProcedures } = collectRouteFixes(plan, departure, destination)
 
   const icaos = fixesToLoad(fixes)
+  started = Date.now()
   const facilities = await Promise.all(icaos.map((icao) => session.loadFacility(icao)))
+  const found = facilities.filter(Boolean).length
+  logLine(
+    `${fixes.length} route fixes; ${found} of ${icaos.length} facilities loaded (${Date.now() - started} ms)`,
+  )
   const positions = new Map(icaos.map((icao, i) => [icaoKey(icao), facilities[i]]))
   const built = buildRoute(fixes, (icao) => {
     const facility = positions.get(icaoKey(icao))
     return facility ? { lat: facility.lat, lon: facility.lon } : undefined
   })
+  logLine(
+    `route built: ${built.waypoints.length} waypoints, ${Math.round(built.totalNm)} nm, cruise ${planCruiseFt(plan) ?? 'none'} ft, missing: ${[...missingProcedures, ...built.missingFixes].join(', ') || 'none'}`,
+  )
 
   return {
     plan,
@@ -101,8 +115,12 @@ export function useFlightPlanRoute() {
       setState((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }))
       try {
         const route = await resolveRoute(session, plan)
-        if (!cancelled && mine === generation) publish(plan, { status: 'ready', route })
-      } catch {
+        if (cancelled || mine !== generation) return
+        // Not cached as the plan: the next visit or Reload asks the sim again.
+        if (route.waypoints.length < 2) publish(null, { status: 'unresolved' })
+        else publish(plan, { status: 'ready', route })
+      } catch (error) {
+        logLine(`building the route failed: ${errorMessage(error)}`)
         if (!cancelled && mine === generation) publish(null, { status: 'none' })
       }
     }

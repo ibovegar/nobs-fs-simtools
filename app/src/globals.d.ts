@@ -25,8 +25,16 @@ declare global {
     unregister(): void
   }
 
-  /** Registers a named view listener; `onReady` runs once the sim has bound it. */
-  function RegisterViewListener(name: string, onReady?: () => void): SimViewListener
+  /**
+   * Registers a named view listener; `onReady` runs once the sim has bound it.
+   * `requiresSingleton`: share one listener of this name per view (as Microsoft's
+   * FacilityLoader registers JS_LISTENER_FACILITY).
+   */
+  function RegisterViewListener(
+    name: string,
+    onReady?: () => void,
+    requiresSingleton?: boolean,
+  ): SimViewListener
 
   /** The sim's DataStorage object; null until it is ready, throws before dataStorage.js binds it. */
   function GetDataStorage(): unknown

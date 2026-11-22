@@ -13,6 +13,10 @@ const MESSAGES = {
     title: 'No flight plan',
     text: 'Plan a route in the EFB or the World Map. It shows up here automatically.',
   },
+  unresolved: {
+    title: "Couldn't load the route",
+    text: "The sim has a flight plan, but didn't give SimTools its airports and fixes. Try Reload in a moment.",
+  },
 } as const
 
 interface FlightPlanMessageProps {
@@ -30,7 +34,7 @@ export function FlightPlanMessage(props: FlightPlanMessageProps) {
       title={message.title}
       hint={message.text}
       actions={
-        status === 'none' ? (
+        status === 'none' || status === 'unresolved' ? (
           <Button size="sm" variant="ghost" onClick={onReload}>
             Reload
           </Button>

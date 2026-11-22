@@ -1,8 +1,31 @@
-import { cx, PageHeaderArea, ScrollArea, Tab, TabList, TabPanel, Tabs } from '@nobs/ui'
+import {
+  cx,
+  ErrorBoundary,
+  type ErrorBoundaryFallbackProps,
+  PageHeaderArea,
+  ScrollArea,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+} from '@nobs/ui'
 import { useState } from 'react'
+import { PageCrash } from '~/components'
+import { crashReport, errorMessage, logLine, recentLog } from '~/diagnostics'
 import { PAGES } from '~/pages'
 import { useSettings, useSim } from '~/providers'
 import styles from './App.module.css'
+
+/** A crashed page shows its error and the recent log instead of blanking the panel. */
+function crashFallback(props: ErrorBoundaryFallbackProps) {
+  const { error, componentStack, reset } = props
+  const { message, groups } = crashReport(error, componentStack, recentLog())
+  return <PageCrash message={message} groups={groups} onRetry={reset} />
+}
+
+function logCrash(error: unknown) {
+  logLine(`Page crashed: ${errorMessage(error)}`)
+}
 
 /**
  * The SimTools shell: a tab per page, remembering the active one. Pages are listed in
@@ -50,7 +73,9 @@ export function App() {
                 scrollbarGutter="auto"
                 onScrollbarChange={setScrollbar}
               >
-                <Component />
+                <ErrorBoundary fallback={crashFallback} onError={logCrash}>
+                  <Component />
+                </ErrorBoundary>
               </ScrollArea>
             </PageHeaderArea>
           </TabPanel>

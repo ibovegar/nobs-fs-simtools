@@ -39,7 +39,7 @@ describe('clipProfile', () => {
   it('cuts the profile to the range with interpolated ends', () => {
     const clipped = clipProfile(profile.points, { fromNm: 50, toNm: 350 })
     expect(clipped[0]).toEqual({ distanceNm: 50, altitudeFt: 15000 })
-    expect(clipped.at(-1)).toEqual({ distanceNm: 350, altitudeFt: 15000 })
+    expect(clipped.slice(-1)[0]).toEqual({ distanceNm: 350, altitudeFt: 15000 })
     expect(clipped.map((p) => p.distanceNm)).toEqual([50, 100, 300, 350])
   })
 })
@@ -164,5 +164,19 @@ describe('placeNames', () => {
   it('flips at the chart edge and leaves out a name with no room', () => {
     expect(placeNames([at(290, 100)], options)[0]?.left).toBe(252)
     expect(placeNames([at(100, 4)], { ...options, groundY: 5 })[0]).toBeUndefined()
+  })
+})
+
+describe('ticks on bad input', () => {
+  it('returns nothing for non-finite input instead of looping', () => {
+    expect(
+      ticks(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY),
+    ).toEqual([])
+    expect(ticks(0, Number.POSITIVE_INFINITY, 1)).toEqual([])
+    expect(altitudeScale(Number.POSITIVE_INFINITY).ticks.length).toBeLessThan(10)
+  })
+
+  it('caps the number of ticks', () => {
+    expect(ticks(0, 1e9, 1).length).toBe(200)
   })
 })

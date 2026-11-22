@@ -56,11 +56,17 @@ export function niceStep(span: number, count: number): number {
   return nice * magnitude
 }
 
-/** Multiples of `step` from `from` to `to` (inclusive). */
+/** At most this many ticks: a bad input must never loop (it would freeze the sim). */
+const MAX_TICKS = 200
+
+/** Multiples of `step` from `from` to `to` (inclusive); none for non-finite input. */
 export function ticks(from: number, to: number, step: number): number[] {
   const out: number[] = []
-  if (!(step > 0)) return out
-  for (let v = Math.ceil(from / step - 1e-9) * step; v <= to + 1e-9; v += step) {
+  if (!(step > 0) || !Number.isFinite(from) || !Number.isFinite(to) || !Number.isFinite(step)) {
+    return out
+  }
+  const first = Math.ceil(from / step - 1e-9) * step
+  for (let i = 0, v = first; v <= to + 1e-9 && i < MAX_TICKS; i++, v = first + i * step) {
     out.push(Math.round(v * 1e6) / 1e6 || 0)
   }
   return out

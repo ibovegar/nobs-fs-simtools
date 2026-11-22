@@ -7,6 +7,7 @@ import '@nobs/ui/base.css'
 import { StrictMode, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { App } from '~/App'
+import { logUncaughtErrors } from '~/diagnostics'
 import { AppProviders } from '~/providers'
 import {
   createCoherentBridge,
@@ -95,6 +96,7 @@ function mountWhenStorageReady(host: ParentNode) {
 }
 
 bootStep(`simtools.js loaded (in sim: ${isInSim() ? 'yes' : 'no'})`)
+logUncaughtErrors()
 
 if (isInSim()) {
   registerPanelElement(PANEL_ELEMENT, mountWhenStorageReady)

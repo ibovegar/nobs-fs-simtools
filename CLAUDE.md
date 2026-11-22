@@ -196,7 +196,12 @@ aircraft/           the aircraft SimTools recognises in the sim (no picker, anyw
                     cruise / descent / approach figures + gradients, approach speed by
                     √weight), hooks/ (useSimAircraft). Data used by one page stays in
                     that page, keyed by the aircraft id (Planning's takeoff profiles)
-components/         views shared by 2+ pages: SimValueField (live sim value or manual entry),
+diagnostics/        logLine (a short in-memory log, also to the console) and crashReport:
+                    App wraps each page in an ErrorBoundary that shows PageCrash (the
+                    error + recent log) instead of blanking the panel (the sim has no
+                    console). Log steps that can fail in the sim (e.g. flight plan loads)
+components/         views shared by 2+ pages: PageCrash (a crashed page's error screen),
+                    SimValueField (live sim value or manual entry),
                     SimFillButton (the "fill from the sim" button in a Stepper: read on tap)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / UI scale / text size / active page /
@@ -217,7 +222,8 @@ storage/            KeyValueStorage.ts (sim DataStorage | localStorage | memory)
 
 | Layer | May import |
 |---|---|
-| `App.tsx` | `~/pages`, `~/providers`, `@nobs/ui` |
+| `App.tsx` | `~/pages`, `~/providers`, `~/components` (PageCrash), `~/diagnostics`, `@nobs/ui` |
+| `diagnostics/` (any layer but domain may log) | nothing app-side |
 | `components/` (shared views) | `@nobs/ui` |
 | `pages/<Page>/<Page>.tsx` | its own `./hooks`, `./containers`, `./components`, `./domain`; `~/aircraft`, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
 | `pages/<Page>/hooks/` | its page's domain, `~/aircraft`, `~/providers`, `~/sim`, `~/storage`, `@nobs/ui` |
@@ -260,6 +266,8 @@ itself.
 See `docs/coherent-compat.md`. In short: flexbox only (no CSS grid, **no flexbox `gap`**: space
 with child margins or `<Stack gap>`), only the sim's fonts (`SIM_FONTS`), no `color-mix()`, no
 `backdrop-filter`, no `inset` shorthand, derive alpha colours in TS. Build target is es2016 (no `async` / `await` in the output),
+and the runtime has no APIs newer than ES2017 (no `flatMap`, `flat`, `at`,
+`Object.fromEntries`): the tsconfig `lib` is ES2017 so the typecheck catches them,
 and pointer events have a mouse-event fallback.
 
 ## Sim performance first
