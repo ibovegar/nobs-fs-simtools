@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import {
   aimPointOffsetNm,
   DOT_DEG,
+  distanceTicks,
   FEET_PER_NM,
   type GlideslopePosition,
   glideslopeHeightFt,
@@ -146,18 +147,4 @@ function Aircraft(props: AircraftProps) {
       />
     </g>
   )
-}
-
-interface Tick {
-  nm: number
-  label: boolean
-}
-
-/** 1 nm ticks out to 10 nm (labelled every 1–2 nm), 5 nm ticks beyond. */
-function distanceTicks(rangeNm: number): Tick[] {
-  const step = rangeNm <= 10 ? 1 : 5
-  const labelEvery = rangeNm <= 6 ? 1 : rangeNm <= 10 ? 2 : 5
-  const ticks: Tick[] = []
-  for (let nm = 0; nm <= rangeNm; nm += step) ticks.push({ nm, label: nm % labelEvery === 0 })
-  return ticks
 }

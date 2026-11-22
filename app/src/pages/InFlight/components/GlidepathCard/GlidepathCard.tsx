@@ -13,13 +13,11 @@ import {
   formatInteger,
   formatRate,
   GLIDEPATH_DEG,
+  type GlidepathReading,
+  glidepathReading,
   glidepathTable,
-  MIN_GROUNDSPEED_KT,
   type PathState,
-  pathAngleDeg,
-  pathState,
-  RULE_OF_THUMB_FACTOR,
-  rateForAngle,
+  ruleOfThumbText,
 } from '~/pages/InFlight/domain'
 import styles from './GlidepathCard.module.css'
 
@@ -45,57 +43,23 @@ interface GlidepathCardProps {
  */
 export function GlidepathCard(props: GlidepathCardProps) {
   const { groundSpeedKt, verticalSpeedFpm, degrees = GLIDEPATH_DEG } = props
-
-  const live = groundSpeedKt !== undefined && groundSpeedKt >= MIN_GROUNDSPEED_KT
-  const angle =
-    live && verticalSpeedFpm !== undefined ? pathAngleDeg(groundSpeedKt, verticalSpeedFpm) : null
-  const state =
-    angle !== null && verticalSpeedFpm !== undefined
-      ? pathState(angle, verticalSpeedFpm, degrees)
-      : null
-  const badge = state ? PATH_BADGE[state] : undefined
+  const reading = glidepathReading(groundSpeedKt, verticalSpeedFpm, degrees)
+  const state = reading?.current?.state
+  const badge = state && PATH_BADGE[state]
+  const stateBadge = badge && (
+    <Badge tone={badge.tone} dot>
+      {badge.label}
+    </Badge>
+  )
 
   return (
-    <Section
-      label={`V/S for ${degrees}°`}
-      actions={
-        badge ? (
-          <Badge tone={badge.tone} dot>
-            {badge.label}
-          </Badge>
-        ) : undefined
-      }
-    >
+    <Section label={`V/S for ${degrees}°`} actions={stateBadge}>
       <SectionContent>
-        {live ? (
-          <ReadoutGroup>
-            <Readout
-              size="lg"
-              label="Target V/S"
-              value={formatRate(-rateForAngle(groundSpeedKt, degrees))}
-              unit="fpm"
-              caption={`at ${formatInteger(groundSpeedKt)} kt`}
-            />
-            {verticalSpeedFpm !== undefined && angle !== null && (
-              <Readout
-                size="lg"
-                tone={badge?.tone}
-                label="Your V/S"
-                value={formatRate(verticalSpeedFpm)}
-                unit="fpm"
-                caption={`${angle.toFixed(1)}° path`}
-              />
-            )}
-          </ReadoutGroup>
-        ) : (
-          <RateTable degrees={degrees} />
-        )}
+        <Rates reading={reading} degrees={degrees} tone={badge?.tone} />
         <Stack gap={3}>
           <Divider />
           <Typography variant="caption" color="dim">
-            {degrees === GLIDEPATH_DEG
-              ? `Rule of thumb: V/S ≈ groundspeed × ${RULE_OF_THUMB_FACTOR}`
-              : `V/S ≈ groundspeed × ${(rateForAngle(1, degrees)).toFixed(1)}`}
+            {ruleOfThumbText(degrees)}
           </Typography>
         </Stack>
       </SectionContent>
@@ -103,8 +67,50 @@ export function GlidepathCard(props: GlidepathCardProps) {
   )
 }
 
+interface RatesProps {
+  reading: GlidepathReading | undefined
+  degrees: number
+  /** Colours your V/S like the state badge. */
+  tone: BadgeTone | undefined
+}
+
+/** The target V/S and yours; without live groundspeed, a table for typical speeds. */
+function Rates(props: RatesProps) {
+  const { reading, degrees, tone } = props
+
+  if (!reading) return <RateTable degrees={degrees} />
+  const { current } = reading
+  const yourRate = current && (
+    <Readout
+      size="lg"
+      tone={tone}
+      label="Your V/S"
+      value={formatRate(current.verticalSpeedFpm)}
+      unit="fpm"
+      caption={`${current.angleDeg.toFixed(1)}° path`}
+    />
+  )
+
+  return (
+    <ReadoutGroup>
+      <Readout
+        size="lg"
+        label="Target V/S"
+        value={formatRate(-reading.targetRateFpm)}
+        unit="fpm"
+        caption={`at ${formatInteger(reading.groundSpeedKt)} kt`}
+      />
+      {yourRate}
+    </ReadoutGroup>
+  )
+}
+
+interface RateTableProps {
+  degrees: number
+}
+
 /** Without live groundspeed: the vertical speed for typical approach speeds. */
-function RateTable(props: { degrees: number }) {
+function RateTable(props: RateTableProps) {
   const { degrees } = props
 
   return (

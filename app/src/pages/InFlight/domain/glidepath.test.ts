@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { rateForAngle } from './descentMath'
-import { glidepathTable, pathAngleDeg, pathState, RULE_OF_THUMB_FACTOR } from './glidepath'
+import {
+  glidepathReading,
+  glidepathTable,
+  pathAngleDeg,
+  pathState,
+  RULE_OF_THUMB_FACTOR,
+  ruleOfThumbText,
+} from './glidepath'
 
 describe('pathAngleDeg', () => {
   it('is 3° when flying the 3° rate', () => {
@@ -41,5 +48,30 @@ describe('glidepathTable', () => {
       expect(ratio).toBeGreaterThan(1)
       expect(ratio).toBeLessThan(1.1)
     }
+  })
+})
+
+describe('glidepathReading', () => {
+  it('is undefined without a usable groundspeed', () => {
+    expect(glidepathReading(undefined, -700)).toBeUndefined()
+    expect(glidepathReading(10, -700)).toBeUndefined()
+  })
+
+  it('gives the target rate, and your descent against it', () => {
+    const r = glidepathReading(130, -690)
+    expect(r?.targetRateFpm).toBeCloseTo(rateForAngle(130, 3))
+    expect(r?.current?.state).toBe('on-path')
+    expect(r?.current?.angleDeg).toBeCloseTo(3, 0)
+  })
+
+  it('has no current descent without a vertical speed', () => {
+    expect(glidepathReading(130, undefined)?.current).toBeUndefined()
+  })
+})
+
+describe('ruleOfThumbText', () => {
+  it('is "× 5" for 3°, the exact factor for other angles', () => {
+    expect(ruleOfThumbText(3)).toBe(`Rule of thumb: V/S ≈ groundspeed × ${RULE_OF_THUMB_FACTOR}`)
+    expect(ruleOfThumbText(3.5)).toBe(`V/S ≈ groundspeed × ${rateForAngle(1, 3.5).toFixed(1)}`)
   })
 })

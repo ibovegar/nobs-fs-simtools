@@ -1,0 +1,56 @@
+/* A cell of one or two stacked lines (fix: ident over via; limit: "between" as two). */
+.fix,
+.limit {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fix {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.fix > *,
+.limit > * {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Fixed-width, right-aligned columns, each with a gutter so values never run together. */
+.dist,
+.plan,
+.limit,
+.speed {
+  flex: none;
+  margin-left: var(--sp-2);
+  text-align: right;
+}
+
+.limit {
+  align-items: flex-end;
+}
+
+.limit > * + * {
+  margin-top: 2px;
+}
+
+.dist {
+  width: calc(42px * var(--ui-scale));
+}
+
+.plan {
+  width: calc(52px * var(--ui-scale));
+}
+
+.limit {
+  width: calc(60px * var(--ui-scale));
+}
+
+.speed {
+  width: calc(36px * var(--ui-scale));
+}
+
+.warning {
+  color: var(--warning);
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   aimPointOffsetNm,
+  distanceTicks,
   glideslopeHeightFt,
   glideslopePosition,
   profileRangeNm,
@@ -87,5 +88,26 @@ describe('profileRangeNm', () => {
     expect(profileRangeNm(5)).toBe(6)
     expect(profileRangeNm(9)).toBe(15)
     expect(profileRangeNm(100)).toBe(30)
+  })
+})
+
+describe('distanceTicks', () => {
+  it('ticks every nm out to 10 nm, labelled every 1 or 2 nm', () => {
+    expect(distanceTicks(5).map((t) => t.nm)).toEqual([0, 1, 2, 3, 4, 5])
+    expect(distanceTicks(5).every((t) => t.label)).toBe(true)
+    expect(
+      distanceTicks(8)
+        .filter((t) => t.label)
+        .map((t) => t.nm),
+    ).toEqual([0, 2, 4, 6, 8])
+  })
+
+  it('ticks every 5 nm beyond 10 nm', () => {
+    expect(distanceTicks(15)).toEqual([
+      { nm: 0, label: true },
+      { nm: 5, label: true },
+      { nm: 10, label: true },
+      { nm: 15, label: true },
+    ])
   })
 })

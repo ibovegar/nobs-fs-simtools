@@ -1,6 +1,12 @@
 import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
-import { type AircraftProfile, formatTrim } from '~/pages/Planning/domain'
+import {
+  type AircraftProfile,
+  airfoil,
+  formatTrim,
+  type Point,
+  placeOutline,
+} from '~/pages/Planning/domain'
 import styles from './TakeoffConfig.module.css'
 
 const HEIGHT = 150
@@ -78,39 +84,6 @@ export function TakeoffConfig(props: TakeoffConfigProps) {
   )
 }
 
-/** Symmetric NACA 4-digit thickness at x (0–1 of chord). */
-function thickness(x: number, t: number): number {
-  return (
-    5 *
-    t *
-    (0.2969 * Math.sqrt(x) - 0.126 * x - 0.3516 * x ** 2 + 0.2843 * x ** 3 - 0.1015 * x ** 4)
-  )
-}
-
-type Point = readonly [number, number]
-
-/** Outline of the airfoil between x0 and x1 (fractions of chord), unit chord, y down. */
-function airfoil(x0: number, x1: number, t: number, steps = 24): Point[] {
-  const xs: number[] = []
-  for (let i = 0; i <= steps; i++) xs.push(x0 + ((x1 - x0) * i) / steps)
-  const upper = xs.map((x) => [x, -thickness(x, t)] as const)
-  const lower = [...xs].reverse().map((x) => [x, thickness(x, t)] as const)
-  return [...upper, ...lower]
-}
-
-/** Scale to `chord` px, rotate by `deg` (clockwise, SVG) around `pivot`, move to (ox, oy). */
-function place(points: Point[], chord: number, pivot: Point, deg: number, ox: number, oy: number) {
-  const c = Math.cos(deg * DEG)
-  const s = Math.sin(deg * DEG)
-  return points
-    .map(([x, y]) => {
-      const dx = (x - pivot[0]) * chord
-      const dy = (y - pivot[1]) * chord
-      return `${(ox + dx * c - dy * s).toFixed(1)},${(oy + dx * s + dy * c).toFixed(1)}`
-    })
-    .join(' ')
-}
-
 interface WingPanelProps {
   x: number
   w: number
@@ -138,11 +111,11 @@ function WingPanel(props: WingPanelProps) {
       <line className={styles.reference} x1={le} y1={y} x2={le + chord + 8} y2={y} />
       <polygon
         className={styles.wing}
-        points={place(airfoil(0, FLAP_HINGE, 0.12), chord, [0, 0], 0, le, y)}
+        points={placeOutline(airfoil(0, FLAP_HINGE, 0.12), chord, [0, 0], 0, le, y)}
       />
       <polygon
         className={styles.flap}
-        points={place(
+        points={placeOutline(
           airfoil(FLAP_HINGE - 0.02, 1, 0.12),
           chord,
           [FLAP_HINGE, 0],
@@ -198,7 +171,7 @@ function TailPanel(props: TailPanelProps) {
       {/* Leading edge down = nose-up trim: a negative (anticlockwise) SVG rotation. */}
       <polygon
         className={styles.stab}
-        points={place(airfoil(0, 1, 0.1), chord, [STAB_PIVOT, 0], -stabDeg, pivotX, y)}
+        points={placeOutline(airfoil(0, 1, 0.1), chord, [STAB_PIVOT, 0], -stabDeg, pivotX, y)}
       />
       <circle className={styles.pivot} cx={pivotX} cy={y} r={2.5} />
 

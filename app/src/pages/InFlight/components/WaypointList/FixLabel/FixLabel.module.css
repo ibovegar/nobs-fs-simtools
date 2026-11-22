@@ -1,0 +1,16 @@
+.ident {
+  font-weight: 600;
+}
+
+.sub,
+.highlightSub {
+  margin-top: 2px;
+  font-size: var(--font-size-label);
+  color: var(--text-dim);
+}
+
+/* The TOD reference's tag, in place of its via / phase. */
+.highlightSub {
+  font-weight: 600;
+  color: var(--accent);
+}

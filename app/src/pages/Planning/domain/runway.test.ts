@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatRunwayDesignator,
+  layoutLines,
   reciprocalRunwayNumber,
   reciprocalSide,
   runwayMarks,
   runwayNumberFromHeading,
+  type SpeedLine,
 } from './runway'
 import { flapAngleDeg } from './takeoffMath'
 
@@ -65,5 +67,38 @@ describe('flapAngleDeg', () => {
     expect(flapAngleDeg({ ...base, label: '20°' })).toBe(20)
     expect(flapAngleDeg({ ...base, label: '5' })).toBe(5)
     expect(flapAngleDeg({ ...base, label: 'Up' })).toBe(0)
+  })
+})
+
+describe('layoutLines', () => {
+  const line = (label: string, speed: number, distanceM: number): SpeedLine => ({
+    key: label,
+    label,
+    speed,
+    distanceM,
+    tone: 'vr',
+  })
+  const xAt = (m: number) => m / 10
+
+  it('labels each line with its speed, in the first row with room', () => {
+    const placed = layoutLines([line('V1', 120, 1000), line('VR', 125, 1300)], xAt)
+    expect(placed.map((p) => [p.text, p.row])).toEqual([
+      ['V1 120', 0],
+      ['VR 125', 1],
+    ])
+  })
+
+  it('moves back to the first row once there is room', () => {
+    const placed = layoutLines([line('V1', 120, 1000), line('V2', 135, 2000)], xAt)
+    expect(placed.map((p) => p.row)).toEqual([0, 0])
+  })
+
+  it('merges lines at the same place', () => {
+    expect(layoutLines([line('V1', 118, 1000), line('VR', 118, 1010)], xAt)[0]?.text).toBe(
+      'V1/VR 118',
+    )
+    expect(layoutLines([line('V1', 117, 1000), line('VR', 118, 1010)], xAt)[0]?.text).toBe(
+      'V1 117 / VR 118',
+    )
   })
 })

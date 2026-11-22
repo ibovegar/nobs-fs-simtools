@@ -1,1 +1,1 @@
-export { HelpPopover } from './HelpPopover'
+export { defaultHelpLabel, HelpPopover } from './HelpPopover'

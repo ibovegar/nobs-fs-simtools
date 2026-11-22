@@ -2,7 +2,6 @@ import {
   Badge,
   type BadgeTone,
   Divider,
-  HelpPopover,
   Readout,
   ReadoutGroup,
   Section,
@@ -16,13 +15,12 @@ import {
   type AircraftOnRoute,
   type FlightPlanStatus,
   type FlightProgress,
+  flightPlanResults,
   formatAltitude,
-  formatDistance,
-  formatDuration,
-  formatInteger,
   type PlannedWaypoint,
   type ProfileBasis,
   type ProfileView,
+  planningText,
   type RouteWaypoint,
   type VerticalProfile,
 } from '~/pages/InFlight/domain'
@@ -87,6 +85,12 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
   } = props
   const badge = STATUS_BADGE[progress.status]
   const cruise = cruiseFromPlan ? formatAltitude(cruiseFt) : `${formatAltitude(cruiseFt)} assumed`
+  const routeLabel = `${title}  ·  ${cruise}`
+  const statusBadge = (
+    <Badge tone={badge.tone} dot pulse={badge.pulse}>
+      {badge.label}
+    </Badge>
+  )
 
   return (
     // Laid out exactly like the TOD calculator's results (no section header, label line
@@ -96,12 +100,8 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
       <Section>
         <SectionContent>
           <Results
-            label={`${title}  ·  ${cruise}`}
-            action={
-              <Badge tone={badge.tone} dot pulse={badge.pulse}>
-                {badge.label}
-              </Badge>
-            }
+            label={routeLabel}
+            action={statusBadge}
             progress={progress}
             descentRateFpm={descentRateFpm}
             basis={basis}
@@ -142,121 +142,22 @@ interface ResultsProps {
   basis: ProfileBasis
 }
 
-interface Value {
-  label: string
-  value: string
-  unit?: string
-  /** What the value means, behind a "?" (also keeps the row as tall as the calculator's). */
-  help: string
-}
-
-// As on the TOD calculator: no thousands separator, so "-2250" doesn't read like a decimal.
-// Climbs are positive, descents negative; to the nearest 50 fpm.
-const verticalSpeed = (fpm: number | undefined, help: string): Value => ({
-  label: 'Vertical speed',
-  help,
-  value: fpm === undefined ? '—' : String(Math.round(fpm / 50) * 50),
-  unit: fpm === undefined ? undefined : 'fpm',
-})
-const time = (sec: number | undefined, help: string): Value => ({
-  label: 'Time',
-  help,
-  value: sec === undefined ? '—' : formatDuration(sec),
-})
-const distance = (label: string, nm: number, help: string): Value => ({
-  label,
-  help,
-  value: formatDistance(Math.max(0, nm)),
-  unit: 'nm',
-})
-
-interface ResultValues {
-  main: { value: string; unit: string; tone?: BadgeTone }
-  secondary: [Value, Value]
-}
-
-/** What the box shows for the phase of flight. Plain function: see Results. */
-function resultValues(progress: FlightProgress, descentRateFpm: number): ResultValues {
-  const { status } = progress
-
-  // The big value reads as one line after the unit: "38 nm to TOD", "1,780 ft below path".
-  let main: { value: string; unit: string; tone?: BadgeTone }
-  let secondary: [Value, Value]
-  if ((status === 'standby' || status === 'climb') && progress.toTocNm > 0) {
-    main = { value: formatDistance(Math.max(0, progress.toTocNm)), unit: 'nm to TOC' }
-    secondary = [
-      time(progress.timeToTocSec, 'Time to TOC at your groundspeed.'),
-      verticalSpeed(
-        progress.climbRateToTocFpm,
-        'The climb rate that reaches the cruise altitude exactly at TOC, from where you are now.',
-      ),
-    ]
-  } else if (status === 'standby' || status === 'cruise' || status === 'approaching') {
-    main = {
-      value: formatDistance(Math.max(0, progress.toTodNm)),
-      unit: 'nm to TOD',
-      tone: status === 'approaching' ? 'warning' : undefined,
-    }
-    // In cruise: hold (or regain) the cruise altitude. Two minutes out: the rate for TOD.
-    secondary = [
-      time(progress.timeToTodSec, 'Time to TOD at your groundspeed.'),
-      status === 'approaching'
-        ? {
-            ...verticalSpeed(
-              -descentRateFpm,
-              'The descent rate to fly from TOD: the planned path angle at your groundspeed.',
-            ),
-            label: 'V/S at TOD',
-          }
-        : verticalSpeed(
-            progress.cruiseRateFpm,
-            '0 at the cruise altitude. Off it: the rate that gets you back (the gap per minute, at most 1500 fpm).',
-          ),
-    ]
-  } else {
-    // Past TOD: how far off the planned path. On it: a signed trend; off it: high / low.
-    const dev = progress.deviationFt ?? 0
-    const rounded = Math.round(dev / 10) * 10
-    const onPath = status === 'on-path'
-    const sign = onPath && rounded > 0 ? '+' : onPath && rounded < 0 ? '-' : ''
-    main = {
-      value: `${sign}${formatInteger(Math.abs(rounded))}`,
-      unit: onPath ? 'ft on path' : dev > 0 ? 'ft above path' : 'ft below path',
-      tone: onPath ? 'success' : status === 'descend' ? 'danger' : 'warning',
-    }
-    // Vertical speed stays on the right in every phase, so it doesn't jump sides at TOD.
-    secondary = [
-      distance('To go', progress.remainingNm, 'Distance left along the route to the runway.'),
-      verticalSpeed(
-        -descentRateFpm,
-        'The descent rate that holds the planned path angle at your groundspeed.',
-      ),
-    ]
-  }
-
-  return { main, secondary }
-}
-
 /**
  * Laid out like the TOD calculator's results: the answer big, two supporting values under
  * a hairline. What the answer is follows the phase of flight.
  */
 function Results(props: ResultsProps) {
   const { label, action, progress, descentRateFpm, basis } = props
-  // Worked out outside the component: the React Compiler mis-memoises a `let` assigned in
-  // branches here (it read `main.tone` before `main` was set).
-  const { main, secondary } = resultValues(progress, descentRateFpm)
+  const { main, secondary } = flightPlanResults(progress, descentRateFpm)
 
   return (
     <>
       <Readout
         size="lg"
         label={label}
-        labelAddon={
-          <HelpPopover label="How is this planned?" size="lg">
-            {planningText(basis)}
-          </HelpPopover>
-        }
+        help={planningText(basis)}
+        helpLabel="How is this planned?"
+        helpSize="lg"
         action={action}
         value={main.value}
         unit={main.unit}
@@ -266,28 +167,10 @@ function Results(props: ResultsProps) {
         <Divider />
         <ReadoutGroup divided>
           {secondary.map((v) => (
-            <Readout
-              key={v.label}
-              label={v.label}
-              labelAddon={
-                <HelpPopover label={`What is ${v.label.toLowerCase()}?`}>{v.help}</HelpPopover>
-              }
-              value={v.value}
-              unit={v.unit}
-            />
+            <Readout key={v.label} label={v.label} help={v.help} value={v.value} unit={v.unit} />
           ))}
         </ReadoutGroup>
       </Stack>
     </>
   )
-}
-
-/** "How is this planned?": the aircraft's own climb and descent, or the generic ones. */
-function planningText(basis: ProfileBasis): string {
-  const own = (fromAircraft: boolean) =>
-    fromAircraft && basis.aircraftName ? ` (the ${basis.aircraftName}'s)` : ' (generic)'
-  const climb = `a climb at ${basis.climbSpeedKt} kt, about ${formatInteger(basis.climbRateFpm)} fpm${own(basis.climbFromAircraft)}`
-  const descent = `a descent of about ${basis.descentAngleDeg.toFixed(1)}°${own(basis.descentFromAircraft)}`
-  const limits = "kept within the procedures' altitude limits. TOC and TOD follow from that."
-  return `From the sim's flight plan: ${climb}, cruise at the plan's altitude and ${descent}, ${limits}`
 }

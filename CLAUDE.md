@@ -13,8 +13,11 @@ Nobs SimTools: an MSFS 2024 toolbar panel with flight tools (VR + 2D) built with
 
 ## Workflow
 
-**Update `CHANGELOG.md` with every change** under `[Unreleased]` (Keep a Changelog: Added /
-Changed / Removed / Fixed).
+**Update `CHANGELOG.md`** under `[Unreleased]` (Keep a Changelog: Added / Changed / Removed /
+Fixed) for every change a pilot would notice. A version's section becomes the GitHub
+release notes, so write for pilots and keep it short: new features, visible changes and
+real bugs, one line each where possible. Leave out internal refactors, `@nobs/ui` and
+dev-harness changes, and small tweaks (spacing, labels, step sizes).
 
 Before finishing: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`.
 
@@ -63,6 +66,26 @@ library. Style: single quotes, no semicolons, 2-space indent, 100 cols (`pnpm fo
   for spacing, padding, hairlines or text styles. A component's own CSS Module is for what
   the toolkit doesn't cover (an instrument, an SVG drawing, a table). When a pattern repeats
   across pages, propose a toolkit component (and ask before adding one).
+- **Clean JSX: work it out above the `return`, the JSX only places names.** No `if`, `const`,
+  formatting, nested ternaries or multi-step conditions inside the JSX. A short optional
+  element goes in a named const first (`const leverBadge = lever && <Badge …/>`), and a
+  `.map()` maps straight to one component. Text and states that depend on data (labels,
+  captions, "—" fallbacks, which row style, help texts) come from a **view model** in the
+  page's `domain/` (`waypointRows`, `flightPlanResults`, `speedReadoutRows`,
+  `takeoffSummary`), unit-tested, so components only lay values out. Helper functions never
+  sit at the bottom of a component file: pure ones go to `domain/`.
+- **Split components, but not too much.** Extract a component for a named, recognisable
+  group (a table header, a row, a help body) or one with its own CSS module or UI state.
+  Don't extract one that only wraps a single child, only picks between two components, or
+  only saves one expression; give the data one shape instead (one `WaypointRow` for fixes
+  and TOC / TOD). Where it lives: **in the same file** while it's small and private to that
+  component (`Results` in FlightPlanOverview, `RateTable` in GlidepathCard); **its own
+  sub-folder** of the component's folder (`WaypointList/WaypointRow/`, with an `index.ts`,
+  not re-exported by the page's `components` barrel) once it needs its own CSS module or
+  grows big. Shared by two components of the page: a sibling folder in `components/`.
+- **A "?" on a readout or field is its `help` prop** (`<Readout label="V1" help="…" />`,
+  same on `Field`), with `helpLabel` when "What is <label>?" doesn't read and `helpSize="lg"`
+  for a paragraph. Not a hand-built `labelAddon={<HelpPopover …>}`.
 - **Code is organised by page (feature modules).** Each page under `pages/<Page>/` owns
   everything only it uses, split into these kinds:
   - `<Page>.tsx`: the screen and its top-level container. It owns the page's state and
@@ -114,7 +137,8 @@ pages/
                     (the sim's aircraft + its speeds; approach from the live weight)
     components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft
                     and its climb / cruise / descent / approach speeds)
-    domain/         callsign (ICAO rules: A–Z, 0–9, at most 7)
+    domain/         callsign (ICAO rules: A–Z, 0–9, at most 7), speedReadouts (the
+                    aircraft card's speed readouts and their help texts)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
     containers/     InkPad, AtcPad, TextPad: the three note modes
@@ -129,9 +153,9 @@ pages/
                     (+ CalculatorTod: the calculator's descent when there's no flight plan),
                     GlideslopeMonitor
     components/     Flight plan (read-only, no settings): FlightPlanOverview (phase,
-                    one readout + RouteProfile side view), WaypointList (collapsible),
-                    FlightPlanMessage, CalculatorTodCard. The "?" next to a readout
-                    label is @nobs/ui's HelpPopover.
+                    one readout + RouteProfile side view), WaypointList (collapsible; its
+                    rows in sub-folders: WaypointRow, WaypointTableHeader, TableRow /
+                    TableCell), FlightPlanMessage, CalculatorTodCard.
                     GS: GlideslopeCard (GlideslopeProfile side view + GlideslopeScale dots),
                     GlidepathCard (V/S for the angle), RunwayCard. Shared: SimValueField
     domain/         topOfDescent (the calculator, ported from descent.vercel.app),
@@ -143,7 +167,9 @@ pages/
                     fix with an altitude, or the pilot's pick),
                     flightProgress (position on route, phase, path deviation),
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
-                    descent), calculatorProfile (the calculator's descent as a side view)
+                    descent), calculatorProfile (the calculator's descent as a side view),
+                    flightPlanResults (the results box per phase), waypointTable (the
+                    waypoint list's rows)
   Planning/         Planning.tsx
                     shows TakeoffPlan for the sim's aircraft (~/aircraft) when it has
                     takeoff data, or UnknownAircraftCard
@@ -156,7 +182,9 @@ pages/
                     UnknownAircraftCard, ConditionsCard. No flap
                     picker: the page shows the recommendation, it never sets anything
     domain/         takeoffMath (speeds, recommended flap, trim), warnings (severity,
-                    which to show), runway (diagram geometry), types, setup, format,
+                    which to show), runway (diagram geometry, speed-label layout), airfoil
+                    (TakeoffConfig's outlines), takeoffSummary (the summary's readouts),
+                    types, setup, format,
                     profiles/ (takeoff data per aircraft id, takeoffProfile(id);
                     docs/takeoff-profiles.md)
   Settings/         Settings.tsx: theme, Size (UI scale + text size), drag

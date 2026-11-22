@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, use, useId } from 'react'
 import { cx } from '../../utils'
+import { defaultHelpLabel, HelpPopover } from '../HelpPopover'
 import styles from './Field.module.css'
 
 interface FieldContextValue {
@@ -20,8 +21,14 @@ export function useFieldControl(): FieldContextValue | null {
 interface FieldProps {
   label: string
   hint?: ReactNode
-  /** Right after the label, e.g. a HelpPopover "?". */
+  /** Right after the label. Use `help` for a "?". */
   labelAddon?: ReactNode
+  /** What the field means or how to fill it: a "?" after the label opens it (on tap). */
+  help?: ReactNode
+  /** The "?" button's accessible name; defaults to "What is <label>?". */
+  helpLabel?: string
+  /** The help popover's width: `md` (default) fits a sentence, `lg` a short paragraph. */
+  helpSize?: 'sm' | 'md' | 'lg'
   /** Right-aligned content on the label row, e.g. a "LIVE" badge. */
   trailing?: ReactNode
   className?: string
@@ -33,10 +40,19 @@ interface FieldProps {
  * Stepper…) reads the generated ids from context, so callers never wire `htmlFor`.
  */
 export function Field(props: FieldProps) {
-  const { label, hint, labelAddon, trailing, className, children } = props
+  const { label, hint, labelAddon, help, helpLabel, helpSize, trailing, className, children } =
+    props
 
   const controlId = useId()
   const hintId = hint ? `${controlId}-hint` : undefined
+  const addon =
+    help != null ? (
+      <HelpPopover label={helpLabel ?? defaultHelpLabel(label)} size={helpSize}>
+        {help}
+      </HelpPopover>
+    ) : (
+      labelAddon
+    )
 
   return (
     <FieldContext value={{ controlId, hintId }}>
@@ -46,7 +62,7 @@ export function Field(props: FieldProps) {
             <label htmlFor={controlId} className={styles.label}>
               {label}
             </label>
-            {labelAddon}
+            {addon}
           </span>
           {trailing}
         </div>

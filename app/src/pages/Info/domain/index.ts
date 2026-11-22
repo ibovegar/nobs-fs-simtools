@@ -8,3 +8,9 @@ export {
   isCallsignFull,
   normaliseCallsign,
 } from './callsign'
+export {
+  type HelpTable,
+  type SpeedHelp,
+  type SpeedReadout,
+  speedReadoutRows,
+} from './speedReadouts'

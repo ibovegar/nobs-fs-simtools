@@ -58,3 +58,38 @@ export function glidepathTable(
     rateFpm: rateForAngle(groundSpeedKt, degrees),
   }))
 }
+
+/** The live reading: the target V/S at your groundspeed, and your descent against it. */
+export interface GlidepathReading {
+  groundSpeedKt: number
+  /** Vertical speed that holds the target angle (positive = down). */
+  targetRateFpm: number
+  /** Your descent; undefined without a vertical speed. */
+  current?: { verticalSpeedFpm: number; angleDeg: number; state: PathState }
+}
+
+/** Undefined without a usable groundspeed: the card then shows the reference table. */
+export function glidepathReading(
+  groundSpeedKt: number | undefined,
+  verticalSpeedFpm: number | undefined,
+  degrees = GLIDEPATH_DEG,
+): GlidepathReading | undefined {
+  if (groundSpeedKt === undefined || groundSpeedKt < MIN_GROUNDSPEED_KT) return undefined
+  const angleDeg =
+    verticalSpeedFpm === undefined ? null : pathAngleDeg(groundSpeedKt, verticalSpeedFpm)
+  return {
+    groundSpeedKt,
+    targetRateFpm: rateForAngle(groundSpeedKt, degrees),
+    current:
+      verticalSpeedFpm === undefined || angleDeg === null
+        ? undefined
+        : { verticalSpeedFpm, angleDeg, state: pathState(angleDeg, verticalSpeedFpm, degrees) },
+  }
+}
+
+/** The in-head rule: "× 5" for 3°, otherwise the exact factor for the angle. */
+export function ruleOfThumbText(degrees = GLIDEPATH_DEG): string {
+  return degrees === GLIDEPATH_DEG
+    ? `Rule of thumb: V/S ≈ groundspeed × ${RULE_OF_THUMB_FACTOR}`
+    : `V/S ≈ groundspeed × ${rateForAngle(1, degrees).toFixed(1)}`
+}

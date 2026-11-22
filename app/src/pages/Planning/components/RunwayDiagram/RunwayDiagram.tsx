@@ -3,8 +3,10 @@ import { useRef } from 'react'
 import {
   formatInteger,
   formatRunwayDesignator,
+  layoutLines,
   type RunwayMarks,
   reciprocalRunwayNumber,
+  type SpeedLine,
   type TakeoffSpeeds,
 } from '~/pages/Planning/domain'
 import styles from './RunwayDiagram.module.css'
@@ -17,15 +19,10 @@ const RUNWAY_H = 46
  * rows in use take space.
  */
 const ROW_H = 14
-const ROWS = 3
 /** Threshold markings + painted number + aircraft before the brake release point. */
 const THRESHOLD_PX = 64
-/** A label goes in the first row whose last label is at least this far to the left. */
-const LABEL_MIN_GAP_PX = 64
 /** Labels end just left of their line, so lines further right never cross them. */
 const LABEL_OFFSET_PX = 4
-/** Lines closer than this are merged into one ("V1/VR 118"). */
-const MERGE_PX = 3
 /** Space after the end of the runway for a V2 point that lies beyond it. */
 const OVERRUN_PX = 26
 
@@ -36,14 +33,6 @@ interface RunwayDiagramProps {
   runwayNumber: number | undefined
   /** Single-engine aircraft: VR and the 50 ft speed, no V1. */
   single: boolean
-}
-
-interface SpeedLine {
-  key: string
-  label: string
-  speed: number
-  distanceM: number
-  tone: 'v1' | 'vr' | 'v2'
 }
 
 /**
@@ -193,41 +182,6 @@ export function RunwayDiagram(props: RunwayDiagramProps) {
       )}
     </div>
   )
-}
-
-interface PlacedLine extends SpeedLine {
-  x: number
-  /** 0 = labels next to the runway, then further out. */
-  row: number
-  text: string
-}
-
-/**
- * Lines at (almost) the same place merge into one label ("V1/VR 118", or "V1 117 / VR 118"
- * when the speeds differ); each label takes the first row with room for it.
- */
-function layoutLines(lines: readonly SpeedLine[], xAt: (m: number) => number): PlacedLine[] {
-  const placed: PlacedLine[] = []
-  /** x of the last label in each row. */
-  const lastX: number[] = Array.from({ length: ROWS }, () => Number.NEGATIVE_INFINITY)
-  for (const l of lines) {
-    const x = xAt(l.distanceM)
-    const prev = placed[placed.length - 1]
-    if (prev && Math.abs(x - prev.x) < MERGE_PX) {
-      prev.text =
-        prev.speed === l.speed
-          ? `${prev.text.split(' ')[0]}/${l.label} ${l.speed}`
-          : `${prev.text} / ${l.label} ${l.speed}`
-      prev.tone = l.tone
-      prev.distanceM = l.distanceM
-      continue
-    }
-    const free = lastX.findIndex((last) => x - last >= LABEL_MIN_GAP_PX)
-    const row = free === -1 ? ROWS - 1 : free
-    lastX[row] = x
-    placed.push({ ...l, x, row, text: `${l.label} ${l.speed}` })
-  }
-  return placed
 }
 
 /** Six white bars across the runway at a threshold. */

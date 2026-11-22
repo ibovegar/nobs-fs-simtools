@@ -1,7 +1,6 @@
 import {
   Button,
   Divider,
-  HelpPopover,
   Readout,
   ReadoutGroup,
   Section,
@@ -48,12 +47,8 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
         <Readout
           size="lg"
           label="Distance"
-          labelAddon={
-            <HelpPopover label="Where is this from?">
-              No flight plan, so this is the TOD calculator's descent. Open the calculator to change
-              it.
-            </HelpPopover>
-          }
+          help="No flight plan, so this is the TOD calculator's descent. Open the calculator to change it."
+          helpLabel="Where is this from?"
           tone={distanceNm === null ? 'danger' : 'neutral'}
           value={distanceNm ?? '—'}
           unit={distanceNm !== null ? 'nm' : undefined}
@@ -63,21 +58,13 @@ export function CalculatorTodCard(props: CalculatorTodCardProps) {
           <ReadoutGroup divided>
             <Readout
               label="Vertical speed"
-              labelAddon={
-                <HelpPopover label="What is vertical speed?">
-                  The rate to descend at to hold the glideslope, at your average speed.
-                </HelpPopover>
-              }
+              help="The rate to descend at to hold the glideslope, at your average speed."
               value={String(Math.round(verticalSpeedFpm))}
               unit="fpm"
             />
             <Readout
               label="Time"
-              labelAddon={
-                <HelpPopover label="What is time?">
-                  How long the descent takes to fly, at your average speed.
-                </HelpPopover>
-              }
+              help="How long the descent takes to fly, at your average speed."
               value={minutes ?? '—'}
               unit={minutes !== null ? 'min' : undefined}
             />

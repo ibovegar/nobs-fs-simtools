@@ -47,12 +47,7 @@ export function DescentCalculator() {
             <Readout
               size="lg"
               label="Distance"
-              labelAddon={
-                <HelpPopover label="What is distance?">
-                  Start descending this far before the point where you want to reach the end
-                  altitude.
-                </HelpPopover>
-              }
+              help="Start descending this far before the point where you want to reach the end altitude."
               action={
                 <IconButton
                   icon={pinned ? MapPin5Solid : MapPin5Outlined}
@@ -73,21 +68,13 @@ export function DescentCalculator() {
               <ReadoutGroup divided>
                 <Readout
                   label="Vertical speed"
-                  labelAddon={
-                    <HelpPopover label="What is vertical speed?">
-                      The rate to descend at to hold the glideslope, at your average speed.
-                    </HelpPopover>
-                  }
+                  help="The rate to descend at to hold the glideslope, at your average speed."
                   value={formatVerticalSpeed(fields.verticalSpeed)}
                   unit="fpm"
                 />
                 <Readout
                   label="Time"
-                  labelAddon={
-                    <HelpPopover label="What is time?">
-                      How long the descent takes to fly, at your average speed.
-                    </HelpPopover>
-                  }
+                  help="How long the descent takes to fly, at your average speed."
                   value={result.minutes ?? '—'}
                   unit={result.minutes !== null ? 'min' : undefined}
                 />

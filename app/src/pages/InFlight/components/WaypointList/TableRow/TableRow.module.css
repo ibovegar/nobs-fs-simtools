@@ -1,0 +1,75 @@
+.head,
+.row,
+.next,
+.passed,
+.top,
+.topPassed {
+  display: flex;
+  align-items: center;
+  /* One height for every row, fitting two lines with equal room above and below. */
+  height: calc(44px * var(--ui-scale));
+  padding: 0 var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.head {
+  height: calc(28px * var(--ui-scale));
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.row {
+  color: var(--text);
+}
+
+/* The fix the aircraft is heading for. */
+.next {
+  color: var(--text-bright);
+  background: var(--accent-dim);
+  border-left: 3px solid var(--accent);
+  /* Keep the text in line with the other rows despite the border. */
+  padding-left: calc(var(--sp-4) - 3px);
+}
+
+.passed,
+.topPassed {
+  color: var(--text-dim);
+}
+
+.top {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* The action column: room for one small icon button, empty on rows without one so the
+   other columns stay aligned. */
+.action {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  width: calc(24px * var(--ui-scale));
+  margin-left: var(--sp-1);
+}
+
+/* A row's action shows on hover, or once the row is tapped (VR lasers have no hover). A
+   pinned action (the TOD reference's filled flag) is always shown. */
+.hoverAction {
+  visibility: hidden;
+}
+
+.selectable:hover .hoverAction,
+.revealed .hoverAction {
+  visibility: visible;
+}
+
+.selectable:hover {
+  background: var(--bg-card-hi);
+}
+
+/* The next fix keeps its highlight on hover. */
+.selectable.next:hover {
+  background: var(--accent-dim);
+}

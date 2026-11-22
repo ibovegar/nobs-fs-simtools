@@ -1,0 +1,1 @@
+export { FixLabel } from './FixLabel'

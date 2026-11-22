@@ -1,4 +1,5 @@
 // Planning's pure maths, aircraft data and formatting: no React. Unit-tested.
+export { airfoil, type Point, placeOutline } from './airfoil'
 export {
   formatInteger,
   formatRunway,
@@ -10,12 +11,15 @@ export {
 export { AIRCRAFT_PROFILES, takeoffProfile } from './profiles'
 export {
   formatRunwayDesignator,
+  layoutLines,
+  type PlacedLine,
   type RunwayMarks,
   type RunwaySide,
   reciprocalRunwayNumber,
   reciprocalSide,
   runwayMarks,
   runwayNumberFromHeading,
+  type SpeedLine,
 } from './runway'
 export {
   type AircraftLoad,
@@ -38,6 +42,14 @@ export {
   takeoffSpeeds,
   takeoffTrim,
 } from './takeoffMath'
+export {
+  type FlapSummary,
+  type SpeedSummary,
+  type SummaryValue,
+  type TakeoffSummaryInput,
+  type TakeoffSummaryModel,
+  takeoffSummary,
+} from './takeoffSummary'
 export type {
   AircraftProfile,
   FlapSetting,

@@ -1,0 +1,6 @@
+/* The Disclosure has no gutters (the table runs edge to edge); a note gets them back. Side
+   margins only: the Disclosure spaces its children vertically. */
+.note {
+  margin-right: var(--sp-4);
+  margin-left: var(--sp-4);
+}

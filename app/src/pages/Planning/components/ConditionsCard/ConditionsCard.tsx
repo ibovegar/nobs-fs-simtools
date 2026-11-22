@@ -1,4 +1,4 @@
-import { Card, Field, HelpPopover, SegmentedControl, Stepper } from '@nobs/ui'
+import { Card, Field, SegmentedControl, Stepper } from '@nobs/ui'
 import { SimFillButton } from '~/components'
 import {
   type ConditionField,
@@ -90,13 +90,9 @@ export function ConditionsCard(props: ConditionsCardProps) {
       </Field>
       <Field
         label="Pressure altitude"
-        labelAddon={
-          <HelpPopover label="How do I set the pressure altitude?" size="lg">
-            On the runway, tap the fill button: the sim gives it directly. Or set the altimeter to
-            1013 hPa (29.92 inHg) and read it. Or work it out: field elevation + (1013 − QNH) × 27
-            ft. Field at 700 ft with QNH 993: 700 + 20 × 27 = 1,240 ft.
-          </HelpPopover>
-        }
+        help="On the runway, tap the fill button: the sim gives it directly. Or set the altimeter to 1013 hPa (29.92 inHg) and read it. Or work it out: field elevation + (1013 − QNH) × 27 ft. Field at 700 ft with QNH 993: 700 + 20 × 27 = 1,240 ft."
+        helpLabel="How do I set the pressure altitude?"
+        helpSize="lg"
       >
         <Stepper
           value={conditions.pressureAltitudeFt}

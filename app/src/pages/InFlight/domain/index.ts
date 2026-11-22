@@ -10,6 +10,12 @@ export {
   resolveDescentReference,
 } from './descentReference'
 export {
+  type FlightPlanResults,
+  flightPlanResults,
+  planningText,
+  type ResultValue,
+} from './flightPlanResults'
+export {
   CRUISE_TOLERANCE_FT,
   cruiseRateFpm,
   type FlightPlanStatus,
@@ -33,16 +39,21 @@ export {
   GLIDEPATH_DEG,
   GLIDEPATH_TABLE_SPEEDS,
   GLIDEPATH_TOLERANCE_DEG,
+  type GlidepathReading,
   type GlidepathRow,
+  glidepathReading,
   glidepathTable,
   type PathState,
   pathAngleDeg,
   pathState,
   RULE_OF_THUMB_FACTOR,
+  ruleOfThumbText,
 } from './glidepath'
 export {
   aimPointOffsetNm,
+  type DistanceTick,
   DOT_DEG,
+  distanceTicks,
   FULL_SCALE_DOTS,
   GLIDESLOPE_ANGLES,
   type GlideslopeInputs,
@@ -126,3 +137,13 @@ export {
   planWaypoints,
   type VerticalProfile,
 } from './verticalProfile'
+export {
+  missingRouteNote,
+  type ReferenceFlagModel,
+  referenceNote,
+  type WaypointRowModel,
+  type WaypointRowState,
+  type WaypointTableInput,
+  waypointRows,
+  waypointSummary,
+} from './waypointTable'
