@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-22
+
 ### Added
 
 - **Settings › Size**: a UI scale (60–250%) that enlarges all text, controls, spacing and
