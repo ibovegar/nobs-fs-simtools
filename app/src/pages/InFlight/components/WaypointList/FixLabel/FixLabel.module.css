@@ -2,15 +2,10 @@
   font-weight: 600;
 }
 
-.sub,
-.highlightSub {
+/* The TOD reference's tag under its ident. */
+.tag {
   margin-top: 2px;
   font-size: var(--font-size-label);
-  color: var(--text-dim);
-}
-
-/* The TOD reference's tag, in place of its via / phase. */
-.highlightSub {
   font-weight: 600;
   color: var(--accent);
 }

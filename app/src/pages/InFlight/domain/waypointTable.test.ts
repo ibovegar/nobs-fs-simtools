@@ -10,11 +10,9 @@ const fix = (
   distanceNm: number,
   extra: Partial<RouteWaypoint> = {},
   plannedFt = 10000,
-  meetsLimit = true,
 ): PlannedWaypoint<RouteWaypoint> => ({
   waypoint: { key: ident, ident, phase, distanceNm, lat: 0, lon: 0, legNm: 0, ...extra },
   plannedFt,
-  meetsLimit,
 })
 
 const waypoints = [
@@ -22,7 +20,7 @@ const waypoints = [
   fix('SID1', 'departure', 5),
   fix('ENR', 'enroute', 50, { via: 'UL9' }, 35000),
   fix('IAF', 'approach', 90, { altitude: { kind: 'between', lowerFt: 3000, upperFt: 5000 } }),
-  fix('RW09', 'approach', 100, { runway: '09' }, 50, false),
+  fix('RW09', 'approach', 100, { runway: '09' }, 50),
 ]
 
 const profile: VerticalProfile = {
@@ -57,16 +55,15 @@ describe('waypointRows', () => {
     expect(rows.filter((r) => r.kind === 'top').map((r) => r.key)).toEqual(['T/D'])
   })
 
-  it('labels each fix with the reference, its runway, its airway or its phase', () => {
-    const subs = fixRows(waypointRows({ waypoints, profile, reference })).map((r) => r.sub)
-    expect(subs).toEqual(['RWY 27', 'SID', 'UL9', 'TOD REF', 'RWY 09'])
+  it('gives each fix its runway, airway or procedure, and tags the TOD reference', () => {
+    const rows = fixRows(waypointRows({ waypoints, profile, reference }))
+    expect(rows.map((r) => r.via)).toEqual(['RW27', 'SID', 'UL9', 'APP', 'RW09'])
+    expect(rows.map((r) => r.tag)).toEqual(['', '', '', 'TOD REF', ''])
   })
 
-  it('formats the cells: limits floor below ceiling, missed limits flagged', () => {
+  it('formats the limits, ceiling over floor', () => {
     const [, , , iaf, rwy] = fixRows(waypointRows({ waypoints, profile, reference }))
     expect(iaf?.limitLines).toEqual(['5,000B', '3,000A'])
-    expect(iaf?.missesLimit).toBe(false)
-    expect(rwy?.missesLimit).toBe(true)
     expect(rwy?.limitLines).toEqual([])
   })
 

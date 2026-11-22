@@ -3,7 +3,6 @@ import type { RoutePhase } from './route'
 import {
   altitudeAt,
   computeVerticalProfile,
-  meetsConstraint,
   type ProfileInputs,
   type ProfileWaypoint,
   planWaypoints,
@@ -190,17 +189,8 @@ describe('computeVerticalProfile with a reference fix', () => {
   })
 })
 
-describe('meetsConstraint', () => {
-  it('checks lower and upper limits with a tolerance', () => {
-    expect(meetsConstraint({ kind: 'atOrAbove', lowerFt: 5000 }, 4950)).toBe(true)
-    expect(meetsConstraint({ kind: 'atOrAbove', lowerFt: 5000 }, 4800)).toBe(false)
-    expect(meetsConstraint({ kind: 'atOrBelow', upperFt: 5000 }, 5300)).toBe(false)
-    expect(meetsConstraint({ kind: 'between', lowerFt: 5000, upperFt: 7000 }, 6000)).toBe(true)
-  })
-})
-
 describe('planWaypoints', () => {
-  it('gives each waypoint its planned altitude and flags missed limits', () => {
+  it('gives each waypoint its planned altitude', () => {
     const waypoints = [
       at(0, 'departure'),
       at(10, 'departure', { altitude: { kind: 'atOrAbove', lowerFt: 5000 } }),
@@ -208,8 +198,6 @@ describe('planWaypoints', () => {
     ]
     const planned = planWaypoints(waypoints, computeVerticalProfile({ ...base, waypoints }))
     expect(planned.map((p) => p.plannedFt)).toEqual([0, 3000, 0])
-    // 300 ft/nm can't make 5000 ft by 10 nm.
-    expect(planned.map((p) => p.meetsLimit)).toEqual([true, false, true])
     expect(planned[1]?.waypoint).toBe(waypoints[1])
   })
 })

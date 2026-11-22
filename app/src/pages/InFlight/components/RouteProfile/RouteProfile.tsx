@@ -2,18 +2,20 @@ import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import {
   type AircraftOnRoute,
-  type AltitudeConstraint,
   altitudeAt,
   altitudeScale,
   type ChartWaypoint,
+  chartLabel,
   clipProfile,
   formatAltitude,
   formatInteger,
+  labelWidthPx,
   niceStep,
   type PlannedWaypoint,
   type ProfilePoint,
   type ProfileView,
-  pickLabels,
+  placeNames,
+  type RoutePhase,
   ticks,
   trendEnd,
   trendLengthPx,
@@ -23,15 +25,26 @@ import {
 import styles from './RouteProfile.module.css'
 
 /**
- * Room for the TOC/TOD labels (top) and the fix and nm labels (bottom). The altitude labels
- * sit inside the plot, so it runs (nearly) edge to edge.
+ * Room for the TOC/TOD labels (top) and the nm row (bottom). The altitude labels and the fix
+ * names sit inside the plot, so it runs (nearly) edge to edge.
  */
-const PAD = { top: 24, right: 8, bottom: 38, left: 8 }
-const LABEL_GAP_PX = 42
+const PAD = { top: 24, right: 8, bottom: 22, left: 8 }
 /** Labels this close to an edge are anchored inwards instead of centred, so none is cut. */
 const LABEL_EDGE_PX = 24
 /** Room for the distance unit at the left end of the nm row. */
 const UNIT_PX = 44
+/**
+ * A runway at the route's ends: a symbol, not to scale (it would be a dot on most views).
+ * The chart keeps this much room for it, so the takeoff roll starts a little in; long
+ * enough for its name above it.
+ */
+const RUNWAY_PX = 32
+/** Space kept between two fix names. */
+const NAME_GAP_PX = 2
+/** The fix names' font size at 100 % text size (as in the CSS). */
+const NAME_FONT_PX = 9
+/** Beside the drop line to the name. */
+const NAME_SIDE_PX = 8
 
 interface RouteProfileProps {
   profile: VerticalProfile
@@ -43,18 +56,20 @@ interface RouteProfileProps {
   aircraft?: AircraftOnRoute
   /** Index of the next waypoint, highlighted while flying. */
   nextIndex?: number
+  /** Index of the fix the TOD is planned to: a flag above it. */
+  referenceIndex?: number
 }
 
 /**
  * Side view of the planned flight: the climb / cruise / descent profile, every fix with
- * its planned altitude and altitude limits, TOC and TOD, and the aircraft. The descent
+ * its planned altitude, TOC and TOD, and the aircraft. The descent
  * view counts distance to go; the others distance from departure.
  */
 export function RouteProfile(props: RouteProfileProps) {
-  const { profile, waypoints, view, showToc = true, aircraft, nextIndex } = props
+  const { profile, waypoints, view, showToc = true, aircraft, nextIndex, referenceIndex } = props
 
   const ref = useRef<HTMLDivElement>(null)
-  const { scale } = useTheme()
+  const { scale, textScale } = useTheme()
   const size = useElementSize(ref)
   // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
   const width = size.width / scale
@@ -72,28 +87,43 @@ export function RouteProfile(props: RouteProfileProps) {
     .filter((w) => inRange(w.planned.waypoint.distanceNm))
   const showAircraft = aircraft && inRange(aircraft.distanceNm) ? aircraft : undefined
 
-  // The scale ends at the flight's top (cruise), whichever part of it is shown.
-  let highestFt = profile.topFt
-  for (const { planned } of visible) {
-    const limit = planned.waypoint.altitude
-    highestFt = Math.max(highestFt, limit?.lowerFt ?? 0, limit?.upperFt ?? 0)
-  }
-  if (showAircraft) highestFt = Math.max(highestFt, showAircraft.altitudeFt)
+  // The scale ends at the flight's top (cruise), whichever part of it is shown, or higher
+  // when the aircraft is above it.
+  const highestFt = Math.max(profile.topFt, showAircraft?.altitudeFt ?? 0)
   const { maxFt, ticks: altTicks } = altitudeScale(highestFt)
 
+  // Room for the runways at the ends: the takeoff roll before the departure fix, the
+  // arrival runway after its threshold.
+  const first = waypoints[0]?.waypoint
+  const last = waypoints.length > 1 ? waypoints[waypoints.length - 1]?.waypoint : undefined
+  const departureRunway = first?.runway !== undefined && inRange(first.distanceNm)
+  const arrivalRunway = last?.runway !== undefined && inRange(last.distanceNm)
+  const plotLeft = PAD.left + (departureRunway ? RUNWAY_PX : 0)
+  const plotRight = width - PAD.right - (arrivalRunway ? RUNWAY_PX : 0)
+
   const groundY = height - PAD.bottom
-  const plotW = Math.max(1, width - PAD.left - PAD.right)
+  const plotW = Math.max(1, plotRight - plotLeft)
   const plotH = Math.max(1, groundY - PAD.top)
-  const x = (nm: number) => PAD.left + ((nm - range.fromNm) / spanNm) * plotW
+  const x = (nm: number) => plotLeft + ((nm - range.fromNm) / spanNm) * plotW
   const y = (ft: number) => groundY - (Math.max(0, Math.min(ft, maxFt)) / maxFt) * plotH
 
   const profilePoints = line.map((p) => `${x(p.distanceNm)},${y(p.altitudeFt)}`).join(' ')
   const area = `${x(range.fromNm)},${groundY} ${profilePoints} ${x(range.toNm)},${groundY}`
 
-  const labels = pickLabels(
-    visible.map(({ planned, index }) => ({
-      x: x(planned.waypoint.distanceNm),
-      priority:
+  const tocX = x(profile.tocNm)
+  const todX = x(profile.todNm)
+  const topY = y(profile.topFt)
+  // Every fix is named inside the chart, level with its dot: on the side where the path is
+  // higher (right in the climb, left in the descent; a line below in cruise), else the other
+  // side or a line up or down. The route's ends, the next fix and fixes with limits are
+  // placed first, so they win a crowded spot.
+  const nameFontPx = NAME_FONT_PX * textScale
+  const byImportance = visible
+    .map(({ planned, index }, i) => ({
+      planned,
+      i,
+      isNext: index === nextIndex,
+      rank:
         index === 0 || index === waypoints.length - 1
           ? 3
           : index === nextIndex
@@ -101,8 +131,61 @@ export function RouteProfile(props: RouteProfileProps) {
             : planned.waypoint.altitude
               ? 1
               : 0,
-    })),
-    LABEL_GAP_PX,
+    }))
+    .sort((a, b) => b.rank - a.rank || a.i - b.i)
+  const nameTexts = byImportance.map(({ planned }) => chartLabel(planned.waypoint))
+  // Names keep off the aircraft and the runways; a runway's own name sits above it.
+  const obstacles = visible.flatMap(({ planned }) => {
+    if (!planned.waypoint.runway) return []
+    const rx = x(planned.waypoint.distanceNm)
+    const ry = y(planned.plannedFt)
+    const left = planned.waypoint.phase === 'departure' ? rx - RUNWAY_PX : rx
+    return [{ left, top: ry - 3, right: left + RUNWAY_PX, bottom: ry + 3 }]
+  })
+  const reference = visible.find(({ index }) => index === referenceIndex)?.planned
+  const referenceFlag = reference && {
+    x: x(reference.waypoint.distanceNm),
+    baseY: y(reference.plannedFt) - 5,
+  }
+  if (referenceFlag) {
+    const { x: fx, baseY } = referenceFlag
+    obstacles.push({ left: fx - 1, top: baseY - FLAG_PX, right: fx + 9, bottom: baseY })
+  }
+  if (showAircraft) {
+    const ax = x(showAircraft.distanceNm)
+    const ay = y(showAircraft.altitudeFt)
+    obstacles.push({ left: ax - 8, top: ay - 8, right: ax + 11, bottom: ay + 8 })
+  }
+  const placed = placeNames(
+    byImportance.map(({ planned }, k) => {
+      const wp = planned.waypoint
+      const departureRunway = wp.runway !== undefined && wp.phase === 'departure'
+      return {
+        pointX: x(wp.distanceNm),
+        pointY: y(planned.plannedFt),
+        widthPx: labelWidthPx(nameTexts[k] ?? '', nameFontPx),
+        // A runway's name goes over the runway: left of the departure fix (the takeoff roll),
+        // right of the arrival one.
+        preferRight: wp.runway !== undefined ? !departureRunway : !isDescending(wp.phase),
+        below: Math.abs(planned.plannedFt - profile.topFt) < 1,
+        sidePx: wp.runway !== undefined ? 0 : undefined,
+      }
+    }),
+    {
+      fontPx: nameFontPx,
+      minX: PAD.left,
+      maxX: width - PAD.right,
+      groundY,
+      sidePx: NAME_SIDE_PX,
+      gapPx: NAME_GAP_PX,
+      obstacles,
+    },
+  )
+  const nameAt = new Map(
+    byImportance.flatMap(({ i, isNext }, k) => {
+      const spot = placed[k]
+      return spot ? [[i, { name: nameTexts[k] ?? '', isNext, ...spot }] as const] : []
+    }),
   )
 
   // Distance axis: to go in the descent view, from departure otherwise.
@@ -125,9 +208,6 @@ export function RouteProfile(props: RouteProfileProps) {
         ? 'end'
         : 'middle'
 
-  const tocX = x(profile.tocNm)
-  const todX = x(profile.todNm)
-  const topY = y(profile.topFt)
   const sameTop = Math.abs(todX - tocX) < 28
 
   return (
@@ -173,14 +253,14 @@ export function RouteProfile(props: RouteProfileProps) {
                 key={t.nm}
                 className={styles.distLabel}
                 x={x(t.nm)}
-                y={groundY + 30}
+                y={groundY + 16}
                 textAnchor={anchor(x(t.nm))}
               >
                 {formatInteger(t.label)}
               </text>
             ))}
           {/* The distance unit at the left end of the nm row. */}
-          <text className={styles.distLabel} x={PAD.left} y={groundY + 30} textAnchor="start">
+          <text className={styles.distLabel} x={PAD.left} y={groundY + 16} textAnchor="start">
             {toGo ? 'nm to go' : 'nm'}
           </text>
 
@@ -191,33 +271,21 @@ export function RouteProfile(props: RouteProfileProps) {
             return (
               <g key={`${planned.waypoint.key}-${index}`}>
                 <line className={styles.drop} x1={wx} y1={wy} x2={wx} y2={groundY} />
-                {planned.waypoint.altitude && (
-                  <LimitMarker
-                    x={wx}
-                    limit={planned.waypoint.altitude}
-                    y={y}
-                    missed={!planned.meetsLimit}
-                  />
+                {planned.waypoint.runway && (
+                  <RunwayMarker x={wx} y={wy} departure={planned.waypoint.phase === 'departure'} />
                 )}
+                <FixName label={nameAt.get(i)} />
                 <circle
                   className={isNext ? styles.fixNext : styles.fix}
                   cx={wx}
                   cy={wy}
                   r={isNext ? 4 : 3}
                 />
-                {labels[i] && (
-                  <text
-                    className={isNext ? styles.fixLabelNext : styles.fixLabel}
-                    x={wx}
-                    y={groundY + 14}
-                    textAnchor={anchor(wx)}
-                  >
-                    {planned.waypoint.ident}
-                  </text>
-                )}
               </g>
             )
           })}
+
+          <ReferenceFlag flag={referenceFlag} />
 
           {showToc && inRange(profile.tocNm) && profile.totalNm > 0 && (
             <TopMarker x={tocX} y={topY} label={sameTop ? 'T/D' : 'TOC'} />
@@ -246,37 +314,78 @@ export function RouteProfile(props: RouteProfileProps) {
   )
 }
 
-interface LimitMarkerProps {
+interface RunwayMarkerProps {
+  /** The runway's fix: where the climb starts, or where the descent touches down. */
   x: number
-  limit: AltitudeConstraint
-  y: (ft: number) => number
-  missed: boolean
+  /** Its planned altitude: the field elevation. */
+  y: number
+  /** The departure runway ends at its fix (with the takeoff roll on it); the arrival runway starts at its fix. */
+  departure: boolean
 }
 
-/** A bar at the limit: a caret below for "at or above", above for "at or below". */
-function LimitMarker(props: LimitMarkerProps) {
-  const { x, limit, y, missed } = props
-  const cls = missed ? styles.limitMissed : styles.limit
+/**
+ * A runway at the field elevation, as in the GS side view: the profile climbs from the end
+ * of the departure runway, after a short takeoff roll along it, and comes down onto the
+ * start of the arrival runway.
+ */
+function RunwayMarker(props: RunwayMarkerProps) {
+  const { x, y, departure } = props
+  const left = departure ? x - RUNWAY_PX : x
 
   return (
-    <g className={cls}>
-      {limit.lowerFt !== undefined && (
-        <>
-          <line x1={x - 6} y1={y(limit.lowerFt)} x2={x + 6} y2={y(limit.lowerFt)} />
-          <polygon
-            points={`${x - 4},${y(limit.lowerFt) + 6} ${x + 4},${y(limit.lowerFt) + 6} ${x},${y(limit.lowerFt) + 1}`}
-          />
-        </>
-      )}
-      {limit.upperFt !== undefined && (
-        <>
-          <line x1={x - 6} y1={y(limit.upperFt)} x2={x + 6} y2={y(limit.upperFt)} />
-          <polygon
-            points={`${x - 4},${y(limit.upperFt) - 6} ${x + 4},${y(limit.upperFt) - 6} ${x},${y(limit.upperFt) - 1}`}
-          />
-        </>
-      )}
+    <g>
+      <rect className={styles.runway} x={left} y={y - 2} width={RUNWAY_PX} height={5} />
+      {departure && <line className={styles.path} x1={left} y1={y} x2={x} y2={y} />}
     </g>
+  )
+}
+
+/** Height of the TOD reference's flag (pole), px. */
+const FLAG_PX = 12
+
+interface ReferenceFlagProps {
+  /** Where the pole stands (its foot); undefined: the reference fix isn't in view. */
+  flag: { x: number; baseY: number } | undefined
+}
+
+/** The TOD reference: a small flag above the fix, like the flag button in the waypoint list. */
+function ReferenceFlag(props: ReferenceFlagProps) {
+  const { flag } = props
+
+  if (!flag) return null
+  const { x, baseY } = flag
+  const topY = baseY - FLAG_PX
+
+  return (
+    <g className={styles.referenceFlag}>
+      <line x1={x} y1={baseY} x2={x} y2={topY} />
+      <polygon points={`${x},${topY} ${x + 8},${topY + 3} ${x},${topY + 6}`} />
+    </g>
+  )
+}
+
+/** Arrival and approach fixes: the path descends into them. */
+const isDescending = (phase: RoutePhase) => phase === 'arrival' || phase === 'approach'
+
+interface FixNameProps {
+  /** The name and where it goes; undefined: the fix has no name drawn. */
+  label: { name: string; left: number; baseline: number; isNext: boolean } | undefined
+}
+
+/** A fix's name level with the fix, inside the chart: weak, the next fix's in accent. */
+function FixName(props: FixNameProps) {
+  const { label } = props
+
+  if (!label) return null
+  return (
+    <text
+      className={label.isNext ? styles.fixNameNext : styles.fixName}
+      x={label.left}
+      y={label.baseline}
+      textAnchor="start"
+    >
+      {label.name}
+    </text>
   )
 }
 

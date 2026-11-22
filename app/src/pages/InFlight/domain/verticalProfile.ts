@@ -43,8 +43,8 @@ export interface DescentTarget {
   altitudeFt: number
   /**
    * The pilot's own pick: the descent from cruise runs straight to this fix, ignoring the
-   * altitude limits of the fixes before it (they show as missed). Otherwise they still
-   * shape the path, as on an FMS.
+   * altitude limits of the fixes before it. Otherwise they still shape the path, as on an
+   * FMS.
    */
   overridesEarlierLimits?: boolean
 }
@@ -245,40 +245,19 @@ export function computeVerticalProfile(i: ProfileInputs): VerticalProfile {
   }
 }
 
-/** Whether an altitude meets a limit, within a tolerance. */
-export function meetsConstraint(
-  constraint: AltitudeConstraint,
-  altitudeFt: number,
-  toleranceFt = 100,
-): boolean {
-  if (constraint.lowerFt !== undefined && altitudeFt < constraint.lowerFt - toleranceFt) {
-    return false
-  }
-  if (constraint.upperFt !== undefined && altitudeFt > constraint.upperFt + toleranceFt) {
-    return false
-  }
-  return true
-}
-
 /** A route waypoint with the altitude the profile plans there. */
 export interface PlannedWaypoint<T extends ProfileWaypoint = ProfileWaypoint> {
   waypoint: T
   plannedFt: number
-  /** False when the planned altitude misses the fix's altitude limit. */
-  meetsLimit: boolean
 }
 
-/** The planned altitude at each waypoint, and whether it meets the fix's limit. */
+/** The planned altitude at each waypoint. */
 export function planWaypoints<T extends ProfileWaypoint>(
   waypoints: readonly T[],
   profile: VerticalProfile,
 ): PlannedWaypoint<T>[] {
-  return waypoints.map((waypoint) => {
-    const plannedFt = altitudeAt(profile.points, waypoint.distanceNm)
-    return {
-      waypoint,
-      plannedFt,
-      meetsLimit: waypoint.altitude ? meetsConstraint(waypoint.altitude, plannedFt) : true,
-    }
-  })
+  return waypoints.map((waypoint) => ({
+    waypoint,
+    plannedFt: altitudeAt(profile.points, waypoint.distanceNm),
+  }))
 }

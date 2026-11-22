@@ -66,31 +66,6 @@ export function ticks(from: number, to: number, step: number): number[] {
   return out
 }
 
-export interface LabelCandidate {
-  x: number
-  /** Higher wins a crowded spot (route ends, fixes with limits). */
-  priority: number
-}
-
-/**
- * Which labels to draw so none sit closer than `minGapPx`: the most important first, then
- * the rest wherever they fit. Returns one flag per candidate.
- */
-export function pickLabels(candidates: readonly LabelCandidate[], minGapPx: number): boolean[] {
-  const order = candidates
-    .map((c, i) => ({ ...c, i }))
-    .sort((a, b) => b.priority - a.priority || a.i - b.i)
-  const placed: number[] = []
-  const shown = candidates.map(() => false)
-  for (const c of order) {
-    if (placed.every((x) => Math.abs(x - c.x) >= minGapPx)) {
-      placed.push(c.x)
-      shown[c.i] = true
-    }
-  }
-  return shown
-}
-
 export interface AltitudeScale {
   /** Top of the chart: the highest altitude shown (normally the cruise altitude). */
   maxFt: number
@@ -165,4 +140,103 @@ export function inClimbWindow(
 export interface ChartWaypoint extends ProfileWaypoint {
   key: string
   ident: string
+  /** The runway this fix is the threshold of, e.g. '27L': drawn as a runway on the ground. */
+  runway?: string
+}
+
+/** About how long a label is in the chart's monospaced font (px), to see where it fits. */
+export function labelWidthPx(text: string, fontPx: number): number {
+  return text.length * fontPx * 0.62
+}
+
+/** A name to place beside a point (a fix's dot). */
+export interface NameRequest {
+  pointX: number
+  pointY: number
+  widthPx: number
+  /** The side it reads best on (inside the profile's area): right, or left. */
+  preferRight: boolean
+  /**
+   * On a level stretch (cruise): a line below the point, so it doesn't sit on the line, and
+   * only further down (inside the profile's area) when that's taken.
+   */
+  below?: boolean
+  /** From the point to the name, instead of the options' `sidePx` (a runway has no carets). */
+  sidePx?: number
+}
+
+export interface PlacedName {
+  left: number
+  baseline: number
+}
+
+export interface NamePlacementOptions {
+  fontPx: number
+  /** The chart's edges: names stay between them, and above the ground. */
+  minX: number
+  maxX: number
+  groundY: number
+  /** From the point's drop line to the name, clear of the limit carets on it. */
+  sidePx: number
+  /** Space kept between two names. */
+  gapPx: number
+  /** Areas no name may cover (the aircraft, the runways). */
+  obstacles?: readonly LabelBox[]
+}
+
+export interface LabelBox {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+/**
+ * Where to draw each name so none overlap: level with its point on the side it prefers,
+ * else on the other side, else one or two lines above or below on either side. Placed in
+ * order, so earlier names win a crowded spot; undefined for a name with no free spot.
+ */
+export function placeNames(
+  requests: readonly NameRequest[],
+  options: NamePlacementOptions,
+): (PlacedName | undefined)[] {
+  const { fontPx, minX, maxX, groundY, sidePx, gapPx, obstacles = [] } = options
+  /** Letters stand about this high above the baseline (capitals and digits). */
+  const capPx = fontPx * 0.75
+  const kept: LabelBox[] = [...obstacles]
+  const clear = (b: LabelBox) =>
+    kept.every(
+      (k) =>
+        b.left >= k.right + gapPx ||
+        b.right + gapPx <= k.left ||
+        b.top >= k.bottom + gapPx ||
+        b.bottom + gapPx <= k.top,
+    )
+
+  return requests.map((r) => {
+    // Level with the point (the letters a touch below its centre line), or a line below it.
+    const level = r.pointY + fontPx * 0.3 + (r.below ? fontPx : 0)
+    const sides = r.preferRight ? [true, false] : [false, true]
+    const side = r.sidePx ?? sidePx
+    const steps = r.below ? [0, fontPx, 2 * fontPx] : [0, -fontPx, fontPx, -2 * fontPx, 2 * fontPx]
+    for (const dy of steps) {
+      for (const right of sides) {
+        const left = right ? r.pointX + side : r.pointX - side - r.widthPx
+        const baseline = level + dy
+        const box = { left, top: baseline - capPx, right: left + r.widthPx, bottom: baseline }
+        const inside =
+          box.left >= minX && box.right <= maxX && box.top >= 0 && baseline <= groundY - 2
+        if (inside && clear(box)) {
+          kept.push(box)
+          return { left, baseline }
+        }
+      }
+    }
+    return undefined
+  })
+}
+
+/** The fix's label under the side view: a runway as the FMS names it ('RW27L'). */
+export function chartLabel(waypoint: Pick<ChartWaypoint, 'ident' | 'runway'>): string {
+  return waypoint.runway ? `RW${waypoint.runway}` : waypoint.ident
 }

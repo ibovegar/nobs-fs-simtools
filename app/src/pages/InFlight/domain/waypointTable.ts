@@ -25,23 +25,21 @@ export interface ReferenceFlagModel {
 
 /**
  * A row of the table: a fix, or TOC / TOD (or T/D when they meet) slotted in between the
- * fixes. TOC / TOD rows have no sub line, limits or flag, so those come out empty.
+ * fixes. TOC / TOD rows have no via, tag, limits or flag, so those come out empty.
  */
 export interface WaypointRowModel {
   kind: 'fix' | 'top'
   key: string
   /** The fix's ident, or TOC / TOD / T/D. */
   ident: string
-  /** Under the ident: "TOD REF", the runway, the airway or the procedure phase. */
-  sub: string
+  /** How the fix is reached: its runway, the airway, or the procedure (SID / STAR / APP). */
+  via: string
+  /** Under the ident: "TOD REF" on the fix the TOD is planned to, else empty. */
+  tag: string
   isReference: boolean
   state: WaypointRowState
   /** Distance (to go while flying); empty once passed. */
   distance: string
-  /** The planned altitude (the cruise altitude for TOC / TOD). */
-  planned: string
-  /** The planned altitude misses the fix's limit. */
-  missesLimit: boolean
   /** The altitude limit, top line first: a "between" limit is the ceiling over the floor. */
   limitLines: readonly string[]
   speed: string
@@ -87,16 +85,11 @@ export function waypointRows(input: WaypointTableInput): WaypointRowModel[] {
         kind: 'fix',
         key: `${wp.key}-${index}`,
         ident: wp.ident,
-        sub: isReference
-          ? 'TOD REF'
-          : wp.runway
-            ? `RWY ${wp.runway}`
-            : (wp.via ?? PHASE_LABEL[wp.phase]),
+        via: wp.runway ? `RW${wp.runway}` : (wp.via ?? PHASE_LABEL[wp.phase]),
+        tag: isReference ? 'TOD REF' : '',
         isReference,
         state: passed ? 'passed' : live && index === nextIndex ? 'next' : 'upcoming',
         distance,
-        planned: roundedAltitude(planned.plannedFt),
-        missesLimit: !planned.meetsLimit,
         limitLines: wp.altitude ? formatAltitudeLimit(wp.altitude).split(' ').reverse() : [],
         speed: wp.speed ? formatSpeedLimit(wp.speed) : '',
         flag: canBeDescentReference(routeWaypoints, index)
@@ -130,12 +123,11 @@ export function waypointRows(input: WaypointTableInput): WaypointRowModel[] {
         kind: 'top',
         key: top.label,
         ident: top.label,
-        sub: '',
+        via: '',
+        tag: '',
         isReference: false,
         state: passed ? 'passed' : 'upcoming',
         distance,
-        planned: roundedAltitude(profile.topFt),
-        missesLimit: false,
         limitLines: [],
         speed: '',
       },

@@ -38,6 +38,11 @@
   stroke-width: 2;
 }
 
+/* As the runway in the GS side view. */
+.runway {
+  fill: var(--text-mid);
+}
+
 .drop {
   stroke: var(--border-mid);
   stroke-width: 1;
@@ -54,42 +59,6 @@
   fill: var(--accent);
   stroke: var(--accent);
   stroke-width: 1.5;
-}
-
-.fixLabel,
-.fixLabelNext {
-  font-family: var(--font-mono);
-  font-size: calc(10px * var(--text-scale));
-}
-
-.fixLabel {
-  fill: var(--text-mid);
-}
-
-.fixLabelNext {
-  fill: var(--accent);
-  font-weight: 600;
-}
-
-.limit line,
-.limitMissed line {
-  stroke-width: 1.5;
-}
-
-.limit line {
-  stroke: var(--text-mid);
-}
-
-.limit polygon {
-  fill: var(--text-mid);
-}
-
-.limitMissed line {
-  stroke: var(--warning);
-}
-
-.limitMissed polygon {
-  fill: var(--warning);
 }
 
 .top {
@@ -127,4 +96,31 @@
 .trend {
   stroke: var(--yellow);
   stroke-width: 2;
+}
+
+/* Fix names beside their dots: weak, so they don't compete with the profile; the next
+   fix's stands out in the accent colour. */
+.fixName,
+.fixNameNext {
+  font-family: var(--font-mono);
+  font-size: calc(9px * var(--text-scale));
+}
+
+.fixName {
+  fill: var(--text-dim);
+}
+
+.fixNameNext {
+  fill: var(--accent);
+  font-weight: 600;
+}
+
+/* The TOD reference's flag, in the accent colour as its flag button in the waypoint list. */
+.referenceFlag line {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.referenceFlag polygon {
+  fill: var(--accent);
 }

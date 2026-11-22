@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-22
+
+### Added
+
+- **In flight › Flight plan**: the side view shows the departure and arrival runways
+  (labelled like the FMS, e.g. RW01L), with the takeoff roll on the departure runway, names
+  every fix, and flags the fix the TOD is planned to.
+
+### Changed
+
+- **In flight › Flight plan**: the waypoint list shows only what the sim gives (altitude and
+  speed restrictions), with no calculated "Plan" column and no orange "missed" warning. How
+  each fix is reached (SID, STAR, APP, airway, runway) has its own Via column. The side view
+  no longer draws the restriction markers; they're in the waypoint list.
+
 ## [0.4.0] - 2026-11-22
 
 ### Added

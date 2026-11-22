@@ -61,6 +61,8 @@ interface FlightPlanOverviewProps {
   /** The live aircraft on the route; omitted without a position. */
   aircraft?: AircraftOnRoute
   nextIndex?: number
+  /** The fix the TOD is planned to, flagged in the side view. */
+  referenceIndex?: number
 }
 
 /**
@@ -82,6 +84,7 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
     onViewChange,
     aircraft,
     nextIndex,
+    referenceIndex,
   } = props
   const badge = STATUS_BADGE[progress.status]
   const cruise = cruiseFromPlan ? formatAltitude(cruiseFt) : `${formatAltitude(cruiseFt)} assumed`
@@ -116,6 +119,7 @@ export function FlightPlanOverview(props: FlightPlanOverviewProps) {
             view={view}
             aircraft={aircraft}
             nextIndex={nextIndex}
+            referenceIndex={referenceIndex}
           />
         </SectionMedia>
         <SectionContent>

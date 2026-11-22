@@ -49,6 +49,7 @@ export function FlightPlanProfile(props: FlightPlanProfileProps) {
         onViewChange={setView}
         aircraft={plan.aircraft}
         nextIndex={flying ? plan.progress.nextIndex : undefined}
+        referenceIndex={plan.reference.index}
       />
       <WaypointList
         waypoints={plan.waypoints}

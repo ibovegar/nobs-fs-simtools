@@ -14,8 +14,8 @@ export function WaypointTableHeader(props: WaypointTableHeaderProps) {
   return (
     <TableRow kind="head">
       <TableCell column="fix">Fix</TableCell>
+      <TableCell column="via">Via</TableCell>
       <TableCell column="dist">{distanceHeading}</TableCell>
-      <TableCell column="plan">Plan</TableCell>
       <TableCell column="limit">Limit</TableCell>
       <TableCell column="speed">Speed</TableCell>
     </TableRow>

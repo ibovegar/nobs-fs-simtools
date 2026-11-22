@@ -6,9 +6,10 @@
   justify-content: center;
 }
 
+/* Fixed width (a 5-letter ident, or "TOD REF" under it), so Via sits right after it. */
 .fix {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: none;
+  width: calc(56px * var(--ui-scale));
 }
 
 .fix > *,
@@ -19,7 +20,6 @@
 
 /* Fixed-width, right-aligned columns, each with a gutter so values never run together. */
 .dist,
-.plan,
 .limit,
 .speed {
   flex: none;
@@ -35,12 +35,20 @@
   margin-top: 2px;
 }
 
-.dist {
-  width: calc(42px * var(--ui-scale));
+/* How the fix is reached (SID, STAR, APP, an airway, RW01L): right after the fix, taking
+   the room left over, quieter. */
+.via {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-left: var(--sp-2);
+  overflow: hidden;
+  color: var(--text-dim);
+  font-size: var(--font-size-label);
+  white-space: nowrap;
 }
 
-.plan {
-  width: calc(52px * var(--ui-scale));
+.dist {
+  width: calc(42px * var(--ui-scale));
 }
 
 .limit {
@@ -49,8 +57,4 @@
 
 .speed {
   width: calc(36px * var(--ui-scale));
-}
-
-.warning {
-  color: var(--warning);
 }

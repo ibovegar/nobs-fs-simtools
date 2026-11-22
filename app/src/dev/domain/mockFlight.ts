@@ -38,9 +38,10 @@ export const INITIAL_MOCK_FLIGHT: MockFlightState = {
   connected: true,
   running: false,
   timeScale: 1,
-  // The harness starts with the Caravan loaded: a Caravan cruise on its FL120 route.
-  altitudeFt: 12_000,
-  groundSpeedKt: 160,
+  // The harness starts with the Caravan on the ground at the start of its FL120 route:
+  // stopped on the runway at ENGM, at the field elevation (what the sim reports there).
+  altitudeFt: 682,
+  groundSpeedKt: 0,
   verticalSpeedFpm: 0,
   gpsDistanceNm: 150,
   selectedAltitudeFt: 12_000,

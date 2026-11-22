@@ -44,12 +44,10 @@ export function WaypointRow(props: WaypointRowProps) {
       revealed={revealed}
     >
       <TableCell column="fix">
-        <FixLabel ident={row.ident} sub={row.sub} highlight={row.isReference} />
+        <FixLabel ident={row.ident} tag={row.tag} />
       </TableCell>
+      <TableCell column="via">{row.via}</TableCell>
       <TableCell column="dist">{row.distance}</TableCell>
-      <TableCell column="plan" warning={row.missesLimit}>
-        {row.planned}
-      </TableCell>
       <TableCell column="limit" lines={row.limitLines} />
       <TableCell column="speed">{row.speed}</TableCell>
     </TableRow>

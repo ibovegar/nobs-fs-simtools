@@ -34,7 +34,7 @@ interface WaypointListProps {
 
 /**
  * Every fix on the route in order, with TOC and TOD slotted in: the distance (to go while
- * flying), the planned altitude, and the procedure's altitude and speed limits. Fixes
+ * flying) and the procedure's altitude and speed limits, as the sim gives them. Fixes
  * already flown are dimmed and the next one is highlighted. A fix after the SID shows a
  * flag button on the right when hovered, or when its row is tapped (VR lasers don't hover);
  * the flag makes it the TOD reference, marked "TOD REF" with the flag kept filled. Folds

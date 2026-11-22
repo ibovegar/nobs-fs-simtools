@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   altitudeScale,
+  chartLabel,
   clipProfile,
   inClimbWindow,
+  labelWidthPx,
   niceStep,
-  pickLabels,
+  placeNames,
   ticks,
   trendEnd,
   trendLengthPx,
@@ -56,22 +58,6 @@ describe('niceStep / ticks', () => {
   })
 })
 
-describe('pickLabels', () => {
-  it('keeps important labels and drops crowded ones', () => {
-    const shown = pickLabels(
-      [
-        { x: 0, priority: 2 },
-        { x: 20, priority: 0 },
-        { x: 45, priority: 1 },
-        { x: 100, priority: 0 },
-        { x: 110, priority: 2 },
-      ],
-      40,
-    )
-    expect(shown).toEqual([true, false, true, false, true])
-  })
-})
-
 describe('altitudeScale', () => {
   it('tops out at the cruise level', () => {
     expect(altitudeScale(25000)).toEqual({ maxFt: 25000, ticks: [10000, 20000, 25000] })
@@ -120,5 +106,63 @@ describe('inClimbWindow', () => {
     expect(inClimbWindow(profile, 125)).toBe(true)
     expect(inClimbWindow(profile, 126)).toBe(false)
     expect(inClimbWindow(profile, undefined)).toBeUndefined()
+  })
+})
+
+describe('chartLabel', () => {
+  it('names a runway as the FMS does, other fixes by their ident', () => {
+    expect(chartLabel({ ident: 'ENGM', runway: '01L' })).toBe('RW01L')
+    expect(chartLabel({ ident: 'GM401' })).toBe('GM401')
+  })
+})
+
+describe('labelWidthPx', () => {
+  it('grows with the text and the font size', () => {
+    expect(labelWidthPx('GM401', 10)).toBeCloseTo(31)
+    expect(labelWidthPx('GM401', 20)).toBeCloseTo(62)
+  })
+})
+
+describe('placeNames', () => {
+  const options = { fontPx: 10, minX: 0, maxX: 300, groundY: 250, sidePx: 8, gapPx: 2 }
+  const at = (pointX: number, pointY: number, preferRight = true) => ({
+    pointX,
+    pointY,
+    widthPx: 30,
+    preferRight,
+  })
+
+  it('puts a name level with its point, on the side it prefers', () => {
+    expect(placeNames([at(100, 100), at(200, 100, false)], options)).toEqual([
+      { left: 108, baseline: 103 },
+      { left: 162, baseline: 103 },
+    ])
+  })
+
+  it('moves to the other side, then a line up or down, rather than overlap', () => {
+    const [, other, up] = placeNames([at(100, 100), at(110, 100, false), at(100, 100)], options)
+    expect(other).toEqual({ left: 72, baseline: 103 })
+    expect(up).toEqual({ left: 108, baseline: 93 })
+  })
+
+  it('goes a line below a point on a level stretch, and only further down when taken', () => {
+    const level = { ...at(100, 100), below: true }
+    const [first, second, third] = placeNames([level, level, level], options)
+    expect(first?.baseline).toBe(113)
+    expect(second?.left).toBe(62)
+    expect(third?.baseline).toBe(123)
+  })
+
+  it('keeps clear of obstacles', () => {
+    const obstacles = [{ left: 100, top: 90, right: 150, bottom: 110 }]
+    expect(placeNames([at(100, 100)], { ...options, obstacles })[0]).toEqual({
+      left: 62,
+      baseline: 103,
+    })
+  })
+
+  it('flips at the chart edge and leaves out a name with no room', () => {
+    expect(placeNames([at(290, 100)], options)[0]?.left).toBe(252)
+    expect(placeNames([at(100, 4)], { ...options, groundY: 5 })[0]).toBeUndefined()
   })
 })

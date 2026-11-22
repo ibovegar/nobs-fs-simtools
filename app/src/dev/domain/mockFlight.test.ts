@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { advanceFlight, INITIAL_MOCK_FLIGHT } from './mockFlight'
+import { mockRoutePath } from './mockRoutePath'
+import { mockRoute } from './mockRoutes'
+
+describe('INITIAL_MOCK_FLIGHT', () => {
+  it('starts stopped on the ground at the start of its route', () => {
+    const route = mockRoute(INITIAL_MOCK_FLIGHT.routeId)
+    if (!route) throw new Error('no route')
+    const path = mockRoutePath(route, false)
+    expect(INITIAL_MOCK_FLIGHT.altitudeFt).toBe(Math.round(path.departureElevationFt))
+    expect(INITIAL_MOCK_FLIGHT.groundSpeedKt).toBe(0)
+    expect(INITIAL_MOCK_FLIGHT.routeProgressNm).toBe(0)
+  })
+})
 
 describe('advanceFlight', () => {
   it('closes the distance at groundspeed', () => {
@@ -18,10 +31,15 @@ describe('advanceFlight', () => {
 
   it('changes altitude by vertical speed', () => {
     const next = advanceFlight(
-      { ...INITIAL_MOCK_FLIGHT, verticalSpeedFpm: -1200, selectedAltitudeFt: 0 },
+      {
+        ...INITIAL_MOCK_FLIGHT,
+        altitudeFt: 12_000,
+        verticalSpeedFpm: -1200,
+        selectedAltitudeFt: 0,
+      },
       30,
     )
-    expect(next.altitudeFt).toBe(INITIAL_MOCK_FLIGHT.altitudeFt - 600)
+    expect(next.altitudeFt).toBe(11_400)
   })
 
   it('levels off at the selected altitude', () => {
@@ -50,11 +68,11 @@ describe('advanceFlight', () => {
   })
 
   it('leaves the selected altitude when a vertical speed is set while level at it', () => {
-    // The harness starts level at the selected altitude (12,000 ft).
-    const descent = advanceFlight({ ...INITIAL_MOCK_FLIGHT, verticalSpeedFpm: -1200 }, 1)
+    const level = { ...INITIAL_MOCK_FLIGHT, altitudeFt: 12_000, selectedAltitudeFt: 12_000 }
+    const descent = advanceFlight({ ...level, verticalSpeedFpm: -1200 }, 1)
     expect(descent.altitudeFt).toBe(11980)
     expect(descent.verticalSpeedFpm).toBe(-1200)
-    const climb = advanceFlight({ ...INITIAL_MOCK_FLIGHT, verticalSpeedFpm: 600 }, 1)
+    const climb = advanceFlight({ ...level, verticalSpeedFpm: 600 }, 1)
     expect(climb.altitudeFt).toBe(12010)
     expect(climb.verticalSpeedFpm).toBe(600)
   })
@@ -72,6 +90,7 @@ describe('advanceFlight', () => {
     const next = advanceFlight(
       {
         ...INITIAL_MOCK_FLIGHT,
+        groundSpeedKt: 160,
         gpsDistanceNm: 0.01,
         altitudeFt: 10,
         verticalSpeedFpm: -6000,
