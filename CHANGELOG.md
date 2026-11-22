@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **In flight › Flight plan**: tap a fix in the side view for its altitude and speed limits,
+  planned altitude, distance and time to go.
+
 ### Changed
 
 - A page that crashes shows the error and what SimTools did just before, instead of a blank

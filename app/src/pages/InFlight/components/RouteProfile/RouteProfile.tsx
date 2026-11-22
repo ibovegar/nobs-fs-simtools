@@ -1,5 +1,5 @@
 import { useElementSize, useTheme } from '@nobs/ui'
-import { useRef } from 'react'
+import { type MouseEvent, useEffect, useRef, useState } from 'react'
 import {
   type AircraftOnRoute,
   altitudeAt,
@@ -7,6 +7,7 @@ import {
   type ChartWaypoint,
   chartLabel,
   clipProfile,
+  fixTooltip,
   formatAltitude,
   formatInteger,
   labelWidthPx,
@@ -23,6 +24,7 @@ import {
   type VerticalProfile,
   viewRange,
 } from '~/pages/InFlight/domain'
+import { FixTooltip } from './FixTooltip'
 import styles from './RouteProfile.module.css'
 
 /**
@@ -46,6 +48,8 @@ const NAME_GAP_PX = 2
 const NAME_FONT_PX = 9
 /** Beside the drop line to the name. */
 const NAME_SIDE_PX = 8
+/** Around a fix's dot, the area that opens its tooltip: big enough for a VR laser. */
+const HIT_PX = 12
 
 interface RouteProfileProps {
   profile: VerticalProfile
@@ -70,6 +74,10 @@ export function RouteProfile(props: RouteProfileProps) {
   const { profile, waypoints, view, showToc = true, aircraft, nextIndex, referenceIndex } = props
 
   const ref = useRef<HTMLDivElement>(null)
+  // The fix under the mouse (a ring: it can be clicked), and the one clicked or tapped,
+  // whose tooltip is open: its waypoint index and hit area (the tooltip's anchor).
+  const [hovered, setHovered] = useState<number>()
+  const [pinned, setPinned] = useState<FixTarget>()
   const { scale, textScale } = useTheme()
   const size = useElementSize(ref)
   // Drawn in unscaled px: the viewBox enlarges the drawing with the UI scale.
@@ -212,6 +220,34 @@ export function RouteProfile(props: RouteProfileProps) {
 
   const sameTop = Math.abs(todX - tocX) < 28
 
+  // The tooltip of the clicked fix, while it's in view.
+  const target = pinned
+  const shown = visible.find(({ index }) => index === target?.index)?.planned
+  const tooltip = target &&
+    shown && {
+      anchorEl: target.el,
+      model: fixTooltip({
+        waypoint: shown.waypoint,
+        plannedFt: shown.plannedFt,
+        startNm,
+        flownNm: aircraft?.distanceNm,
+        groundSpeedKt: aircraft?.groundSpeedKt,
+        isReference: target.index === referenceIndex,
+      }),
+    }
+  const tapFix = (fix: FixTarget) =>
+    setPinned((current) => (current?.index === fix.index ? undefined : fix))
+
+  // A tapped fix's tooltip stays until a tap anywhere else (a tap on a fix doesn't reach
+  // the document). Listening only while one is open.
+  const isPinned = pinned !== undefined
+  useEffect(() => {
+    if (!isPinned) return
+    const close = () => setPinned(undefined)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [isPinned])
+
   return (
     <div ref={ref} className={styles.profile}>
       {width > 0 && (
@@ -270,6 +306,14 @@ export function RouteProfile(props: RouteProfileProps) {
             const wx = x(planned.waypoint.distanceNm)
             const wy = y(planned.plannedFt)
             const isNext = index === nextIndex
+            // The tapped fix (its tooltip held open) in orange; the next fix in the accent.
+            const dot =
+              index === pinned?.index
+                ? { className: styles.fixPinned, r: 5 }
+                : { className: isNext ? styles.fixNext : styles.fix, r: isNext ? 4 : 3 }
+            const hoverRing = index === hovered && (
+              <circle className={styles.fixHover} cx={wx} cy={wy} r={HIT_PX - 3} />
+            )
             return (
               <g key={`${planned.waypoint.key}-${index}`}>
                 <line className={styles.drop} x1={wx} y1={wy} x2={wx} y2={groundY} />
@@ -277,12 +321,8 @@ export function RouteProfile(props: RouteProfileProps) {
                   <RunwayMarker x={wx} y={wy} departure={planned.waypoint.phase === 'departure'} />
                 )}
                 <FixName label={nameAt.get(i)} />
-                <circle
-                  className={isNext ? styles.fixNext : styles.fix}
-                  cx={wx}
-                  cy={wy}
-                  r={isNext ? 4 : 3}
-                />
+                {hoverRing}
+                <circle className={dot.className} cx={wx} cy={wy} r={dot.r} />
               </g>
             )
           })}
@@ -310,9 +350,65 @@ export function RouteProfile(props: RouteProfileProps) {
               toScreen={(p) => ({ x: x(p.distanceNm), y: y(p.altitudeFt) })}
             />
           )}
+
+          {/* On top of everything: what opens a fix's tooltip. */}
+          {visible.map(({ planned, index }) => (
+            <FixHitArea
+              key={`${planned.waypoint.key}-${index}-hit`}
+              index={index}
+              x={x(planned.waypoint.distanceNm)}
+              y={y(planned.plannedFt)}
+              onHover={setHovered}
+              onTap={tapFix}
+            />
+          ))}
         </svg>
       )}
+      {tooltip && <FixTooltip model={tooltip.model} anchorEl={tooltip.anchorEl} />}
     </div>
+  )
+}
+
+/** A fix with a tooltip: its waypoint index and its hit area. */
+interface FixTarget {
+  index: number
+  el: Element
+}
+
+interface FixHitAreaProps {
+  index: number
+  x: number
+  y: number
+  /** The fix under the mouse (its index), or undefined when it leaves. */
+  onHover: (index: number | undefined) => void
+  /** A tap or click: opens (or closes) its tooltip. */
+  onTap: (fix: FixTarget) => void
+}
+
+/**
+ * An invisible circle around a fix's dot: hovering it rings the fix (it can be clicked), a
+ * click or tap opens its tooltip.
+ */
+function FixHitArea(props: FixHitAreaProps) {
+  const { index, x, y, onHover, onTap } = props
+  const tap = (event: MouseEvent) => {
+    // Not a tap on the chart around it, which closes the tooltip.
+    event.stopPropagation()
+    onTap({ index, el: event.currentTarget })
+  }
+
+  return (
+    // The chart is hidden from screen readers; the waypoint list has the same details.
+    // biome-ignore lint/a11y/noStaticElementInteractions: see above
+    <circle
+      className={styles.hit}
+      cx={x}
+      cy={y}
+      r={HIT_PX}
+      onMouseEnter={() => onHover(index)}
+      onMouseLeave={() => onHover(undefined)}
+      onClick={tap}
+    />
   )
 }
 

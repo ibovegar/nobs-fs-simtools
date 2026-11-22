@@ -3,6 +3,7 @@ import {
   ErrorBoundary,
   type ErrorBoundaryFallbackProps,
   PageHeaderArea,
+  POPOVER_BOUNDARY,
   ScrollArea,
   Tab,
   TabList,
@@ -22,6 +23,9 @@ function crashFallback(props: ErrorBoundaryFallbackProps) {
   const { message, groups } = crashReport(error, componentStack, recentLog())
   return <PageCrash message={message} groups={groups} onRetry={reset} />
 }
+
+/** Popovers (help, a fix's details) stay inside the panel, also in the dev harness's frame. */
+const popoverBoundary = { [POPOVER_BOUNDARY]: '' }
 
 function logCrash(error: unknown) {
   logLine(`Page crashed: ${errorMessage(error)}`)
@@ -51,7 +55,7 @@ export function App() {
   if (!panelVisible) return null
 
   return (
-    <div className={cx(styles.app, scrollbar && styles.withScrollbar)}>
+    <div className={cx(styles.app, scrollbar && styles.withScrollbar)} {...popoverBoundary}>
       <Tabs value={active} onValueChange={(id) => updateSettings({ activePage: id })}>
         <TabList label="SimTools pages">
           {PAGES.map((page) => (

@@ -20,8 +20,8 @@ export type PopoverCloseReason = 'backdropClick' | 'escapeKeyDown'
 export interface PopoverProps {
   /** Whether the popover is shown. Controlled: the caller owns the state. */
   open: boolean
-  /** The element the popover is attached to, usually the button that opened it. */
-  anchorEl: HTMLElement | null
+  /** The element the popover is attached to, usually the button that opened it (or an SVG shape). */
+  anchorEl: Element | null
   /** Called when the user taps outside the popover or presses Escape. */
   onClose?: (reason: PopoverCloseReason) => void
   /** The point on the anchor the popover attaches to. Default: its top left corner. */
@@ -30,6 +30,12 @@ export interface PopoverProps {
   transformOrigin?: PopoverOrigin
   /** Minimum distance kept to the screen edges, in px. Default 16. */
   marginThreshold?: number
+  /**
+   * Keep it inside this element's box instead of the window (e.g. an app drawn in a frame
+   * smaller than the page); `marginThreshold` applies inside it. Default: the anchor's
+   * nearest ancestor with the `data-popover-boundary` attribute, else the window.
+   */
+  boundary?: Element | null
   /** Where to render it. Default: `document.body`. */
   container?: HTMLElement
   /**
@@ -37,9 +43,20 @@ export interface PopoverProps {
    * paragraph. Never wider than the screen allows (`marginThreshold` on each side).
    */
   size?: 'sm' | 'md' | 'lg'
+  /**
+   * Default true: a backdrop catches the tap outside, which closes it. False for a tooltip:
+   * no backdrop, and it never takes the mouse or taps, so what is under it keeps them.
+   */
+  modal?: boolean
   className?: string
   children: ReactNode
 }
+
+/**
+ * Mark an app's root with this attribute and every popover inside it stays within it (an
+ * app smaller than the page, e.g. a panel drawn in a frame).
+ */
+export const POPOVER_BOUNDARY = 'data-popover-boundary'
 
 const offset = (origin: PopoverOrigin['vertical' | 'horizontal'], size: number) => {
   if (typeof origin === 'number') return origin
@@ -66,8 +83,10 @@ export function Popover(props: PopoverProps) {
     anchorOrigin = { vertical: 'top', horizontal: 'left' },
     transformOrigin = { vertical: 'top', horizontal: 'left' },
     marginThreshold = 16,
+    boundary,
     container,
     size = 'md',
+    modal = true,
     className,
     children,
   } = props
@@ -84,21 +103,30 @@ export function Popover(props: PopoverProps) {
 
     const place = () => {
       const anchor = anchorEl.getBoundingClientRect()
-      const width = paper.offsetWidth
-      const height = paper.offsetHeight
+      const within = boundary ?? anchorEl.closest(`[${POPOVER_BOUNDARY}]`)
+      const box = within?.getBoundingClientRect() ?? {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+      }
+      const maxWidth = box.right - box.left - 2 * marginThreshold
+      const maxHeight = box.bottom - box.top - 2 * marginThreshold
+      const width = Math.min(paper.offsetWidth, maxWidth)
+      const height = Math.min(paper.offsetHeight, maxHeight)
       const left = anchor.left + offset(anchorH, anchor.width) - offset(originH, width)
       const top = anchor.top + offset(anchorV, anchor.height) - offset(originV, height)
       setPosition({
         left: Math.max(
-          marginThreshold,
-          Math.min(left, window.innerWidth - width - marginThreshold),
+          box.left + marginThreshold,
+          Math.min(left, box.right - width - marginThreshold),
         ),
         top: Math.max(
-          marginThreshold,
-          Math.min(top, window.innerHeight - height - marginThreshold),
+          box.top + marginThreshold,
+          Math.min(top, box.bottom - height - marginThreshold),
         ),
-        maxWidth: window.innerWidth - 2 * marginThreshold,
-        maxHeight: window.innerHeight - 2 * marginThreshold,
+        maxWidth,
+        maxHeight,
       })
     }
 
@@ -109,7 +137,7 @@ export function Popover(props: PopoverProps) {
       window.removeEventListener('resize', place)
       window.removeEventListener('scroll', place, true)
     }
-  }, [open, anchorEl, anchorH, anchorV, originH, originV, marginThreshold])
+  }, [open, anchorEl, boundary, anchorH, anchorV, originH, originV, marginThreshold])
 
   useEffect(() => {
     if (!open) return
@@ -128,11 +156,13 @@ export function Popover(props: PopoverProps) {
   if (!open) return null
 
   return createPortal(
-    <div className={styles.root}>
-      <div className={styles.backdrop} onClick={() => onClose?.('backdropClick')} aria-hidden />
+    <div className={cx(styles.root, !modal && styles.passThrough)}>
+      {modal && (
+        <div className={styles.backdrop} onClick={() => onClose?.('backdropClick')} aria-hidden />
+      )}
       <div
         ref={paperRef}
-        role="dialog"
+        role={modal ? 'dialog' : 'tooltip'}
         className={cx(styles.paper, styles[size], className)}
         // Invisible for the one frame before it is measured and placed.
         style={position ?? { visibility: 'hidden', top: 0, left: 0 }}

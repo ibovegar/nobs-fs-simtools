@@ -10,6 +10,13 @@ export {
   resolveDescentReference,
 } from './descentReference'
 export {
+  altitudeLimitText,
+  type FixTooltipInput,
+  type FixTooltipModel,
+  fixTooltip,
+  speedLimitText,
+} from './fixTooltip'
+export {
   type FlightPlanResults,
   flightPlanResults,
   planningText,
@@ -145,6 +152,7 @@ export {
   missingRouteNote,
   type ReferenceFlagModel,
   referenceNote,
+  viaLabel,
   type WaypointRowModel,
   type WaypointRowState,
   type WaypointTableInput,

@@ -43,3 +43,9 @@
 .lg {
   width: calc(340px * var(--ui-scale));
 }
+
+/* Not modal (a tooltip): nothing takes the mouse or taps, so hover stays on the anchor. */
+.passThrough,
+.passThrough .paper {
+  pointer-events: none;
+}

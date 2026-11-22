@@ -1,0 +1,1 @@
+export { FixTooltip } from './FixTooltip'

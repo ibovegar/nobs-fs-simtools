@@ -3,6 +3,7 @@
 // Pure and unit-tested.
 
 import type { ProfileView } from './profileAssumptions'
+import type { SpeedConstraint } from './route'
 import {
   altitudeAt,
   type ProfilePoint,
@@ -148,6 +149,10 @@ export interface ChartWaypoint extends ProfileWaypoint {
   ident: string
   /** The runway this fix is the threshold of, e.g. '27L': drawn as a runway on the ground. */
   runway?: string
+  /** Airway flown to the fix (its tooltip). */
+  via?: string
+  /** The sim's speed limit at the fix (its tooltip). */
+  speed?: SpeedConstraint
 }
 
 /** About how long a label is in the chart's monospaced font (px), to see where it fits. */

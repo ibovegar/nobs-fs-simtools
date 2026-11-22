@@ -12,6 +12,7 @@ export { IconButton, type IconButtonColor, type IconButtonVariant } from './Icon
 export { Keypad, type KeypadLayout } from './Keypad'
 export { PageHeader, PageHeaderArea } from './PageHeader'
 export {
+  POPOVER_BOUNDARY,
   Popover,
   type PopoverCloseReason,
   type PopoverOrigin,

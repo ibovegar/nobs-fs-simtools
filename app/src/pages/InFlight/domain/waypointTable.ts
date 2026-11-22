@@ -12,6 +12,11 @@ const PHASE_LABEL: Record<RoutePhase, string> = {
   approach: 'APP',
 }
 
+/** How a fix is reached: its runway, the airway, or the procedure (SID / STAR / APP). */
+export function viaLabel(wp: { runway?: string; via?: string; phase: RoutePhase }): string {
+  return wp.runway ? `RW${wp.runway}` : (wp.via ?? PHASE_LABEL[wp.phase])
+}
+
 /** A row ahead of the aircraft, the fix it's heading for, or one already flown. */
 export type WaypointRowState = 'upcoming' | 'next' | 'passed'
 
@@ -85,7 +90,7 @@ export function waypointRows(input: WaypointTableInput): WaypointRowModel[] {
         kind: 'fix',
         key: `${wp.key}-${index}`,
         ident: wp.ident,
-        via: wp.runway ? `RW${wp.runway}` : (wp.via ?? PHASE_LABEL[wp.phase]),
+        via: viaLabel(wp),
         tag: isReference ? 'TOD REF' : '',
         isReference,
         state: passed ? 'passed' : live && index === nextIndex ? 'next' : 'upcoming',

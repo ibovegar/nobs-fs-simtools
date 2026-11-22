@@ -61,6 +61,21 @@
   stroke-width: 1.5;
 }
 
+/* Around the fix under the mouse: it can be clicked for its details. */
+.fixHover {
+  fill: var(--accent);
+  fill-opacity: 0.15;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* The fix whose tooltip is open. */
+.fixPinned {
+  fill: var(--warning);
+  stroke: var(--warning);
+  stroke-width: 1.5;
+}
+
 .top {
   fill: var(--accent);
 }
@@ -113,6 +128,13 @@
 .fixNameNext {
   fill: var(--accent);
   font-weight: 600;
+}
+
+/* Invisible, but it takes the mouse and taps: a fix's tooltip. */
+.hit {
+  fill: var(--bg-card);
+  fill-opacity: 0;
+  cursor: pointer;
 }
 
 /* The TOD reference's flag, in the accent colour as its flag button in the waypoint list. */
