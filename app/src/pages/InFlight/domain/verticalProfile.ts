@@ -35,6 +35,12 @@ export interface ProfileInputs {
    * when the runway path is still higher). Omitted: straight down to the runway.
    */
   reference?: DescentTarget
+  /**
+   * Where the climb ahead starts: the aircraft once it's flying (or where it reached
+   * cruise). The flown part runs straight from the runway to it. Omitted: the climb starts
+   * at the runway.
+   */
+  climbFrom?: ProfilePoint
 }
 
 export interface DescentTarget {
@@ -86,16 +92,28 @@ export function altitudeAt(points: readonly ProfilePoint[], distanceNm: number):
   return (points[points.length - 1] as ProfilePoint).altitudeFt
 }
 
-/** Forwards from the runway: climb at the gradient, level below SID "at or below" limits. */
+/**
+ * Forwards from the runway (or from `climbFrom`): climb at the gradient, level below SID
+ * "at or below" limits.
+ */
 function climbPass(i: ProfileInputs): ProfilePoint[] {
   const wps = i.waypoints
   const first = wps[0] as ProfileWaypoint
+  const last = wps[wps.length - 1] as ProfileWaypoint
   const points: ProfilePoint[] = [{ distanceNm: first.distanceNm, altitudeFt: i.startFt }]
   let alt = i.startFt
   let d = first.distanceNm
 
+  const from = i.climbFrom
+  if (from && from.distanceNm > first.distanceNm && from.distanceNm < last.distanceNm) {
+    d = from.distanceNm
+    alt = Math.max(i.startFt, Math.min(from.altitudeFt, i.cruiseFt))
+    points.push({ distanceNm: d, altitudeFt: alt })
+  }
+
   for (let k = 1; k < wps.length; k++) {
     const wp = wps[k] as ProfileWaypoint
+    if (wp.distanceNm <= d) continue
     const upper = climbPhase(wp.phase) ? wp.altitude?.upperFt : undefined
     const cap = upper === undefined ? i.cruiseFt : Math.min(i.cruiseFt, upper)
     const end = wp.distanceNm

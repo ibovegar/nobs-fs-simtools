@@ -13,6 +13,8 @@ All notable changes to this project are documented here. The format is based on
 
 ### Changed
 
+- **In flight › Flight plan**: the climb is planned from where you are, so TOC moves with
+  you (a late or slower climb isn't "behind" anymore) and stays where you reach cruise.
 - A page that crashes shows the error and what SimTools did just before, instead of a blank
   panel.
 

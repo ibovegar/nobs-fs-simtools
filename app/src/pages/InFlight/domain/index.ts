@@ -1,5 +1,11 @@
 // In flight's pure maths, formatting and setup — no React. Unit-tested.
 export { type CalculatorProfile, calculatorProfile } from './calculatorProfile'
+export {
+  type ClimbAnchor,
+  type ClimbAnchorInput,
+  CRUISE_REACHED_FT,
+  climbAnchor,
+} from './climbAnchor'
 export { advanceDistance, FEET_PER_NM, MIN_GROUNDSPEED_KT, rateForAngle } from './descentMath'
 export {
   canBeDescentReference,
@@ -144,6 +150,7 @@ export {
   computeVerticalProfile,
   type DescentTarget,
   type PlannedWaypoint,
+  type ProfileInputs,
   type ProfilePoint,
   planWaypoints,
   type VerticalProfile,

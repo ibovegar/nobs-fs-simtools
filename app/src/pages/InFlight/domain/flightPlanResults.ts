@@ -42,7 +42,10 @@ const distance = (label: string, nm: number, help: string): ResultValue => ({
   unit: 'nm',
 })
 
-/** Before TOC: distance to it, the time, and the climb rate that makes it. */
+/**
+ * Before TOC: distance to it, the time, and the planned climb rate. In flight the climb is
+ * planned from the aircraft, so TOC is a prediction that moves with how you climb.
+ */
 function climbResults(progress: FlightProgress): FlightPlanResults {
   return {
     main: { value: formatDistance(Math.max(0, progress.toTocNm)), unit: 'nm to TOC' },
@@ -50,7 +53,7 @@ function climbResults(progress: FlightProgress): FlightPlanResults {
       time(progress.timeToTocSec, 'Time to TOC at your groundspeed.'),
       verticalSpeed(
         progress.climbRateToTocFpm,
-        'The climb rate that reaches the cruise altitude exactly at TOC, from where you are now.',
+        "The planned climb at your groundspeed. TOC is worked out from where you are: climb slower and it moves further on, faster and it comes closer. It's fixed where you reach the cruise altitude.",
       ),
     ],
   }

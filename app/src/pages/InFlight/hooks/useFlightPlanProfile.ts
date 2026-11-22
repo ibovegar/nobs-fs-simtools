@@ -9,6 +9,7 @@ import {
 import {
   type AircraftOnRoute,
   angleForGradientDeg,
+  climbAnchor,
   computeVerticalProfile,
   type DescentReference,
   descentTarget,
@@ -21,6 +22,7 @@ import {
   type PlannedWaypoint,
   PROFILE_ASSUMPTIONS,
   type ProfileBasis,
+  type ProfileInputs,
   type ProfileView,
   planWaypoints,
   positionOnRoute,
@@ -73,6 +75,12 @@ export function useFlightPlanProfile() {
   const [referenceKey, setReferenceKey] = usePersistentState('inflight.plan.todRef.v1', '', {
     debounceMs: 0,
   })
+  // Where this flight reached cruise (the TOC), on which route: saved, so reopening the
+  // panel in cruise keeps it.
+  const [rememberedToc, setRememberedToc] = usePersistentState<{
+    route: string
+    tocNm: number | undefined
+  }>('inflight.plan.reachedToc.v1', { route: '', tocNm: undefined })
   const sim = useSimVars(FLIGHT_PLAN_SIM_VARS, 1)
   const { aircraft: simAircraft } = useSimAircraft()
 
@@ -89,13 +97,31 @@ export function useFlightPlanProfile() {
   }
 
   let live: FlightPlanView | undefined
+  let reachedTocNm: number | undefined
   if (plan) {
     const position =
       sim.latitude !== undefined && sim.longitude !== undefined
         ? positionOnRoute(plan.route.waypoints, { lat: sim.latitude, lon: sim.longitude })
         : undefined
+    // The climb ahead is planned from the aircraft (TOC moves with it), and TOC stays
+    // where cruise was reached.
+    const anchor = climbAnchor({
+      planned: plan.profile,
+      aircraft:
+        position && sim.altitude !== undefined
+          ? { distanceNm: position.distanceNm, altitudeFt: sim.altitude }
+          : undefined,
+      reachedTocNm: rememberedToc.route === plan.routeKey ? rememberedToc.tocNm : undefined,
+    })
+    reachedTocNm = anchor.reachedTocNm
+    const profile = anchor.climbFrom
+      ? computeVerticalProfile({ ...plan.inputs, climbFrom: anchor.climbFrom })
+      : plan.profile
+    const waypoints = anchor.climbFrom
+      ? planWaypoints(plan.route.waypoints, profile)
+      : plan.waypoints
     const progress = flightProgress({
-      profile: plan.profile,
+      profile,
       startNm: plan.route.waypoints[0]?.distanceNm,
       position,
       altitudeFt: sim.altitude,
@@ -103,6 +129,8 @@ export function useFlightPlanProfile() {
     })
     live = {
       ...plan,
+      profile,
+      waypoints,
       progress,
       aircraft:
         position && sim.altitude !== undefined
@@ -124,6 +152,14 @@ export function useFlightPlanProfile() {
       ),
     }
   }
+
+  // Remember the TOC once cruise is reached (a single write; nothing while climbing).
+  const routeKey = plan?.routeKey
+  useEffect(() => {
+    if (routeKey === undefined || reachedTocNm === undefined) return
+    if (rememberedToc.route === routeKey && rememberedToc.tocNm === reachedTocNm) return
+    setRememberedToc({ route: routeKey, tocNm: reachedTocNm })
+  }, [routeKey, reachedTocNm, rememberedToc, setRememberedToc])
 
   // Flying out of the climb view's window switches the chart to the whole flight. Only on
   // that moment: picking Climb again afterwards sticks.
@@ -164,7 +200,7 @@ function planView(
   const first = route.waypoints[0]
   const last = route.waypoints[route.waypoints.length - 1]
   const reference = resolveDescentReference(route.waypoints, referenceKey)
-  const profile = computeVerticalProfile({
+  const inputs: ProfileInputs = {
     reference: descentTarget(reference),
     waypoints: route.waypoints,
     startFt: first?.elevationFt ?? 0,
@@ -172,9 +208,14 @@ function planView(
     cruiseFt,
     climbFtPerNm: basis.climbFtPerNm,
     descentFtPerNm: basis.descentFtPerNm,
-  })
+  }
+  const profile = computeVerticalProfile(inputs)
   return {
     route,
+    /** The plan's inputs, to plan the climb again from the aircraft. */
+    inputs,
+    /** Identifies the route, for the TOC remembered on it. */
+    routeKey: `${first?.key}|${last?.key}|${route.totalNm.toFixed(1)}`,
     waypoints: planWaypoints(route.waypoints, profile),
     profile,
     reference,
