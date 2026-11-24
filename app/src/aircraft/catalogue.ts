@@ -23,7 +23,8 @@ const LB = 1 / 2.204_622_6
  * Black Square Caravan Professional manual, Engine Power Settings (without cargo pod),
  * Standard Day: climb at 115 KIAS (torque from the climb table, 1,900 RPM, ITT 765 °C max
  * in the climb, from the limitations), normal cruise ≈ 164 KTAS (4,000–16,000 ft), descent at
- * 140 KIAS and −800 fpm. Max landing weight 8,500 lb. The manual gives no approach speed:
+ * −800 fpm. Descent speed 155 KIAS: what the descent table below flies (e.g. 12,000 ft in
+ * 15 min over 43 nm, the same as the 208B handbook's example). Max landing weight 8,500 lb. The manual gives no approach speed:
  * 78 KIAS with full flaps at max landing weight, from the Cessna 208B handbook.
  */
 const CARAVAN_PERFORMANCE: AircraftPerformance = {
@@ -53,7 +54,7 @@ const CARAVAN_PERFORMANCE: AircraftPerformance = {
   },
   cruise: { speedKtas: 164 },
   descent: {
-    speedKias: 140,
+    speedKias: 155,
     rateFpm: 800,
     table: [
       { altitudeFt: 4000, timeMin: 5, distanceNm: 14 },

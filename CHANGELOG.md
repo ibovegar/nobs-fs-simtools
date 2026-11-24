@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-24
+
 ### Added
 
 - **In flight › Flight plan**: tap a fix in the side view to plan the TOD to it.
@@ -27,6 +29,7 @@ All notable changes to this project are documented here. The format is based on
 
 ### Fixed
 
+- **Grand Caravan**: descent speed 155 kt (was 140 kt), matching its descent table.
 - **In flight › TOD calculator**: you no longer reach the end altitude miles before the target.
 - **In flight › Flight plan**: the TOD uses the aircraft's descent figures from cruise to the
   TOD reference, not all the way to sea level.

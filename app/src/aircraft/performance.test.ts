@@ -70,7 +70,7 @@ describe('climbSpeedKias', () => {
 
 describe('descentSpeedKias', () => {
   it('is the single descent speed without a schedule', () => {
-    expect(descentSpeedKias(perf('c208b'), 10_000)).toBe(140)
+    expect(descentSpeedKias(perf('c208b'), 10_000)).toBe(155)
   })
 
   it('follows the schedule by altitude', () => {
