@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   type Aircraft,
+  approachSpeedKias,
   climbGradientFtPerNm,
   climbRateFpm,
   descentGradientFtPerNm,
@@ -60,6 +61,8 @@ export interface FlightPlanView {
   /** Near and past TOD: the speed and V/S to fly, and any slowdown cue. */
   descentGuidance: DescentGuidance | undefined
 }
+
+const LB_PER_KG = 2.204_622_6
 
 const GUIDED_STATUSES: readonly FlightProgress['status'][] = [
   'approaching',
@@ -176,6 +179,12 @@ export function useFlightPlanProfile() {
               simAircraft?.performance && sim.altitude !== undefined
                 ? descentSpeedKias(simAircraft.performance, sim.altitude)
                 : undefined,
+            approachSpeedKias:
+              simAircraft?.performance &&
+              approachSpeedKias(
+                simAircraft.performance,
+                sim.weightLb === undefined ? undefined : sim.weightLb / LB_PER_KG,
+              ),
           })
         : undefined,
     }

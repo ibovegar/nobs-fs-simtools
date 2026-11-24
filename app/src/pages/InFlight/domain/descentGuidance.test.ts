@@ -118,6 +118,28 @@ describe('descentGuidance: speed', () => {
     expect(descentGuidance(input({ flownNm: 55, altitudeFt: 3000 }))?.speedKias).toBe(120)
   })
 
+  it('cues the approach speed before 5 nm from the runway', () => {
+    // 42 kt at 0.5 kt/s is 84 s (4.2 nm), plus 1 nm: due 5.2 nm before the 65 nm point.
+    const g = descentGuidance(
+      input({ flownNm: 58, altitudeFt: 2000, iasKt: 120, approachSpeedKias: 78 }),
+    )
+    expect(g?.speedKias).toBe(120)
+    expect(g?.slowdown?.kt).toBe(78)
+    expect(g?.slowdown?.inNm).toBeCloseTo(1.8, 6)
+  })
+
+  it('flies the approach speed from 5 nm out', () => {
+    const g = descentGuidance(
+      input({ flownNm: 66, altitudeFt: 1200, iasKt: 80, approachSpeedKias: 78 }),
+    )
+    expect(g?.speedKias).toBe(78)
+    expect(g?.slowdown).toBeUndefined()
+  })
+
+  it('without an approach speed, keeps the last limit to the runway', () => {
+    expect(descentGuidance(input({ flownNm: 66, altitudeFt: 1200 }))?.speedKias).toBe(120)
+  })
+
   it('has no speed without a descent speed or a limit behind', () => {
     expect(descentGuidance(input({ descentSpeedKias: undefined }))?.speedKias).toBeUndefined()
   })

@@ -1,5 +1,5 @@
-// What the flight plan's results box shows in each phase of flight: the big answer and two
-// supporting values, and the "How is this planned?" text.
+// What the flight plan's results box shows in each phase of flight: the big answer and three
+// supporting values (time or distance, V/S, speed), and the "How is this planned?" text.
 import type { BadgeTone } from '@nobs/ui'
 import type { ClimbTarget } from './climbTarget'
 import type { DescentGuidance } from './descentGuidance'
@@ -14,15 +14,18 @@ export interface ResultValue {
   /** What the value means, behind a "?" (also keeps the row as tall as the calculator's). */
   help: string
   tone?: BadgeTone
-  /** A short instruction under the value: a slowdown, or too high. */
+  /** A short instruction under the value: too high (V/S), or a slowdown (speed). */
   caption?: string
 }
 
 export interface FlightPlanResults {
   /** The big value, which reads as one line with its unit: "38 nm to TOD". */
   main: { value: string; unit: string; tone?: BadgeTone }
-  /** Under it, vertical speed always on the right so it doesn't jump sides at TOD. */
-  secondary: readonly [ResultValue, ResultValue]
+  /**
+   * Under it: time or distance, the V/S, and the speed to fly beside it (as the autopilot's
+   * V/S and speed). The same three columns in every phase, so nothing jumps at TOC or TOD.
+   */
+  secondary: readonly [ResultValue, ResultValue, ResultValue]
 }
 
 // As on the TOD calculator: no thousands separator, so "-2250" doesn't read like a decimal.
@@ -45,6 +48,14 @@ const distance = (label: string, nm: number, help: string): ResultValue => ({
   help,
   value: formatDistance(Math.max(0, nm)),
   unit: 'nm',
+})
+
+const speed = (kias: number | undefined, help: string, caption?: string): ResultValue => ({
+  label: 'Speed',
+  help,
+  value: kias === undefined ? '—' : String(Math.round(kias)),
+  unit: kias === undefined ? undefined : 'kt',
+  caption,
 })
 
 const NO_CLIMB_SPEED_HELP = 'SimTools has no recommended climb speed for this aircraft.'
@@ -70,29 +81,46 @@ function climbResults(
     secondary: [
       time(progress.timeToTocSec, 'Time to TOC at your groundspeed.'),
       climbTargetValue(climbTarget),
+      speed(
+        climbTarget?.speedKias,
+        climbTarget
+          ? "The aircraft's recommended climb speed (indicated airspeed)."
+          : NO_CLIMB_SPEED_HELP,
+      ),
     ],
   }
 }
 
-/** The instruction under the descent V/S: too high first, it's the one that can't wait. */
-function descentCaption(guidance: DescentGuidance): string | undefined {
-  if (guidance.tooHighFor) return `Too high for ${guidance.tooHighFor}`
-  const { slowdown } = guidance
+/** The instruction under the speed: when to slow down for a limit or the approach. */
+function slowdownCaption(guidance: DescentGuidance | undefined): string | undefined {
+  const slowdown = guidance?.slowdown
   if (!slowdown) return undefined
   const when = slowdown.inNm > 0 ? `in ${formatDistance(slowdown.inNm)} nm` : 'now'
   return `Slow to ${slowdown.kt} kt ${when}`
 }
 
-/** A descent V/S with its instruction; the speed it's planned for is in the help. */
+/** A descent V/S, in red with a note when the next fix can't be made. */
 function withDescentGuidance(rate: ResultValue, guidance: DescentGuidance | undefined) {
-  if (!guidance) return rate
-  const { speedKias, tooHighFor } = guidance
-  return {
-    ...rate,
-    help: speedKias === undefined ? rate.help : `${rate.help} Planned for ${speedKias} kt.`,
-    tone: tooHighFor ? ('danger' as const) : undefined,
-    caption: descentCaption(guidance),
-  }
+  const tooHighFor = guidance?.tooHighFor
+  if (!tooHighFor) return rate
+  return { ...rate, tone: 'danger' as const, caption: `Too high for ${tooHighFor}` }
+}
+
+const DESCENT_SPEED_HELP =
+  "The speed to fly in the descent (indicated airspeed): the aircraft's descent speed, lowered by the procedure's speed limits, and its approach speed from 5 nm before the runway. Below it: when to start slowing down."
+const NO_DESCENT_SPEED_HELP =
+  "SimTools has no descent speed for this aircraft. It shows the procedure's speed limits once you pass them."
+const CRUISE_SPEED_HELP =
+  'In cruise the speed follows your cruise power. Close to TOD this shows the speed to descend at.'
+
+/** The speed to fly in the descent, with the slowdown cue. */
+function descentSpeed(guidance: DescentGuidance | undefined): ResultValue {
+  const kias = guidance?.speedKias
+  return speed(
+    kias,
+    kias === undefined ? NO_DESCENT_SPEED_HELP : DESCENT_SPEED_HELP,
+    slowdownCaption(guidance),
+  )
 }
 
 /** In cruise: distance to TOD; hold (or regain) the cruise altitude, then the rate for TOD. */
@@ -123,7 +151,11 @@ function cruiseResults(
       unit: 'nm to TOD',
       tone: approaching ? 'warning' : undefined,
     },
-    secondary: [time(progress.timeToTodSec, 'Time to TOD at your groundspeed.'), rate],
+    secondary: [
+      time(progress.timeToTodSec, 'Time to TOD at your groundspeed.'),
+      rate,
+      approaching ? descentSpeed(guidance) : speed(undefined, CRUISE_SPEED_HELP),
+    ],
   }
 }
 
@@ -150,6 +182,7 @@ function descentResults(
         ),
         guidance,
       ),
+      descentSpeed(guidance),
     ],
   }
 }

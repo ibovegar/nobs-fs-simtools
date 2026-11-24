@@ -172,7 +172,8 @@ pages/
                     climbTarget (the V/S that holds the climb speed, from live energy),
                     descentReference (the fix the TOD is planned to: first approach
                     fix with an altitude, or the pilot's pick),
-                    descentGuidance (speed to hold, live V/S to the reference, slowdown cue),
+                    descentGuidance (speed to hold, live V/S to the reference, slowdown cue,
+                    approach speed from 5 nm out),
                     flightProgress (position on route, phase, path deviation),
                     profileChart (side-view geometry), profileAssumptions (fixed climb /
                     descent), calculatorProfile (the calculator's descent as a side view),
