@@ -48,6 +48,12 @@ export interface PopoverProps {
    * no backdrop, and it never takes the mouse or taps, so what is under it keeps them.
    */
   modal?: boolean
+  /**
+   * A tooltip (`modal={false}`) with a button in it: the whole tooltip takes the mouse and
+   * taps, so the button can be clicked. Default false. (Some browsers, e.g. the sim's, don't
+   * let an element take taps again inside one that lets them through.)
+   */
+  interactive?: boolean
   className?: string
   children: ReactNode
 }
@@ -87,6 +93,7 @@ export function Popover(props: PopoverProps) {
     container,
     size = 'md',
     modal = true,
+    interactive = false,
     className,
     children,
   } = props
@@ -155,21 +162,35 @@ export function Popover(props: PopoverProps) {
 
   if (!open) return null
 
-  return createPortal(
-    <div className={cx(styles.root, !modal && styles.passThrough)}>
-      {modal && (
-        <div className={styles.backdrop} onClick={() => onClose?.('backdropClick')} aria-hidden />
+  const paper = (
+    <div
+      ref={paperRef}
+      role={modal ? 'dialog' : 'tooltip'}
+      className={cx(
+        styles.paper,
+        styles[size],
+        !modal && styles.floating,
+        !modal && !interactive && styles.passThrough,
+        className,
       )}
-      <div
-        ref={paperRef}
-        role={modal ? 'dialog' : 'tooltip'}
-        className={cx(styles.paper, styles[size], className)}
-        // Invisible for the one frame before it is measured and placed.
-        style={position ?? { visibility: 'hidden', top: 0, left: 0 }}
-      >
-        {children}
+      // Invisible for the one frame before it is measured and placed.
+      style={position ?? { visibility: 'hidden', top: 0, left: 0 }}
+    >
+      {children}
+    </div>
+  )
+
+  // A tooltip is drawn on its own, with no full-screen layer around it: nothing else on the
+  // screen is covered, and an interactive one isn't inside an element that lets taps through.
+  return createPortal(
+    modal ? (
+      <div className={styles.root}>
+        <div className={styles.backdrop} onClick={() => onClose?.('backdropClick')} aria-hidden />
+        {paper}
       </div>
-    </div>,
+    ) : (
+      paper
+    ),
     container ?? document.body,
   )
 }

@@ -1,4 +1,0 @@
-/* The tooltip lets the mouse through to the chart; its button still takes taps. */
-.action {
-  pointer-events: auto;
-}

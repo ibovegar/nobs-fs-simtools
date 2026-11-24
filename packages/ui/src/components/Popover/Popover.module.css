@@ -44,8 +44,13 @@
   width: calc(340px * var(--ui-scale));
 }
 
-/* Not modal (a tooltip): nothing takes the mouse or taps, so hover stays on the anchor. */
-.passThrough,
-.passThrough .paper {
+/* Not modal (a tooltip): drawn on its own, without the full-screen layer. */
+.floating {
+  position: fixed;
+  z-index: 1000;
+}
+
+/* A tooltip without buttons: it never takes the mouse or taps, so hover stays on the anchor. */
+.passThrough {
   pointer-events: none;
 }

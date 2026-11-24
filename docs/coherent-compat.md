@@ -19,6 +19,7 @@ Update this file as the in-sim checks confirm or rule things out.
 | Theme | CSS custom properties set from TS on `<html>` | `ThemeProvider` |
 | `matchMedia` | May be missing; guarded | `supportsSystemTheme()`. Settings offers dark/light only |
 | Pointer input | Pointer events, with a mouse-event fallback | `InkCanvas` |
+| Pass-through layers | `pointer-events: auto` inside an element with `pointer-events: none` doesn't make it clickable again (seen in the sim: a fix tooltip's button did nothing). Give a clickable part its own element outside any pass-through layer | `Popover` `interactive` (@nobs/ui) |
 | Resize | `ResizeObserver`, with a window `resize` fallback | `useElementSize` (@nobs/ui) |
 | Storage | Sim `DataStorage` (`GetStoredData`/`SetStoredData`), not `localStorage`. Only after the sim's `dataStorageReady` event: before it, reads return null and writes are dropped, so `main.tsx` mounts once it is ready | `~/storage`, `main.tsx` |
 | Sim globals | `typeof` guards; never `window.X` (some are bare declarations) | `~/sim/simGlobals.ts` |

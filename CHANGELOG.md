@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Fixed
+
+- **In flight › Flight plan**: the "Plan TOD to …" button on a fix in the side view did
+  nothing in the sim.
+
 ## [0.7.0] - 2026-11-24
 
 ### Added

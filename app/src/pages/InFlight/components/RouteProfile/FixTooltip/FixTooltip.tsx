@@ -1,7 +1,6 @@
 import { Flag1Outlined, Flag1Solid } from '@lineiconshq/free-icons'
 import { Button, Popover, Stack, Typography } from '@nobs/ui'
 import type { FixTooltipModel } from '~/pages/InFlight/domain'
-import styles from './FixTooltip.module.css'
 
 interface FixTooltipProps {
   model: FixTooltipModel
@@ -14,15 +13,16 @@ interface FixTooltipProps {
 /**
  * A clicked fix's details above its dot: its charted limits and distance, and a button to
  * plan the TOD to it. Drawn on the page (a Popover), so the card around the chart
- * never cuts it off; apart from the button it never takes the mouse, so the fixes under it
- * can still be hovered and clicked.
+ * never cuts it off. Without the button it never takes the mouse, so the fixes under it
+ * can still be hovered and clicked; with it, the whole tooltip takes taps (the sim's
+ * browser can't re-enable taps on just the button). A tap on it closes it, like a tap
+ * anywhere else.
  */
 export function FixTooltip(props: FixTooltipProps) {
   const { model, anchorEl, onSelectReference } = props
   const action = model.referenceAction
   const referenceButton = action && (
     <Button
-      className={styles.action}
       variant="soft"
       size="sm"
       icon={action.isPicked ? Flag1Solid : Flag1Outlined}
@@ -36,6 +36,7 @@ export function FixTooltip(props: FixTooltipProps) {
     <Popover
       open
       modal={false}
+      interactive={Boolean(action)}
       anchorEl={anchorEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
