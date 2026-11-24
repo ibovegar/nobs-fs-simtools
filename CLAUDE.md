@@ -131,14 +131,17 @@ App.tsx             tab shell: renders a tab per page and remembers the active o
 pages/
   pageRegistry.ts   the list of pages (tabs) in order
   Info/             Info.tsx: what the pilot enters once and keeps (the callsign), and
-                    the aircraft loaded in the sim (~/aircraft)
+                    the aircraft loaded in the sim (~/aircraft), the QNH
                     + infoIcon (the tab's "i" icon: Lineicons has none)
     hooks/          useInfo (saved at once, survives closing the sim), useAircraftSpeeds
                     (the sim's aircraft + its speeds; approach from the live weight)
+                    usePressure (the sea-level pressure, polled every 2 s)
     components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft
-                    and its climb / cruise / descent / approach speeds)
+                    and its climb / cruise / descent / approach speeds),
+                    PressureCard (QNH in hPa and inHg)
     domain/         callsign (ICAO rules: A–Z, 0–9, at most 7), speedReadouts (the
-                    aircraft card's speed readouts and their help texts)
+                    aircraft card's speed readouts and their help texts), pressure
+                    (QNH in hPa / inHg)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
     containers/     InkPad, AtcPad, TextPad: the three note modes

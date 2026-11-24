@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Info**: the barometric pressure (QNH) where you are, in hPa and inHg.
+
 ### Fixed
 
 - **In flight › Flight plan**: the "Plan TOD to …" button on a fix in the side view did

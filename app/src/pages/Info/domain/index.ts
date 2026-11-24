@@ -8,6 +8,7 @@ export {
   isCallsignFull,
   normaliseCallsign,
 } from './callsign'
+export { INHG_PER_HPA, type PressureReadouts, pressureReadouts } from './pressure'
 export {
   type HelpTable,
   type SpeedHelp,

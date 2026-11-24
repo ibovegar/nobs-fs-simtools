@@ -62,6 +62,8 @@ export function useMockFlight() {
     bridge.set('CG PERCENT', on ? state.cgPercentMac : undefined)
     bridge.set('AMBIENT TEMPERATURE', on ? state.oatC : undefined)
     bridge.set('PRESSURE ALTITUDE', on ? state.pressureAltitudeFt : undefined)
+    // A low-pressure day: QNH 1008 hPa (29.77 inHg).
+    bridge.set('SEA LEVEL PRESSURE', on ? 1008 : undefined)
     bridge.set('FLAPS HANDLE INDEX', on ? state.flapHandleIndex : undefined)
     bridge.set('PLANE HEADING DEGREES MAGNETIC', on ? state.headingMagDeg : undefined)
     const aircraft = mockAircraft(state.aircraftId)
