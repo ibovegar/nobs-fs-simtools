@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-25
+
 ### Added
 
 - **Info**: the barometric pressure (QNH) where you are, in hPa and inHg.
