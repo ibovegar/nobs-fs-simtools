@@ -176,6 +176,7 @@ export function useFlightPlanProfile() {
               simAircraft?.performance && sim.altitude !== undefined
                 ? descentSpeedKias(simAircraft.performance, sim.altitude)
                 : undefined,
+            approachStartKias: simAircraft?.performance?.descent?.approachStartKias,
           })
         : undefined,
     }

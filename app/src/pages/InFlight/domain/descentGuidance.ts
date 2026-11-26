@@ -34,6 +34,8 @@ export interface DescentGuidanceInput {
   descentFtPerNm: number
   /** The aircraft's published descent speed, when it has one. */
   descentSpeedKias?: number
+  /** The speed to be at by the approach's first fix (the aircraft's, when it has one). */
+  approachStartKias?: number
 }
 
 export interface DescentGuidance {
@@ -86,6 +88,12 @@ function speedPlan(i: DescentGuidanceInput, flownNm: number, gs: number) {
         (wp.speed?.kind === 'at' || wp.speed?.kind === 'atOrBelow'),
     )
     .map((wp) => ({ distanceNm: wp.distanceNm, kt: wp.speed?.kt as number }))
+  // The aircraft's approach speed, as one more limit at the approach's first fix.
+  const approachStart = i.waypoints.find((p) => p.waypoint.phase === 'approach')?.waypoint
+  if (i.approachStartKias !== undefined && approachStart) {
+    limits.push({ distanceNm: approachStart.distanceNm, kt: i.approachStartKias })
+    limits.sort((a, b) => a.distanceNm - b.distanceNm)
+  }
   const passed = limits.filter((l) => l.distanceNm <= flownNm).map((l) => l.kt)
   const speeds = i.descentSpeedKias === undefined ? passed : [i.descentSpeedKias, ...passed]
   const base = speeds.length > 0 ? Math.min(...speeds) : undefined

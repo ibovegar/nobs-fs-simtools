@@ -73,7 +73,9 @@ const CARAVAN_PERFORMANCE: AircraftPerformance = {
  * ("850 mode" torque from the climb table, 2,000 RPM, ITT 840 °C max in climb / cruise),
  * normal cruise ≈ 300 KTAS (270 at 10,000 ft, 312 at 25,000 ft), descent at 230 KIAS and
  * −2,000 fpm. Max landing weight 7,024 lb. The manual gives no approach speed: 85 KIAS
- * with landing flaps at max landing weight (≈ 1.3 × Vso 65 kt).
+ * with landing flaps at max landing weight (≈ 1.3 × Vso 65 kt). Its Before Landing
+ * checklist has the gear down and flaps to Approach under 178 KIAS (Vle / Vfa): SimTools
+ * has the TBM at 170 KIAS by the approach's first fix.
  */
 const TBM850_PERFORMANCE: AircraftPerformance = {
   climb: {
@@ -104,6 +106,7 @@ const TBM850_PERFORMANCE: AircraftPerformance = {
   descent: {
     speedKias: 230,
     rateFpm: 2000,
+    approachStartKias: 170,
     table: [
       { altitudeFt: 5000, timeMin: 1, distanceNm: 6 },
       { altitudeFt: 10_000, timeMin: 5, distanceNm: 21 },

@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-11-26
+
+### Changed
+
+- **In flight › Flight plan**: in the TBM 850 the recommended descent speed comes down to
+  170 KIAS by the approach's first fix (the manual has the gear and approach flaps under
+  178 kt), with a cue when to start slowing down.
+
 ## [0.10.1] - 2026-11-26
 
 ### Fixed

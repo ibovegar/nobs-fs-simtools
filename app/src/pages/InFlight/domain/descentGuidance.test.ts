@@ -118,6 +118,49 @@ describe('descentGuidance: speed', () => {
     expect(descentGuidance(input({ flownNm: 55, altitudeFt: 3000 }))?.speedKias).toBe(120)
   })
 
+  it("slows to the aircraft's approach speed by the approach's first fix", () => {
+    const arrival = [
+      fix('START', 0, 10_000, { phase: 'arrival' }),
+      fix('IAF', 50, 4000),
+      fix('RWY', 70, 50, { runway: '17' }),
+    ]
+    // 230 → 170 kt at 0.5 kt/s is 120 s (6 nm at 180 kt), plus 1 nm: due 7 nm before IAF.
+    const soon = descentGuidance(
+      input({
+        waypoints: arrival,
+        flownNm: 40,
+        iasKt: 230,
+        descentSpeedKias: 230,
+        approachStartKias: 170,
+      }),
+    )
+    expect(soon?.speedKias).toBe(230)
+    expect(soon?.slowdown?.kt).toBe(170)
+    expect(soon?.slowdown?.inNm).toBeCloseTo(3, 6)
+    const past = descentGuidance(
+      input({
+        waypoints: arrival,
+        flownNm: 55,
+        altitudeFt: 3000,
+        iasKt: 170,
+        descentSpeedKias: 230,
+        approachStartKias: 170,
+      }),
+    )
+    expect(past?.speedKias).toBe(170)
+    // Without one (the Caravan): the descent speed to the runway.
+    const without = descentGuidance(
+      input({
+        waypoints: arrival,
+        flownNm: 55,
+        altitudeFt: 3000,
+        iasKt: 140,
+        descentSpeedKias: 140,
+      }),
+    )
+    expect(without?.speedKias).toBe(140)
+  })
+
   it('has no speed without a descent speed or a limit behind', () => {
     expect(descentGuidance(input({ descentSpeedKias: undefined }))?.speedKias).toBeUndefined()
   })

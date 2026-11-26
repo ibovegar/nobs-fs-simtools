@@ -49,6 +49,11 @@ export interface AircraftPerformance {
     rateFpm?: number
     /** Time and distance to descend to sea level, ascending by altitude. */
     table?: readonly ClimbRow[]
+    /**
+     * The speed to be at by the start of the approach (its first fix), when the aircraft's
+     * descent speed is too fast for it (e.g. above its gear / approach-flap limit).
+     */
+    approachStartKias?: number
   }
   approach?: {
     /** Final approach speed (KIAS), landing flaps, at `atWeightKg`. */
