@@ -1,7 +1,7 @@
 {
   "name": "nobs-fs-simtools",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Nobs SimTools: in-sim toolbar panel with flight tools for Microsoft Flight Simulator 2024 (VR and 2D).",
   "type": "module",
   "engines": {
