@@ -2,3 +2,27 @@
 .fieldSelected {
   border-color: var(--accent);
 }
+
+/* The heading-up switch in the graph's top-right corner (its canvas is empty there), quiet: just the words and the switch, no
+   box, as wide as they are (a Switch is a full-width boxed row; the element selector wins
+   over its own class). The whole row stays the hit target. */
+/* The graph, with the heading-up switch over its top-right corner. */
+.graph {
+  position: relative;
+}
+
+button.headingUp {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-mid);
+  font-size: var(--font-size-sm);
+}
+
+button.headingUp span {
+  font-weight: 400;
+}

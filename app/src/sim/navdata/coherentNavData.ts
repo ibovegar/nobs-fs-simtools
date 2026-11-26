@@ -1,6 +1,13 @@
 import { logLine } from '~/diagnostics'
 import { getRegisterViewListener, translateSimText } from '../simGlobals'
-import { facilityIcao, icaoKey, isEmptyRoute, parseIcaoString } from './icao'
+import {
+  facilityIcao,
+  hasCruiseAltitude,
+  icaoKey,
+  isEmptyRoute,
+  parseIcaoString,
+  sameRouteAirports,
+} from './icao'
 import { cleanMetar } from './metar'
 import type { NavData, NavDataSession } from './NavData'
 import type {
@@ -152,7 +159,11 @@ function describeRoute(plan: NavFlightPlanRoute | null) {
   const dest = plan.destinationAirport?.ident || '?'
   const procedures = [plan.departure, plan.arrival, plan.approach?.type].filter(Boolean)
   const named = procedures.length > 0 ? `, ${procedures.join(' / ')}` : ''
-  return `${dep} → ${dest}, ${plan.enroute?.length ?? 0} enroute legs${named}`
+  const cruise = plan.cruiseAltitude
+  const altitude = hasCruiseAltitude(plan)
+    ? `, cruise ${cruise?.isFlightLevel ? 'FL' : ''}${cruise?.altitude}`
+    : ', no cruise altitude'
+  return `${dep} → ${dest}, ${plan.enroute?.length ?? 0} enroute legs${named}${altitude}`
 }
 
 /**
@@ -198,6 +209,24 @@ function buildCoherentNavData(): NavData {
   let rereadAt = Number.NEGATIVE_INFINITY
   let rereading = false
 
+  // The last cruise altitude seen for a plan. The avionics' copy of the route (read first,
+  // and sent on every change) may come without one while the EFB's has it: it's filled in
+  // from here, or from the EFB / ATC copy of the same plan.
+  let knownCruise: NavFlightPlanRoute | undefined
+  const withCruise = (plan: NavFlightPlanRoute): NavFlightPlanRoute => {
+    if (hasCruiseAltitude(plan)) {
+      knownCruise = plan
+      return plan
+    }
+    if (knownCruise && sameRouteAirports(plan, knownCruise)) {
+      logLine(
+        `cruise altitude kept from the earlier copy of the plan: ${describeRoute(knownCruise)}`,
+      )
+      return { ...plan, cruiseAltitude: knownCruise.cruiseAltitude }
+    }
+    return plan
+  }
+
   const onRouteUpdated = (next: NavFlightPlanRoute) => {
     logLine(`route changed in the sim: ${describeRoute(next)}`)
     // An empty EFB route doesn't clear a plan the avionics may still have: read again.
@@ -215,7 +244,8 @@ function buildCoherentNavData(): NavData {
       })
       return
     }
-    for (const subscriber of routeSubscribers) subscriber(next)
+    const plan = withCruise(next)
+    for (const subscriber of routeSubscribers) subscriber(plan)
   }
 
   const onAvionicsRouteResponse = (next: NavFlightPlanRoute, requestId: unknown) => {
@@ -265,13 +295,23 @@ function buildCoherentNavData(): NavData {
       ['EFB', () => readRoute(bound, 'GET_EFB_ROUTE')],
       ['ATC', () => readRoute(bound, 'GET_ATC_ROUTE')],
     ]
-    for (const [source, read] of sources) {
+    for (let i = 0; i < sources.length; i++) {
+      const [source, read] = sources[i] as (typeof sources)[number]
       const started = Date.now()
       const plan = await read()
       const took = Date.now() - started
-      if (!isEmptyRoute(plan)) {
+      if (plan && !isEmptyRoute(plan)) {
         logLine(`flight plan from the ${source} route (${took} ms): ${describeRoute(plan)}`)
-        return plan
+        if (hasCruiseAltitude(plan)) return withCruise(plan)
+        // No cruise altitude in this copy: the next copies of the same plan may have it.
+        for (const [other, readOther] of sources.slice(i + 1)) {
+          const copy = await readOther()
+          if (copy && sameRouteAirports(plan, copy) && hasCruiseAltitude(copy)) {
+            logLine(`cruise altitude from the ${other} route: ${describeRoute(copy)}`)
+            return withCruise({ ...plan, cruiseAltitude: copy.cruiseAltitude })
+          }
+        }
+        return withCruise(plan)
       }
       logLine(`${source} route empty (${took} ms)`)
     }

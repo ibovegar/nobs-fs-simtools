@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Info**: a "Heading up" switch on the wind graph: your heading at the top, the compass and
+  the wind turning with you.
+
+### Fixed
+
+- **In flight › Flight plan**: the cruise altitude is read from the flight plan again (it
+  showed FL100 "assumed" when the avionics' copy of the plan had none).
+- Help ("?") texts close again with a tap outside them (in the sim they stayed open).
+
 ## [0.9.0] - 2026-11-26
 
 ### Added

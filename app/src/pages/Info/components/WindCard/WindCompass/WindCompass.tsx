@@ -35,13 +35,12 @@ const TICKS = Array.from({ length: 12 }, (_, i) => {
   return { deg, x1: C + inner.x, y1: C + inner.y, x2: C + outer.x, y2: C + outer.y }
 })
 
-/** Every 30°: the cardinal letters, the degrees between. */
+/** Every 30°: the cardinal letters, the degrees between (placed as the compass is turned). */
 const LABELS = Array.from({ length: 12 }, (_, i) => {
   const deg = i * 30
-  const p = compassPoint(deg, LETTER_R)
   const label = compassLabel(deg)
   const className = deg === 0 ? 'north' : label.cardinal ? 'letter' : 'degree'
-  return { deg, text: label.text, className, x: C + p.x, y: C + p.y + BASELINE }
+  return { deg, text: label.text, className }
 })
 
 /**
@@ -78,6 +77,12 @@ const LABEL_CLEARANCE_DEG = 25
 /** Without an arrow (calm, variable, unknown), the wind's figures go under the compass. */
 const STILL_WIND_Y = C + LETTER_R + 26
 
+/**
+ * The canvas's height: down to a strong wind's arrow from the south and its figures, no
+ * further. The same for every wind and view, so nothing under it moves.
+ */
+const VIEW_H = C + ARROW_TAIL_R + FIGURE_H + 4
+
 /** An airport before its runways are loaded: a chart symbol. */
 const AIRPORT_R = 16
 
@@ -86,7 +91,8 @@ interface WindCompassProps {
 }
 
 /**
- * The wind as a simple north-up graphic: a quiet compass ring, the aircraft on its heading
+ * The wind as a simple graphic, north up (or heading up: the bearing `view.upDeg` at the
+ * top, everything turned with it, text kept upright): a quiet compass ring, the aircraft on its heading
  * or the airport's runways (to scale, the one into the wind in green) in the middle, and
  * the wind: its side lit on the ring, and a bold arrow coming in from outside, as long as
  * the wind is strong, its direction and speed beside it. The aircraft's heading is a dotted
@@ -100,7 +106,9 @@ export function WindCompass(props: WindCompassProps) {
   const frameRef = useRef<HTMLDivElement>(null)
   const width = useElementSize(frameRef).width
   const size = Math.min(width, MAX_PX * scale)
-  const turn = (deg: number) => `rotate(${deg} ${C} ${C})`
+  // Every bearing is drawn relative to the one at the top.
+  const up = view.upDeg
+  const turn = (deg: number) => `rotate(${deg - up} ${C} ${C})`
 
   // The longer the arrow, the stronger the wind.
   const reach = ARROW_MIN_REACH + (ARROW_TAIL_R - ARROW_MIN_REACH) * (view.strength ?? 0)
@@ -117,7 +125,7 @@ export function WindCompass(props: WindCompassProps) {
   const spots =
     view.arrowDeg !== undefined &&
     arrowLabelSpots(
-      view.arrowDeg,
+      view.arrowDeg - up,
       Math.max(reach - 4, FIGURES_MIN_R),
       { w: textWidthPx(direction, DIRECTION_FONT * textScale), h: FIGURE_H * textScale },
       { w: textWidthPx(speed ?? '', SPEED_FONT * textScale), h: FIGURE_H * textScale },
@@ -147,10 +155,12 @@ export function WindCompass(props: WindCompassProps) {
       {speed ? `${direction} ${speed}` : direction}
     </text>
   )
-  const labels =
-    view.arrowDeg === undefined
-      ? LABELS
-      : LABELS.filter((l) => angleApart(l.deg, view.arrowDeg ?? 0) > LABEL_CLEARANCE_DEG)
+  const labels = LABELS.filter(
+    (l) => view.arrowDeg === undefined || angleApart(l.deg, view.arrowDeg) > LABEL_CLEARANCE_DEG,
+  ).map((l) => {
+    const p = compassPoint(l.deg - up, LETTER_R)
+    return { ...l, x: C + p.x, y: C + p.y + BASELINE }
+  })
   // The side the wind comes from, lit on the ring.
   const sector = view.arrowDeg !== undefined && (
     <path className={styles.sector} d={SECTOR} transform={turn(view.arrowDeg)} />
@@ -181,15 +191,17 @@ export function WindCompass(props: WindCompassProps) {
   const drawing = size > 0 && (
     <svg
       width={size}
-      height={size}
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
+      height={(size * VIEW_H) / SIZE}
+      viewBox={`0 0 ${SIZE} ${VIEW_H}`}
       className={styles.svg}
       aria-hidden="true"
     >
       <circle className={styles.disc} cx={C} cy={C} r={RING_R} />
-      {TICKS.map((t) => (
-        <line key={t.deg} className={styles.tick} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
-      ))}
+      <g transform={turn(0)}>
+        {TICKS.map((t) => (
+          <line key={t.deg} className={styles.tick} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+        ))}
+      </g>
       {labels.map((l) => (
         <text key={l.deg} className={styles[l.className]} x={l.x} y={l.y} textAnchor="middle">
           {l.text}

@@ -139,7 +139,7 @@ pages/
                     (the sim's aircraft + its speeds; approach from the live weight)
                     usePressure (the sea-level pressure, polled every 2 s), useWind (wind +
                     true heading, 2 Hz while shown), useWindSource (aircraft or a picked
-                    airport, saved), useAirportWind (the airport's METAR, every 10 min),
+                    airport, heading up; saved), useAirportWind (the airport's METAR, every 10 min),
                     useAirportRunways (its runways, loaded once),
                     useAirportSearch (nearest airports on opening + the sim's code search)
     containers/     WindPanel: the wind card's state (source, airport dropdown)

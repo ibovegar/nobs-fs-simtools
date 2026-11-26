@@ -36,3 +36,16 @@ export function isEmptyRoute(route: NavFlightPlanRoute | null | undefined): bool
     (route.enroute?.length ?? 0) === 0
   )
 }
+
+/** The route has a cruise altitude (the avionics' copy may come without one). */
+export function hasCruiseAltitude(route: NavFlightPlanRoute | null | undefined): boolean {
+  return (route?.cruiseAltitude?.altitude ?? 0) > 0
+}
+
+/** The same plan: same departure and destination airports. */
+export function sameRouteAirports(a: NavFlightPlanRoute, b: NavFlightPlanRoute): boolean {
+  return (
+    (a.departureAirport?.ident ?? '') === (b.departureAirport?.ident ?? '') &&
+    (a.destinationAirport?.ident ?? '') === (b.destinationAirport?.ident ?? '')
+  )
+}

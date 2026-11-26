@@ -64,6 +64,12 @@ export interface PopoverProps {
  */
 export const POPOVER_BOUNDARY = 'data-popover-boundary'
 
+/** A press: pointer events where there are, mouse events otherwise (the sim's browser). */
+const PRESS_EVENT =
+  typeof window !== 'undefined' && typeof window.PointerEvent === 'function'
+    ? 'pointerdown'
+    : 'mousedown'
+
 const offset = (origin: PopoverOrigin['vertical' | 'horizontal'], size: number) => {
   if (typeof origin === 'number') return origin
   if (origin === 'center') return size / 2
@@ -76,9 +82,9 @@ const offset = (origin: PopoverOrigin['vertical' | 'horizontal'], size: number) 
  * meets which point of the popover.
  * There is no built-in trigger, and nothing depends on hover (there is none in VR).
  *
- * It is drawn on `document.body` (or `container`) with fixed positioning, under an invisible
- * full-screen backdrop that closes it when tapped, so a parent that clips its contents
- * never cuts it off. It is kept `marginThreshold` px inside the screen, and follows its
+ * It is drawn on `document.body` (or `container`) with fixed positioning, so a parent that
+ * clips its contents never cuts it off. A modal one sits on an invisible full-screen
+ * backdrop and closes on a press anywhere outside it. It is kept `marginThreshold` px inside the screen, and follows its
  * anchor when the page scrolls or resizes.
  */
 export function Popover(props: PopoverProps) {
@@ -154,6 +160,21 @@ export function Popover(props: PopoverProps) {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [open, onClose])
+
+  // A modal popover closes on a press anywhere outside it. Listened for on the document
+  // (capture, so nothing on the page can stop it) rather than only through the backdrop's
+  // click: in the sim's browser a tap on the invisible backdrop didn't close it. The press
+  // (not the click), so the tap that opened it can't close it again.
+  useEffect(() => {
+    if (!open || !modal) return
+    const onPress = (event: Event) => {
+      const paper = paperRef.current
+      if (paper && event.target instanceof Node && paper.contains(event.target)) return
+      onClose?.('backdropClick')
+    }
+    document.addEventListener(PRESS_EVENT, onPress, true)
+    return () => document.removeEventListener(PRESS_EVENT, onPress, true)
+  }, [open, modal, onClose])
 
   // Forget the last placement, so the next opening is measured afresh.
   useEffect(() => {

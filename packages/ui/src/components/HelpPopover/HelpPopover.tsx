@@ -23,7 +23,7 @@ interface HelpPopoverProps {
 
 /**
  * A small "?" next to a label (a Readout builds one from its `help`); tapping it explains what the
- * value means. Opens on tap, never on hover.
+ * value means. Opens on tap, never on hover; a tap outside it closes it.
  */
 export function HelpPopover(props: HelpPopoverProps) {
   const { label, children, size } = props

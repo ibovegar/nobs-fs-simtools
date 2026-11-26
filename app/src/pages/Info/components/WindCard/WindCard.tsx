@@ -1,5 +1,5 @@
 import { Search1Outlined } from '@lineiconshq/free-icons'
-import { Button, Card, cx, Stack, TextInput } from '@nobs/ui'
+import { Button, Card, cx, Stack, Switch, TextInput } from '@nobs/ui'
 import { useRef } from 'react'
 import { FieldButton } from '~/components'
 import type { AirportSuggestion, WindView } from '~/pages/Info/domain'
@@ -11,6 +11,9 @@ interface WindCardProps {
   view: WindView
   /** The aircraft's wind is shown (else an airport's). */
   aircraftSelected: boolean
+  /** The aircraft's wind is drawn heading up (else north up). */
+  headingUp: boolean
+  onHeadingUpChange: (headingUp: boolean) => void
   /** In the airport field: what is typed while picking, else the last airport (or ''). */
   fieldText: string
   /** An airport has been picked before: the field shows it, with a search button. */
@@ -41,6 +44,8 @@ export function WindCard(props: WindCardProps) {
   const {
     view,
     aircraftSelected,
+    headingUp,
+    onHeadingUpChange,
     fieldText,
     hasAirport,
     picking,
@@ -62,6 +67,18 @@ export function WindCard(props: WindCardProps) {
   // rebuilt (and doesn't lose focus) mid-typing.
   const searchButton = hasAirport && (
     <FieldButton icon={Search1Outlined} label="Find another airport" onClick={onOpenPicker} />
+  )
+  // Only the aircraft's wind turns with a heading; an airport's runways stay north up.
+  // A switch in the graph's top-right corner: your heading at the top, the compass turning
+  // as you turn. Only for the aircraft (an airport's runways stay north up); over the graph,
+  // so showing it or not moves nothing.
+  const headingUpSwitch = aircraftSelected && (
+    <Switch
+      className={styles.headingUp}
+      label="Heading up"
+      checked={headingUp}
+      onChange={onHeadingUpChange}
+    />
   )
   const picker = picking && (
     <AirportPicker
@@ -100,7 +117,10 @@ export function WindCard(props: WindCardProps) {
           </Stack>
         </Stack>
         {picker}
-        <WindCompass view={view} />
+        <div className={styles.graph}>
+          <WindCompass view={view} />
+          {headingUpSwitch}
+        </div>
       </Stack>
     </Card>
   )

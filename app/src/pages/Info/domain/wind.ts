@@ -30,6 +30,11 @@ export interface WindView {
   headingDeg: number | undefined
   /** An airport's runways, to scale; none for the aircraft (or before they're loaded). */
   runways: readonly RunwayShape[]
+  /**
+   * The bearing drawn at the top: 0 north up; the aircraft's heading when heading-up (the
+   * compass and the wind turn with it, the aircraft points up).
+   */
+  upDeg: number
 }
 
 /** The wind is drawn at full strength from this speed on. */
@@ -51,16 +56,19 @@ export function bearingText(deg: number): string {
 const NO_WIND: WindText = { direction: '—', speed: undefined }
 const CALM: WindText = { direction: 'Calm', speed: undefined }
 
-/** The wind at the aircraft, with its heading. */
+/** The wind at the aircraft, with its heading; north up, or heading up. */
 export function windView(
   windFromDeg: number | undefined,
   windKt: number | undefined,
   headingDeg: number | undefined,
+  /** Draw the aircraft's heading at the top instead of north (needs a heading). */
+  headingUp = false,
 ): WindView {
   const heading = known(headingDeg) ? headingDeg : undefined
   const still = {
     center: 'aircraft' as const,
     headingDeg: heading,
+    upDeg: headingUp && heading !== undefined ? heading : 0,
     runways: [],
     arrowDeg: undefined,
     strength: undefined,
@@ -113,6 +121,8 @@ export function airportWindView(
   const still = {
     center: 'airport' as const,
     headingDeg: undefined,
+    // An airport's runways are drawn north up, as on a chart.
+    upDeg: 0,
     runways: runwayDiagram(runways, RUNWAY_DIAGRAM_R, undefined, plannedRunway),
     arrowDeg: undefined,
     strength: undefined,

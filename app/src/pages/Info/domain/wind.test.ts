@@ -21,6 +21,12 @@ describe('windView', () => {
     })
   })
 
+  it('draws north up, or the heading up when asked (and there is a heading)', () => {
+    expect(windView(45, 15, 268).upDeg).toBe(0)
+    expect(windView(45, 15, 268, true).upDeg).toBe(268)
+    expect(windView(45, 15, undefined, true).upDeg).toBe(0)
+  })
+
   it('is calm below 1 kt: no arrow', () => {
     const view = windView(200, 0.4, 90)
     expect(view.arrowDeg).toBeUndefined()

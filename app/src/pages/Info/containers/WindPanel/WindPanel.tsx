@@ -24,7 +24,7 @@ import { useSimKeyboardCapture } from '~/sim'
  * sim; the airport search runs only while the dropdown is open.
  */
 export function WindPanel() {
-  const { source, airport, showAircraft, showAirport } = useWindSource()
+  const { source, airport, headingUp, setHeadingUp, showAircraft, showAirport } = useWindSource()
   // With a flight plan: its departure runway at the start, its destination's after leaving.
   useFlightPlanAirport(showAirport)
   // UI-only: the dropdown and what is typed in it. Not saved: it starts closed.
@@ -32,7 +32,7 @@ export function WindPanel() {
   const [query, setQuery] = useState('')
   const keyboardCapture = useSimKeyboardCapture()
 
-  const aircraftWind = useWind(source === 'aircraft')
+  const aircraftWind = useWind(source === 'aircraft', headingUp)
   const shownAirport = source === 'airport' ? airport : null
   const metar = useAirportWind(shownAirport)
   const runways = useAirportRunways(shownAirport)
@@ -72,6 +72,8 @@ export function WindPanel() {
     <WindCard
       view={view}
       aircraftSelected={source === 'aircraft'}
+      headingUp={headingUp}
+      onHeadingUpChange={setHeadingUp}
       fieldText={picking ? query : rememberedAirport}
       hasAirport={airport !== null}
       picking={picking}
