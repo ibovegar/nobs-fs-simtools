@@ -65,7 +65,11 @@ describe('flightPlanResults', () => {
       speedKias: 140,
       rateFpm: 760,
     })
-    expect(r.secondary[1]).toMatchObject({ value: '-750', unit: 'fpm', aside: '140 kt' })
+    expect(r.secondary[1]).toMatchObject({
+      value: '-750',
+      unit: 'fpm',
+      aside: { value: '140', unit: 'kt' },
+    })
     expect(r.secondary[1].caption).toBeUndefined()
   })
 

@@ -1,4 +1,4 @@
-import { useElementSize, useTheme } from '@nobs/ui'
+import { cx, useElementSize, useTheme } from '@nobs/ui'
 import { type MouseEvent, useEffect, useRef, useState } from 'react'
 import {
   type AircraftOnRoute,
@@ -259,8 +259,11 @@ export function RouteProfile(props: RouteProfileProps) {
   // The tap also reaches the document, which closes the tooltip: the chart then shows the
   // new TOD and the flag on the fix.
   const selectTappedFix = target && onSelectReference && (() => onSelectReference(target.index))
-  const tapFix = (fix: FixTarget) =>
+  const tapFix = (fix: FixTarget) => {
+    // The chart stops taking the mouse while the tooltip is open, so the ring would stay.
+    setHovered(undefined)
     setPinned((current) => (current?.index === fix.index ? undefined : fix))
+  }
 
   // A tapped fix's tooltip stays until a tap anywhere else (a tap on a fix doesn't reach
   // the document). Listening only while one is open.
@@ -271,6 +274,10 @@ export function RouteProfile(props: RouteProfileProps) {
     document.addEventListener('click', close)
     return () => document.removeEventListener('click', close)
   }, [isPinned])
+  // While a tooltip is open the chart takes no taps: in the sim the SVG under the tooltip
+  // would catch the tap meant for its button (a low fix's tooltip sits over the chart). A
+  // tap on the chart then closes the tooltip, like a tap anywhere else.
+  const svgClass = cx(styles.svg, isPinned && styles.passive)
 
   return (
     <div ref={ref} className={styles.profile}>
@@ -279,7 +286,7 @@ export function RouteProfile(props: RouteProfileProps) {
           width={size.width}
           height={size.height}
           viewBox={`0 0 ${width} ${height}`}
-          className={styles.svg}
+          className={svgClass}
           aria-hidden="true"
         >
           {altTicks.map((ft) => (

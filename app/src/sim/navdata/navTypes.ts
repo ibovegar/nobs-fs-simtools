@@ -140,3 +140,31 @@ export interface NavAirport extends NavFacility {
   arrivals: readonly NavProcedure[]
   approaches: readonly NavApproach[]
 }
+
+/** An airport's name and position, without runways or procedures (a minimal, cheap load). */
+export interface NavAirportSummary extends NavFacility {
+  /** The airport's name, translated; '' when the sim has none. */
+  name: string
+}
+
+/**
+ * A METAR as the sim reports it (JS_LISTENER_FACILITY GET_METAR_BY_IDENT, msfs-sdk
+ * `Metar`), cleaned: fields the sim reports as negative (not given) are left out.
+ */
+export interface NavMetar {
+  icao: string
+  /** Observation time, UTC. */
+  day: number
+  hour: number
+  min: number
+  /** Degrees true the wind blows from. */
+  windDir?: number
+  windSpeed?: number
+  gust?: number
+  /** SDK `MetarWindSpeedUnits`: -1 undefined, 0 knots, 1 metres per second, 2 km/h. */
+  windSpeedUnits: number
+  /** Variable direction. */
+  vrb: boolean
+  /** The raw METAR text. */
+  metarString: string
+}

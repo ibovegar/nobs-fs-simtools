@@ -36,6 +36,11 @@ declare global {
     requiresSingleton?: boolean,
   ): SimViewListener
 
+  /** The sim's localisation (common.js): 'TT:…' keys to text. */
+  const Utils: {
+    Translate(key: string): string | null
+  }
+
   /** The sim's DataStorage object; null until it is ready, throws before dataStorage.js binds it. */
   function GetDataStorage(): unknown
   function GetStoredData(key: string): string | null

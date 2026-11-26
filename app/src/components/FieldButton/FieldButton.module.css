@@ -1,4 +1,4 @@
-/* Sized to sit inside a Stepper's value box, at its right edge. */
+/* Sized to sit inside a field (a Stepper's value box, a TextInput), at its right edge. */
 .button {
   width: calc(var(--control-h) * 0.6);
   height: calc(var(--control-h) * 0.6);

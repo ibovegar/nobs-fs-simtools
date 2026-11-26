@@ -24,6 +24,12 @@ function crashFallback(props: ErrorBoundaryFallbackProps) {
   return <PageCrash message={message} groups={groups} onRetry={reset} />
 }
 
+/**
+ * Where each page was scrolled to, so it opens there again (after switching tabs, or closing
+ * and reopening the panel). In memory only: a sim restart starts at the top.
+ */
+const scrollTops = new Map<string, number>()
+
 /** Popovers (help, a fix's details) stay inside the panel, also in the dev harness's frame. */
 const popoverBoundary = { [POPOVER_BOUNDARY]: '' }
 
@@ -76,6 +82,8 @@ export function App() {
                 scrollToTopButton
                 scrollbarGutter="auto"
                 onScrollbarChange={setScrollbar}
+                initialScrollTop={scrollTops.get(id)}
+                onScrollTopChange={(top) => scrollTops.set(id, top)}
               >
                 <ErrorBoundary fallback={crashFallback} onError={logCrash}>
                   <Component />

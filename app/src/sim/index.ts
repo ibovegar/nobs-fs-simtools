@@ -21,6 +21,7 @@ export {
 export {
   icaoKey,
   type NavAirport,
+  type NavAirportSummary,
   type NavApproach,
   type NavData,
   type NavDataSession,
@@ -28,6 +29,7 @@ export {
   type NavFacility,
   type NavFlightPlanRoute,
   type NavIcao,
+  type NavMetar,
   type NavProcedure,
   type NavProcedureLeg,
   type NavRunway,

@@ -1,0 +1,144 @@
+/* As wide as the card: the drawing is measured to it and centred. */
+.frame {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+/* The compass: a quiet disc in the page colour (just darker than the card), hairline edge. */
+.disc {
+  fill: var(--bg);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tick {
+  stroke: var(--border-mid);
+  stroke-width: 1.5;
+}
+
+.letter,
+.north,
+.degree {
+  font-family: var(--font-sans);
+  font-size: calc(11px * var(--text-scale));
+  font-weight: 600;
+}
+
+.letter {
+  fill: var(--text-dim);
+}
+
+.north {
+  fill: var(--text-mid);
+}
+
+/* The degrees between the cardinal points: smaller, quieter, in figures. */
+.degree {
+  fill: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: calc(9px * var(--text-scale));
+  font-weight: 400;
+}
+
+/* The side the wind comes from, lit on the ring. */
+.sector {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* The aircraft in white, like the runways; where it's heading as a dotted yellow line. */
+.aircraft {
+  fill: var(--text-bright);
+}
+
+.headingLine {
+  stroke: var(--yellow);
+  stroke-width: 2;
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+}
+
+/* Runways: white strips with a dashed centre line, numbered at each end; the end to land on
+   (the most headwind) in green: recommended. */
+.runway {
+  stroke: var(--text-bright);
+  stroke-width: 9;
+}
+
+.centreLine {
+  stroke: var(--bg);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.runwayLabel,
+.runwayLabelPlanned,
+.runwayBest {
+  font-family: var(--font-mono);
+  font-size: calc(14px * var(--text-scale));
+  font-weight: 700;
+}
+
+.runwayLabel {
+  fill: var(--text-mid);
+}
+
+.runwayLabelPlanned {
+  fill: var(--yellow);
+}
+
+.runwayBest {
+  fill: var(--green);
+}
+
+/* An airport before its runways are loaded. */
+.airport {
+  fill: none;
+  stroke: var(--text-mid);
+  stroke-width: 3;
+}
+
+/* The wind: a bold accent arrow, with a halo in the card colour where it crosses a letter. */
+.arrowHalo {
+  stroke: var(--bg-card);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.arrow {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.arrowHead {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+/* The wind's figures beside the arrow: the direction in the wind's colour, the speed quieter. */
+.windDirection,
+.windSpeed {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.windDirection {
+  fill: var(--accent);
+  font-size: calc(11px * var(--text-scale));
+}
+
+.windSpeed {
+  fill: var(--text-bright);
+  font-size: calc(10px * var(--text-scale));
+}

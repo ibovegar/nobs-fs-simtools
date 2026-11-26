@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Info**: the wind on a north-up compass, where you are (your aircraft and its heading) or
+  at an airport from its METAR, with its runways and the one into the wind in green. Pick
+  the airport from the ones near you, or find it by its code or name.
+- **Info**: with a flight plan, the wind card follows it: the departure airport and runway
+  at the start, the destination and its runway once you've left.
+
+### Changed
+
+- Each page opens where you left it scrolled, also after closing and reopening SimTools.
+
+### Fixed
+
+- **In flight › Flight plan**: the "Plan TOD to …" button on the lowest fixes in the side
+  view did nothing in the sim.
+
 ## [0.8.0] - 2026-11-25
 
 ### Added

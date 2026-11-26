@@ -16,8 +16,8 @@ export interface ResultValue {
   tone?: BadgeTone
   /** A short instruction under the value: a slowdown, or too high. */
   caption?: string
-  /** Subtle, in the readout's top-right corner: the speed to fly beside the descent V/S. */
-  aside?: string
+  /** Quieter, at the right of the value's line: the speed to fly beside the descent V/S. */
+  aside?: { value: string; unit: string }
 }
 
 export interface FlightPlanResults {
@@ -153,7 +153,9 @@ function descentResults(
     main: { value: `${sign}${formatInteger(Math.abs(rounded))}`, unit, tone },
     secondary: [
       distance('To go', progress.remainingNm, 'Distance left along the route to the runway.'),
-      speedKias === undefined ? rate : { ...rate, aside: `${Math.round(speedKias)} kt` },
+      speedKias === undefined
+        ? rate
+        : { ...rate, aside: { value: String(Math.round(speedKias)), unit: 'kt' } },
     ],
   }
 }

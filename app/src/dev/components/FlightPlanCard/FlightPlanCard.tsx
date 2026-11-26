@@ -6,15 +6,18 @@ interface FlightPlanCardProps {
   /** The selected route as the app builds it; undefined without a flight plan. */
   path: MockRoutePath | undefined
   onChange: (patch: Partial<MockFlightState>) => void
+  /** Put the aircraft at the TOD, set up to descend. */
+  onStartDescent: () => void
 }
 
 /**
  * The mock flight plan behind In flight › Flight plan: which sample route the sim reports,
  * where the aircraft is along it (moves at groundspeed while flying), quick set-ups for
- * the start of the flight and the cruise, and a missing-fix test.
+ * the start of the flight, the cruise and the descent (at the TOD: press Fly), and a
+ * missing-fix test.
  */
 export function FlightPlanCard(props: FlightPlanCardProps) {
-  const { state, path, onChange } = props
+  const { state, path, onChange, onStartDescent } = props
   const total = path?.totalNm ?? 0
 
   const takeOff = () =>
@@ -69,6 +72,9 @@ export function FlightPlanCard(props: FlightPlanCardProps) {
             </Button>
             <Button variant="secondary" onClick={cruise}>
               Jump to cruise
+            </Button>
+            <Button variant="secondary" onClick={onStartDescent}>
+              Start descent
             </Button>
           </Stack>
           <Switch

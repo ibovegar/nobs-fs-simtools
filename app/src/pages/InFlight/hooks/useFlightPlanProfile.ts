@@ -99,7 +99,7 @@ export function useFlightPlanProfile() {
 
   const plan =
     state.status === 'ready'
-      ? planView(state.route, simAircraft, referenceKey || undefined)
+      ? planFlight(state.route, simAircraft, referenceKey || undefined)
       : undefined
 
   /** Pick a fix as the TOD reference; picking the current pick again returns to the default. */
@@ -221,12 +221,15 @@ export function useFlightPlanProfile() {
   }
 }
 
+/** What planning needs of a loaded route. */
+type PlannableRoute = Pick<LoadedRoute, 'waypoints' | 'totalNm' | 'cruiseFt'>
+
 /**
  * The planned profile for a route and aircraft (no live data: recomputed only when either
- * changes).
+ * changes). Exported for the dev harness, which starts its mock descent at this TOD.
  */
-function planView(
-  route: LoadedRoute,
+export function planFlight<R extends PlannableRoute>(
+  route: R,
   aircraft: Aircraft | undefined,
   referenceKey: string | undefined,
 ) {

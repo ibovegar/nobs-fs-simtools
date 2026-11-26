@@ -118,12 +118,14 @@ dev/                browser dev harness (`pnpm dev`): same tree with a mock sim 
                     localStorage, in a panel-size frame. Never in the sim bundle. Laid out
                     like a page: DevHarness.tsx (+ main.tsx entry), MockSimBridge.ts,
                     MockNavData.ts (mock flight plan + nav database), hooks/
-                    (useMockFlight), components/ (PanelFrame, SimulatorCard,
+                    (useMockFlight; mockDescentStart: "Start descent" puts the aircraft at
+                    the TOD from In flight's planFlight), components/ (PanelFrame, SimulatorCard,
                     AircraftStateCard, FlightPlanCard, TakeoffStateCard: the aircraft
                     loaded in the mock sim), domain/ (mockFlight: the tested
                     flight model; mockAircraft: sim TITLE / ATC MODEL presets;
                     mockRoutes: sample flight plans in the sim's shapes;
-                    mockRoutePath: the flown path, built with the In flight domain)
+                    mockRoutePath: the flown path, built with the In flight domain;
+                    mockAirports: airports + made-up METARs for search / nearest)
 App.tsx             tab shell: renders a tab per page and remembers the active one. Each page
                     scrolls in a ScrollArea under a fixed PageHeaderArea: a page puts its
                     sub-tabs in <PageHeader> so they don't scroll. Renders nothing while the
@@ -131,17 +133,28 @@ App.tsx             tab shell: renders a tab per page and remembers the active o
 pages/
   pageRegistry.ts   the list of pages (tabs) in order
   Info/             Info.tsx: what the pilot enters once and keeps (the callsign), and
-                    the aircraft loaded in the sim (~/aircraft), the QNH
+                    the aircraft loaded in the sim (~/aircraft), the QNH, the wind
                     + infoIcon (the tab's "i" icon: Lineicons has none)
     hooks/          useInfo (saved at once, survives closing the sim), useAircraftSpeeds
                     (the sim's aircraft + its speeds; approach from the live weight)
-                    usePressure (the sea-level pressure, polled every 2 s)
+                    usePressure (the sea-level pressure, polled every 2 s), useWind (wind +
+                    true heading, 2 Hz while shown), useWindSource (aircraft or a picked
+                    airport, saved), useAirportWind (the airport's METAR, every 10 min),
+                    useAirportRunways (its runways, loaded once),
+                    useAirportSearch (nearest airports on opening + the sim's code search)
+    containers/     WindPanel: the wind card's state (source, airport dropdown)
     components/     CallsignCard (alphanumeric Keypad), AircraftCard (the sim's aircraft
                     and its climb / cruise / descent / approach speeds),
-                    PressureCard (QNH in hPa and inHg)
+                    PressureCard (QNH in hPa and inHg), WindCard (Aircraft button + airport
+                    field; AirportPicker: suggestions + keypad; WindCompass: a simple
+                    north-up graphic, aircraft on its heading or the airport's runways, wind
+                    arrow from outside the ring; readouts under it)
     domain/         callsign (ICAO rules: A–Z, 0–9, at most 7), speedReadouts (the
                     aircraft card's speed readouts and their help texts), pressure
-                    (QNH in hPa / inHg)
+                    (QNH in hPa / inHg), wind (the graphic + readouts for the aircraft or a
+                    METAR), airportSearch (suggestions: ranking, names
+                    typed without Æ/Ø/Å, distances), runwayDiagram (runways to scale
+                    in the compass, the end with the most headwind)
   Notes/            Notes.tsx
     hooks/          useInkPages, useNotesMode
     containers/     InkPad, AtcPad, TextPad: the three note modes
@@ -210,7 +223,11 @@ diagnostics/        logLine (a short in-memory log, also to the console) and cra
                     console). Log steps that can fail in the sim (e.g. flight plan loads)
 components/         views shared by 2+ pages: PageCrash (a crashed page's error screen),
                     SimValueField (live sim value or manual entry),
-                    SimFillButton (the "fill from the sim" button in a Stepper: read on tap)
+                    FieldButton (the small accent button inside a field: a Stepper's or a
+                    TextInput's endAdornment), SimFillButton (a FieldButton: "fill from the
+                    sim" in a Stepper, read on tap)
+                    Dock (docks its children, e.g. a Keypad, at the bottom of the panel over
+                    the page, leaving room and keeping a field in view)
 providers/          every React context provider + its hook: StorageProvider (useStorage),
                     SettingsProvider (useSettings: theme / UI scale / text size / active page /
                     drag-scroll direction),
@@ -219,7 +236,8 @@ providers/          every React context provider + its hook: StorageProvider (us
 sim/                the only code that talks to MSFS. SimBridge.ts (interface),
                     bridges/ (coherent, offline), navdata/ (flight plan + navigation
                     database: JS_LISTENER_PLANNEDROUTE / JS_LISTENER_FACILITY, reached via
-                    `bridge.navData`), hooks/ (useSimVars / useSimText polling, useNavData,
+                    `bridge.navData`; also airport search by code, nearest airports, airport
+                    summaries (name + position) and METARs), hooks/ (useSimVars / useSimText polling, useNavData,
                     useSimKeyboardCapture), panel/ (registerPanelElement, panelVisibility),
                     simGlobals.ts (guarded sim globals)
 storage/            KeyValueStorage.ts (sim DataStorage | localStorage | memory),
@@ -289,7 +307,8 @@ change has a cost:
   connection, the panel open/close events) remain. Reopening remounts the pages, which
   restore their saved state and read the sim afresh. So anything the user expects back
   after closing and reopening (open tab, mode, inputs, open sections) must be persisted
-  with `usePersistentState`; transient UI state (scroll position, an open popover) resets.
+  with `usePersistentState`; transient UI state (an open popover) resets. Each page's scroll
+  position is kept in memory by App (until the sim restarts).
 - **No work while nothing changes.** No timers, intervals or animation loops running idle,
   and inactive pages are unmounted.
 - **Poll the sim only for what is shown live**, at the lowest rate that works (default 4 Hz,

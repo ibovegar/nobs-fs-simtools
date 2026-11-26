@@ -1,0 +1,46 @@
+/* A suggestion: a full-width row, tall enough to hit with a VR laser. */
+.row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: calc(44px * var(--ui-scale));
+  padding: 0 var(--sp-2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--bg-card-hi);
+}
+
+.ident {
+  flex-shrink: 0;
+  width: calc(56px * var(--ui-scale));
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.name {
+  flex-grow: 1;
+  min-width: 0;
+  margin-left: var(--sp-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-mid);
+}
+
+.distance {
+  flex-shrink: 0;
+  margin-left: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-dim);
+}

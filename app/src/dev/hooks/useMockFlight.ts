@@ -9,6 +9,7 @@ import {
   pointAlong,
 } from '~/dev/domain'
 import { MockSimBridge } from '~/dev/MockSimBridge'
+import { mockDescentStart } from './mockDescentStart'
 
 const TICK_MS = 250
 
@@ -66,10 +67,18 @@ export function useMockFlight() {
     bridge.set('SEA LEVEL PRESSURE', on ? 1008 : undefined)
     bridge.set('FLAPS HANDLE INDEX', on ? state.flapHandleIndex : undefined)
     bridge.set('PLANE HEADING DEGREES MAGNETIC', on ? state.headingMagDeg : undefined)
+    // No magnetic variation in the mock; a westerly breeze.
+    bridge.set('PLANE HEADING DEGREES TRUE', on ? state.headingMagDeg : undefined)
+    bridge.set('AMBIENT WIND DIRECTION', on ? 250 : undefined)
+    bridge.set('AMBIENT WIND VELOCITY', on ? 14 : undefined)
     const aircraft = mockAircraft(state.aircraftId)
     bridge.setText('TITLE', on ? aircraft.title : undefined)
     bridge.setText('ATC MODEL', on ? aircraft.atcModel : undefined)
   }, [bridge, state, path])
 
-  return { bridge, state, update, path }
+  /** At the route's TOD, set up to descend (the TOD reference the app has picked, if any). */
+  const startDescent = (referenceKey: string | undefined) =>
+    path && update(mockDescentStart(state, path, referenceKey))
+
+  return { bridge, state, update, path, startDescent }
 }

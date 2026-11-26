@@ -11,7 +11,7 @@ import {
   TakeoffStateCard,
 } from './components'
 import styles from './DevHarness.module.css'
-import { useMockFlight } from './hooks'
+import { storedTodReference, useMockFlight } from './hooks'
 
 /** Typical toolbar panel sizes to preview against. */
 const FRAME_PRESETS = [
@@ -28,8 +28,10 @@ type FramePreset = (typeof FRAME_PRESETS)[number]['value']
  * with a MockSimBridge and localStorage instead of the sim.
  */
 export function DevHarness() {
-  const { bridge, state, update, path } = useMockFlight()
+  const { bridge, state, update, path, startDescent } = useMockFlight()
   const [storage] = useState(() => createBrowserStorage())
+  // Descend to the fix picked as the TOD reference in the app, as the app plans it.
+  const startDescentAtTod = () => startDescent(storedTodReference(storage))
   const [preset, setPreset] = useState<FramePreset>('vr')
   const frame = FRAME_PRESETS.find((p) => p.value === preset) ?? FRAME_PRESETS[0]
 
@@ -54,7 +56,12 @@ export function DevHarness() {
           </Field>
           <SimulatorCard state={state} onChange={update} />
           <AircraftStateCard state={state} onChange={update} />
-          <FlightPlanCard state={state} path={path} onChange={update} />
+          <FlightPlanCard
+            state={state}
+            path={path}
+            onChange={update}
+            onStartDescent={startDescentAtTod}
+          />
           <TakeoffStateCard state={state} onChange={update} />
         </SectionContent>
       </Section>

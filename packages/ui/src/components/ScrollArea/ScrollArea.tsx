@@ -118,6 +118,13 @@ interface ScrollAreaProps {
   /** Called when the scrollbar appears or goes away, e.g. to line up a header with it. */
   onScrollbarChange?: (visible: boolean) => void
   /**
+   * Where to start, scrolled down this far (px; read on mount), e.g. where the page was
+   * left. Content that fills in later is waited for until it's reached or the user scrolls.
+   */
+  initialScrollTop?: number
+  /** Called with the scroll position as it changes, e.g. to start there next time. */
+  onScrollTopChange?: (scrollTop: number) => void
+  /**
    * Stop all background work, e.g. while the host panel is hidden. Only the fallback poll
    * (browsers without ResizeObserver) runs in the background at all.
    */
@@ -171,9 +178,17 @@ export function ScrollArea(props: ScrollAreaProps) {
     scrollToTopButton = false,
     scrollbarGutter = 'stable',
     onScrollbarChange,
+    initialScrollTop = 0,
+    onScrollTopChange,
     paused = false,
     children,
   } = props
+  // Read on mount only; the callback through a ref, so a new one doesn't re-run the effect.
+  const startAt = useRef(initialScrollTop)
+  const reportScroll = useRef(onScrollTopChange)
+  useEffect(() => {
+    reportScroll.current = onScrollTopChange
+  }, [onScrollTopChange])
 
   const rootRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -204,9 +219,25 @@ export function ScrollArea(props: ScrollAreaProps) {
       setMeasured((prev) => (prev && sameThumb(prev, next) ? prev : next))
       setScrolledDown(viewport.scrollTop > viewport.clientHeight * TO_TOP_AFTER)
     }
+    // Back to where it started (initialScrollTop): again as the content grows, until it's
+    // reached or the user scrolls themselves.
+    let restoring = startAt.current > 0
+    const restore = () => {
+      if (!restoring) return
+      viewport.scrollTop = startAt.current
+      if (viewport.scrollTop >= startAt.current - 1) restoring = false
+    }
+    const stopRestoring = () => {
+      restoring = false
+    }
     const onResize = () => {
       placeTrack()
+      restore()
       measure()
+    }
+    const onScroll = () => {
+      measure()
+      reportScroll.current?.(viewport.scrollTop)
     }
     onResize()
     // Once more just after: a page header is drawn into its slot right after this mounts,
@@ -215,12 +246,19 @@ export function ScrollArea(props: ScrollAreaProps) {
     // Event-driven, so nothing runs while nothing changes (sim performance): scrolling,
     // window resizes and, with ResizeObserver, any size change of the viewport or its
     // content. setMeasured / setScrolledDown bail out when nothing changed.
-    viewport.addEventListener('scroll', measure)
+    viewport.addEventListener('scroll', onScroll)
     window.addEventListener('resize', onResize)
+    // The user's own scrolling (wheel, a press on the content or the scrollbar) ends the
+    // restoring.
+    const root = rootRef.current
+    root?.addEventListener('wheel', stopRestoring)
+    root?.addEventListener(EVENTS.down, stopRestoring)
     const cleanups: (() => void)[] = [
       () => window.clearTimeout(settle),
-      () => viewport.removeEventListener('scroll', measure),
+      () => viewport.removeEventListener('scroll', onScroll),
       () => window.removeEventListener('resize', onResize),
+      () => root?.removeEventListener('wheel', stopRestoring),
+      () => root?.removeEventListener(EVENTS.down, stopRestoring),
     ]
     if (typeof ResizeObserver !== 'undefined') {
       const observer = new ResizeObserver(onResize)

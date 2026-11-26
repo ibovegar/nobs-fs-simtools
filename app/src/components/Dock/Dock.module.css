@@ -1,0 +1,11 @@
+/* At the bottom of the panel, over the page (popovers are drawn above it, at 1000). */
+.dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  padding: var(--sp-3);
+  border-top: 1px solid var(--border-mid);
+  background: var(--bg-card);
+}

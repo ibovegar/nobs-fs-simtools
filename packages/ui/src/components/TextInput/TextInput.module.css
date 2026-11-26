@@ -26,6 +26,56 @@
   opacity: 0.5;
 }
 
+/* With adornments: the box looks like the input (border, background, focus), the input
+   inside it is bare, and the adornments sit beside the text, as in Stepper's value box. */
+.box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  background: var(--bg);
+  transition: border-color 0.12s ease;
+}
+
+.boxFocused {
+  border-color: var(--accent);
+}
+
+.boxDisabled {
+  opacity: 0.5;
+}
+
+.box .bare {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--sp-2) 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.box .bare:disabled {
+  opacity: 1;
+}
+
+.adornment {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.start {
+  margin-right: var(--sp-2);
+}
+
+.end {
+  margin-left: var(--sp-2);
+}
+
 .mono {
   font-family: var(--font-mono);
   letter-spacing: 0.04em;

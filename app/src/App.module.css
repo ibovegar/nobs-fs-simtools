@@ -1,4 +1,6 @@
 .app {
+  /* What is docked to the panel's edges (the airport keypad) is placed against it. */
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;

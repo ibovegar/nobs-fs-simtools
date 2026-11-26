@@ -21,7 +21,8 @@ export function shallowEqual(a: Record<string, unknown>, b: Record<string, unkno
 
 /**
  * Poll a set of sim variables at `hz` (default 4 Hz — plenty for these tools and cheap
- * for the sim). Polling pauses while the panel is closed.
+ * for the sim). Polling pauses while the panel is closed, and `hz` 0 stops it (the values
+ * are read once, on mount): for a value only shown some of the time.
  *
  * Define `vars` at module level so its identity is stable:
  *
@@ -35,7 +36,7 @@ export function useSimVars<T extends SimVarMap>(vars: T, hz = 4): SimValues<T> {
   const [values, setValues] = useState(() => readAll(bridge, vars))
 
   useEffect(() => {
-    if (!panelVisible) return
+    if (!panelVisible || hz <= 0) return
     const poll = () =>
       setValues((prev) => {
         const next = readAll(bridge, vars)

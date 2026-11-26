@@ -5,12 +5,14 @@ export { facilityIcao, icaoKey, isEmptyRoute, parseIcaoString } from './icao'
 export type { NavData, NavDataSession } from './NavData'
 export type {
   NavAirport,
+  NavAirportSummary,
   NavApproach,
   NavApproachIdentifier,
   NavEnrouteLeg,
   NavFacility,
   NavFlightPlanRoute,
   NavIcao,
+  NavMetar,
   NavProcedure,
   NavProcedureLeg,
   NavProcedureTransition,

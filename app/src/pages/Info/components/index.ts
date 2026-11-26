@@ -2,3 +2,4 @@
 export { AircraftCard } from './AircraftCard'
 export { CallsignCard } from './CallsignCard'
 export { PressureCard } from './PressureCard'
+export { WindCard } from './WindCard'

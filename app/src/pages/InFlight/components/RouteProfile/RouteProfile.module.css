@@ -9,6 +9,11 @@
   overflow: visible;
 }
 
+/* A fix's tooltip is open: the chart lets every tap through (see RouteProfile). */
+.passive {
+  pointer-events: none;
+}
+
 .grid {
   stroke: var(--border);
   stroke-width: 1;

@@ -1,0 +1,4 @@
+/* The airport field while it is the wind shown: outlined in the accent, as a picked toggle. */
+.fieldSelected {
+  border-color: var(--accent);
+}

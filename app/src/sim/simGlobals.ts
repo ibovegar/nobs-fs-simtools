@@ -15,6 +15,20 @@ export function getCoherent() {
   return typeof Coherent !== 'undefined' ? Coherent : undefined
 }
 
+/**
+ * The sim's translation of a localisation key ('TT:AIRPORTEU.ENBR.name'); the text itself
+ * when it isn't a key or there is no translation.
+ */
+export function translateSimText(text: string): string {
+  if (!text.startsWith('TT:')) return text
+  try {
+    const translated = typeof Utils !== 'undefined' ? Utils.Translate(text) : null
+    return translated || ''
+  } catch {
+    return ''
+  }
+}
+
 export function getRegisterViewListener() {
   return typeof RegisterViewListener === 'function' ? RegisterViewListener : undefined
 }

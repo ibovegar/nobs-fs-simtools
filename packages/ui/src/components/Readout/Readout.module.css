@@ -75,6 +75,23 @@
   color: var(--danger);
 }
 
+/* The value and the aside on one line, the aside at the right end. */
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+/* After the tone classes: a quieter colour, whatever the value's tone. */
+.value.aside {
+  margin-left: var(--sp-2);
+  color: var(--text-dim);
+}
+
+.aside .unit {
+  color: var(--text-dim);
+}
+
 .caption {
   font-size: var(--font-size-sm);
   color: var(--text-mid);
