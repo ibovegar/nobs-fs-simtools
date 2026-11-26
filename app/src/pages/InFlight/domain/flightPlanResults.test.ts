@@ -24,9 +24,8 @@ describe('flightPlanResults', () => {
     const climbing = progress({ status: 'climb', toTocNm: 12, timeToTocSec: 180 })
     const r = flightPlanResults(climbing, 1500, { speedKias: 115, rateFpm: 850 })
     expect(r.main).toEqual({ value: '12', unit: 'nm to TOC' })
-    expect(r.secondary.map((v) => v.label)).toEqual(['Time', 'Vertical speed', 'Speed'])
+    expect(r.secondary.map((v) => v.label)).toEqual(['Time', 'Vertical speed'])
     expect(r.secondary[1]).toMatchObject({ value: '850', unit: 'fpm' })
-    expect(r.secondary[2]).toMatchObject({ value: '115', unit: 'kt' })
   })
 
   it('climbing: a dash until the V/S is known, and without a climb speed', () => {
@@ -35,14 +34,12 @@ describe('flightPlanResults', () => {
     expect(waiting.secondary[1]).toMatchObject({ value: '—', unit: undefined })
     const unknown = flightPlanResults(climbing, 1500)
     expect(unknown.secondary[1]).toMatchObject({ value: '—', unit: undefined })
-    expect(unknown.secondary[2]).toMatchObject({ value: '—', unit: undefined })
   })
 
-  it('cruising: distance to TOD and the cruise rate, no speed', () => {
+  it('cruising: distance to TOD and the cruise rate', () => {
     const r = flightPlanResults(progress({}), 1500)
     expect(r.main).toEqual({ value: '38', unit: 'nm to TOD', tone: undefined })
     expect(r.secondary[1]).toMatchObject({ label: 'Vertical speed', value: '0' })
-    expect(r.secondary[2]).toMatchObject({ label: 'Speed', value: '—' })
   })
 
   it('approaching TOD: warns and gives the descent rate to fly from it', () => {
@@ -54,7 +51,7 @@ describe('flightPlanResults', () => {
   it('on the descent: signed deviation on path, high / low off it', () => {
     const on = flightPlanResults(progress({ status: 'on-path', deviationFt: 84 }), 1500)
     expect(on.main).toEqual({ value: '+80', unit: 'ft on path', tone: 'success' })
-    expect(on.secondary.map((v) => v.label)).toEqual(['To go', 'Vertical speed', 'Speed'])
+    expect(on.secondary.map((v) => v.label)).toEqual(['To go', 'Vertical speed'])
 
     const low = flightPlanResults(progress({ status: 'below-path', deviationFt: -1780 }), 1500)
     expect(low.main).toEqual({ value: '1,780', unit: 'ft below path', tone: 'warning' })
@@ -63,40 +60,49 @@ describe('flightPlanResults', () => {
     expect(high.main).toMatchObject({ unit: 'ft above path', tone: 'danger' })
   })
 
-  it('on the descent: the live V/S and the speed to fly beside it', () => {
+  it('on the descent: the live V/S, with the speed to fly beside it', () => {
     const r = flightPlanResults(progress({ status: 'on-path' }), 1500, undefined, {
       speedKias: 140,
       rateFpm: 760,
     })
-    expect(r.secondary[1]).toMatchObject({ value: '-750', unit: 'fpm' })
+    expect(r.secondary[1]).toMatchObject({ value: '-750', unit: 'fpm', aside: '140 kt' })
     expect(r.secondary[1].caption).toBeUndefined()
-    expect(r.secondary[2]).toMatchObject({ value: '140', unit: 'kt' })
-    expect(r.secondary[2].caption).toBeUndefined()
   })
 
-  it('on the descent: the slowdown under the speed, too high under the V/S', () => {
+  it('shows the speed only past TOD, and only when there is one', () => {
+    const guidance = { speedKias: 140, rateFpm: 200 }
+    const approaching = progress({ status: 'approaching', toTodNm: 4 })
+    expect(
+      flightPlanResults(approaching, 1520, undefined, guidance).secondary[1].aside,
+    ).toBeUndefined()
+    const noSpeed = { speedKias: undefined, rateFpm: 760 }
+    const on = progress({ status: 'on-path' })
+    expect(flightPlanResults(on, 1500, undefined, noSpeed).secondary[1].aside).toBeUndefined()
+  })
+
+  it('on the descent: cues a slowdown, and warns when too high', () => {
     const on = progress({ status: 'on-path' })
     const soon = { speedKias: 140, rateFpm: 750, slowdown: { kt: 120, inNm: 3 } }
-    expect(flightPlanResults(on, 1500, undefined, soon).secondary[2].caption).toBe(
+    expect(flightPlanResults(on, 1500, undefined, soon).secondary[1].caption).toBe(
       'Slow to 120 kt in 3.0 nm',
     )
     const now = { speedKias: 120, rateFpm: 750, slowdown: { kt: 120, inNm: 0 } }
-    expect(flightPlanResults(on, 1500, undefined, now).secondary[2].caption).toBe(
+    expect(flightPlanResults(on, 1500, undefined, now).secondary[1].caption).toBe(
       'Slow to 120 kt now',
     )
     const high = { speedKias: 140, rateFpm: 1200, tooHighFor: 'BARVO', slowdown: soon.slowdown }
-    const r = flightPlanResults(on, 1500, undefined, high)
-    expect(r.secondary[1]).toMatchObject({ caption: 'Too high for BARVO', tone: 'danger' })
-    expect(r.secondary[2].caption).toBe('Slow to 120 kt in 3.0 nm')
+    expect(flightPlanResults(on, 1500, undefined, high).secondary[1]).toMatchObject({
+      caption: 'Too high for BARVO',
+      tone: 'danger',
+    })
   })
 
-  it('approaching TOD: the V/S to fly from it, and the descent speed', () => {
+  it('approaching TOD: shows only the V/S to fly from it', () => {
     const r = flightPlanResults(progress({ status: 'approaching', toTodNm: 4 }), 1520, undefined, {
       speedKias: 140,
       rateFpm: 200,
     })
     expect(r.secondary[1]).toMatchObject({ label: 'V/S at TOD', value: '-1500' })
-    expect(r.secondary[2]).toMatchObject({ value: '140', unit: 'kt' })
   })
 
   it('shows a dash without a value', () => {

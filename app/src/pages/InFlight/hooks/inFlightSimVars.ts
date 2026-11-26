@@ -23,6 +23,4 @@ export const FLIGHT_PLAN_SIM_VARS = {
   groundSpeed: { name: 'GROUND VELOCITY', unit: 'knots' },
   verticalSpeed: { name: 'VERTICAL SPEED', unit: 'feet per minute' },
   indicatedSpeed: { name: 'AIRSPEED INDICATED', unit: 'knots' },
-  /** For the approach speed, which follows the weight. */
-  weightLb: { name: 'TOTAL WEIGHT', unit: 'pounds' },
 }

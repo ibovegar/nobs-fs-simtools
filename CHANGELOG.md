@@ -11,10 +11,7 @@ All notable changes to this project are documented here. The format is based on
 ### Added
 
 - **Info**: the barometric pressure (QNH) where you are, in hPa and inHg.
-- **In flight › Flight plan**: the speed to fly, next to the vertical speed, in the climb and
-  the descent.
-- **In flight › Flight plan**: in the descent, the speed comes down to the aircraft's approach
-  speed 5 nm from the runway, with a cue when to start slowing down.
+- **In flight › Flight plan**: in the descent, the speed to fly next to the vertical speed.
 
 ### Fixed
 

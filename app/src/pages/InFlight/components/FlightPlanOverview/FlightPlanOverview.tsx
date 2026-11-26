@@ -9,6 +9,7 @@ import {
   SectionMedia,
   SegmentedControl,
   Stack,
+  Typography,
 } from '@nobs/ui'
 import type { ReactNode } from 'react'
 import {
@@ -177,6 +178,15 @@ function Results(props: ResultsProps) {
     climbTarget,
     descentGuidance,
   )
+  // The speed beside the descent V/S: small and dim in the readout's corner.
+  const readouts = secondary.map((v) => ({
+    ...v,
+    corner: v.aside && (
+      <Typography variant="caption" color="dim" mono>
+        {v.aside}
+      </Typography>
+    ),
+  }))
 
   return (
     <>
@@ -194,7 +204,7 @@ function Results(props: ResultsProps) {
       <Stack gap={3}>
         <Divider />
         <ReadoutGroup divided>
-          {secondary.map((v) => (
+          {readouts.map((v) => (
             <Readout
               key={v.label}
               label={v.label}
@@ -203,6 +213,7 @@ function Results(props: ResultsProps) {
               unit={v.unit}
               tone={v.tone}
               caption={v.caption}
+              action={v.corner}
             />
           ))}
         </ReadoutGroup>
