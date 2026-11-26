@@ -64,11 +64,17 @@ export interface PopoverProps {
  */
 export const POPOVER_BOUNDARY = 'data-popover-boundary'
 
-/** A press: pointer events where there are, mouse events otherwise (the sim's browser). */
-const PRESS_EVENT =
-  typeof window !== 'undefined' && typeof window.PointerEvent === 'function'
-    ? 'pointerdown'
-    : 'mousedown'
+/**
+ * A press, listened for as both: a browser may say it has pointer events and still only
+ * send mouse events (the sim's is unverified). Closing twice does nothing more.
+ */
+const PRESS_EVENTS = ['pointerdown', 'mousedown']
+
+/**
+ * A modal popover never takes more than this share of the space it's kept in, so there's
+ * always some outside left to tap (a long text in a small VR panel scrolls inside instead).
+ */
+const MAX_HEIGHT_SHARE = 0.7
 
 const offset = (origin: PopoverOrigin['vertical' | 'horizontal'], size: number) => {
   if (typeof origin === 'number') return origin
@@ -124,7 +130,8 @@ export function Popover(props: PopoverProps) {
         bottom: window.innerHeight,
       }
       const maxWidth = box.right - box.left - 2 * marginThreshold
-      const maxHeight = box.bottom - box.top - 2 * marginThreshold
+      const room = box.bottom - box.top - 2 * marginThreshold
+      const maxHeight = modal ? Math.min(room, (box.bottom - box.top) * MAX_HEIGHT_SHARE) : room
       const width = Math.min(paper.offsetWidth, maxWidth)
       const height = Math.min(paper.offsetHeight, maxHeight)
       const left = anchor.left + offset(anchorH, anchor.width) - offset(originH, width)
@@ -150,7 +157,7 @@ export function Popover(props: PopoverProps) {
       window.removeEventListener('resize', place)
       window.removeEventListener('scroll', place, true)
     }
-  }, [open, anchorEl, boundary, anchorH, anchorV, originH, originV, marginThreshold])
+  }, [open, anchorEl, boundary, anchorH, anchorV, originH, originV, marginThreshold, modal])
 
   useEffect(() => {
     if (!open) return
@@ -172,8 +179,10 @@ export function Popover(props: PopoverProps) {
       if (paper && event.target instanceof Node && paper.contains(event.target)) return
       onClose?.('backdropClick')
     }
-    document.addEventListener(PRESS_EVENT, onPress, true)
-    return () => document.removeEventListener(PRESS_EVENT, onPress, true)
+    for (const type of PRESS_EVENTS) document.addEventListener(type, onPress, true)
+    return () => {
+      for (const type of PRESS_EVENTS) document.removeEventListener(type, onPress, true)
+    }
   }, [open, modal, onClose])
 
   // Forget the last placement, so the next opening is measured afresh.

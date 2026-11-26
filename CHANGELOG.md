@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-26
+
+### Fixed
+
+- Help ("?") texts: a tap outside closes them also when the sim only sends mouse presses,
+  and a long one never covers the whole panel (it scrolls inside), so there's always an
+  outside to tap.
+
 ## [0.10.0] - 2026-11-26
 
 ### Added
