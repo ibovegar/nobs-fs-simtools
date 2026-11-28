@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format is based on
 
 - **Info › Wind**: picking an airport could leave the sim's controls captured by SimTools
   until it was closed.
+- The first flight plan load in a flight no longer asks the sim for every waypoint at once,
+  which could make the sim stutter (e.g. a motion rig pausing).
 
 ## [0.10.2] - 2026-11-26
 

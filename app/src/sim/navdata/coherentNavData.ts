@@ -85,6 +85,13 @@ const AVIONICS_TIMEOUT_MS = 1500
 /** After an empty route event made us read again, ignore further ones for this long. */
 const REREAD_PAUSE_MS = 5000
 
+/**
+ * At most this many facility loads waiting on the sim at once. A flight plan asks for every
+ * waypoint plus two full airports; sent in one go they can make the sim stutter (seen as a
+ * motion rig pausing the first time SimTools opened in a flight).
+ */
+const MAX_FACILITY_LOADS = 3
+
 interface Bound {
   listener: SimViewListener
   ready: Promise<boolean>
@@ -445,11 +452,34 @@ function buildCoherentNavData(): NavData {
     return answer
   }
 
+  // Facility loads queue here so only MAX_FACILITY_LOADS wait on the sim at a time.
+  let loading = 0
+  const queued: (() => void)[] = []
+  const nextLoad = () => {
+    if (loading >= MAX_FACILITY_LOADS) return
+    const start = queued.shift()
+    if (!start) return
+    loading++
+    start()
+  }
+  const queuedRequest = (icao: NavIcao, kind: LoadKind) =>
+    new Promise<NavFacility | null>((resolve) => {
+      queued.push(() => {
+        const done = (found: NavFacility | null) => {
+          loading--
+          resolve(found)
+          nextLoad()
+        }
+        request(icao, kind).then(done, () => done(null))
+      })
+      nextLoad()
+    })
+
   const load = (icao: NavIcao, kind: LoadKind = 'full') => {
     const key = `${kind}:${icaoKey(icao)}`
     let promise = cache.get(key)
     if (!promise) {
-      promise = request(icao, kind)
+      promise = queuedRequest(icao, kind)
       cache.set(key, promise)
       // Only found facilities stay cached: a miss (e.g. a timeout) is asked again next time.
       void promise.then((found) => {
