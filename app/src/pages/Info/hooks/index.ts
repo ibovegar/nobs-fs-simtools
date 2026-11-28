@@ -2,7 +2,7 @@
 
 export { useAircraftFix } from './useAircraftFix'
 export { useAircraftSpeeds } from './useAircraftSpeeds'
-export { useAirportRunways } from './useAirportRunways'
+export { type AirportData, useAirportData } from './useAirportData'
 export { useAirportSearch } from './useAirportSearch'
 export { useAirportWind } from './useAirportWind'
 export { useFlightPlanAirport } from './useFlightPlanAirport'

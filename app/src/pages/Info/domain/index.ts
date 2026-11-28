@@ -1,6 +1,7 @@
 // Info's pure rules: no React. Unit-tested.
 
 export type { AircraftSpeeds, ClimbPowerInfo } from './aircraftSpeeds'
+export { type AirportDistances, airportDistances, slantRangeNm } from './airportDistances'
 export {
   type AirportCandidate,
   type AirportSuggestion,

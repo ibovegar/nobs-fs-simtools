@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { WindCard } from '~/pages/Info/components'
 import {
   type AirportSuggestion,
+  airportDistances,
   airportLabel,
   airportMarker,
   airportQuery,
@@ -9,7 +10,7 @@ import {
 } from '~/pages/Info/domain'
 import {
   useAircraftFix,
-  useAirportRunways,
+  useAirportData,
   useAirportSearch,
   useAirportWind,
   useFlightPlanAirport,
@@ -40,7 +41,8 @@ export function WindPanel() {
   const aircraft = useAircraftFix(airport !== null)
   const aircraftWind = useWind(source === 'aircraft', headingUp, airportMarker(aircraft, airport))
   const metar = useAirportWind(shownAirport)
-  const runways = useAirportRunways(shownAirport)
+  // Loaded for any picked airport: its elevation gives the DME distance in both views.
+  const { runways, elevationM } = useAirportData(airport)
   const { suggestions, status } = useAirportSearch(picking, query, airport)
 
   const view = shownAirport
@@ -50,6 +52,7 @@ export function WindPanel() {
         headingUp,
       })
     : aircraftWind
+  const distances = airportDistances(aircraft, airport, elevationM)
   // The last airport stays in the field while the aircraft's wind is shown.
   const rememberedAirport = airport ? airportLabel(airport) : ''
 
@@ -85,6 +88,7 @@ export function WindPanel() {
   return (
     <WindCard
       view={view}
+      distances={distances}
       aircraftSelected={source === 'aircraft'}
       headingUp={headingUp}
       onHeadingUpChange={setHeadingUp}

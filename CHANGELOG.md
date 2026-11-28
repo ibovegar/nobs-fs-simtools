@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Info › Wind**: the distance to the picked airport under the graph, both over the
+  ground (GPS) and the slant distance through the air (DME).
+
 ## [0.11.0] - 2026-11-28
 
 ### Added

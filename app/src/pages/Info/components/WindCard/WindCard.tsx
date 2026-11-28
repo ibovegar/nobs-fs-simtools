@@ -1,14 +1,16 @@
 import { Search1Outlined } from '@lineiconshq/free-icons'
-import { Button, Card, cx, Stack, Switch, TextInput } from '@nobs/ui'
+import { Button, Card, cx, Readout, ReadoutGroup, Stack, Switch, TextInput } from '@nobs/ui'
 import { useRef } from 'react'
 import { FieldButton } from '~/components'
-import type { AirportSuggestion, WindView } from '~/pages/Info/domain'
+import type { AirportDistances, AirportSuggestion, WindView } from '~/pages/Info/domain'
 import { AirportPicker } from './AirportPicker'
 import styles from './WindCard.module.css'
 import { WindCompass } from './WindCompass'
 
 interface WindCardProps {
   view: WindView
+  /** The distances to the picked airport (GPS and DME), under the graph; none without one. */
+  distances: AirportDistances | undefined
   /** The aircraft's wind is shown (else an airport's). */
   aircraftSelected: boolean
   /** The wind graph is drawn heading up (else north up), for the aircraft or an airport. */
@@ -35,7 +37,7 @@ interface WindCardProps {
 
 /**
  * The wind as a graphic (WindCompass, its figures at the arrow), for the aircraft or an
- * airport: the
+ * airport, with the distances to the airport (GPS and DME) under it: the
  * Aircraft button, or the airport field (a tap shows the last airport again; its search
  * button, or the field while empty, opens a dropdown of nearby airports and matches for a
  * code or name typed on its keypad, docked at the bottom of the panel).
@@ -43,6 +45,7 @@ interface WindCardProps {
 export function WindCard(props: WindCardProps) {
   const {
     view,
+    distances,
     aircraftSelected,
     headingUp,
     onHeadingUpChange,
@@ -78,6 +81,12 @@ export function WindCard(props: WindCardProps) {
       checked={headingUp}
       onChange={onHeadingUpChange}
     />
+  )
+  const distanceReadouts = distances && (
+    <ReadoutGroup divided>
+      <Readout label="GPS" help={distances.gpsHelp} value={distances.gps} unit="nm" />
+      <Readout label="DME" help={distances.dmeHelp} helpSize="lg" value={distances.dme} unit="nm" />
+    </ReadoutGroup>
   )
   const picker = picking && (
     <AirportPicker
@@ -120,6 +129,7 @@ export function WindCard(props: WindCardProps) {
           <WindCompass view={view} />
           {headingUpSwitch}
         </div>
+        {distanceReadouts}
       </Stack>
     </Card>
   )

@@ -15,6 +15,8 @@ export interface AircraftFix {
   lat: number | undefined
   lon: number | undefined
   headingDeg: number | undefined
+  /** Above sea level (for the slant distance to an airport). */
+  altitudeFt?: number | undefined
 }
 
 /** An airport with a position (the wind card's picked airport). */
