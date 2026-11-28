@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Fixed
+
+- **Info › Wind**: picking an airport could leave the sim's controls captured by SimTools
+  until it was closed.
+
 ## [0.10.2] - 2026-11-26
 
 ### Changed

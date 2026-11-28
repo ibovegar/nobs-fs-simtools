@@ -42,7 +42,10 @@ export function WindPanel() {
   // The last airport stays in the field while the aircraft's wind is shown.
   const rememberedAirport = airport ? airportLabel(airport) : ''
 
+  // Always hand the sim its input back: the field may never have had focus (opened from
+  // its search button, typed on the keypad), so its blur can't be relied on.
   const closePicker = () => {
+    keyboardCapture.onBlur()
     setPicking(false)
     setQuery('')
   }
