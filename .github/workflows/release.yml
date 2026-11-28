@@ -72,14 +72,33 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # NSIS ships on the Windows runner images; install it if that ever changes.
+      # Find a makensis.exe that runs (installing NSIS if the runner image has none) and hand
+      # its full path to the installer script as MAKENSIS. The image's PATH entry for NSIS has
+      # come and gone, so the script is never left to search for it.
       - name: Ensure NSIS
         shell: pwsh
         run: |
-          if (-not (Get-Command makensis -ErrorAction SilentlyContinue) -and
-              -not (Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe')) {
-            choco install nsis -y --no-progress
+          $ErrorActionPreference = 'Stop'
+          function Find-Makensis {
+            $candidates = @(
+              (Get-Command makensis.exe -CommandType Application -ErrorAction SilentlyContinue |
+                Select-Object -First 1 -ExpandProperty Source),
+              'C:\Program Files (x86)\NSIS\makensis.exe',
+              'C:\Program Files\NSIS\makensis.exe'
+            ) | Where-Object { $_ -and (Test-Path $_) }
+            foreach ($exe in $candidates) {
+              & $exe /VERSION | Out-Host
+              if ($LASTEXITCODE -eq 0) { return $exe }
+            }
+            return $null
           }
+          $makensis = Find-Makensis
+          if (-not $makensis) {
+            choco install nsis -y --no-progress
+            $makensis = Find-Makensis
+          }
+          if (-not $makensis) { throw 'NSIS could not be found or installed' }
+          "MAKENSIS=$makensis" >> $env:GITHUB_ENV
 
       - name: Build package + installer
         run: pnpm installer
