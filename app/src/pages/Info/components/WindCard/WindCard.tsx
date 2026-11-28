@@ -11,7 +11,7 @@ interface WindCardProps {
   view: WindView
   /** The aircraft's wind is shown (else an airport's). */
   aircraftSelected: boolean
-  /** The aircraft's wind is drawn heading up (else north up). */
+  /** The wind graph is drawn heading up (else north up), for the aircraft or an airport. */
   headingUp: boolean
   onHeadingUpChange: (headingUp: boolean) => void
   /** In the airport field: what is typed while picking, else the last airport (or ''). */
@@ -68,11 +68,10 @@ export function WindCard(props: WindCardProps) {
   const searchButton = hasAirport && (
     <FieldButton icon={Search1Outlined} label="Find another airport" onClick={onOpenPicker} />
   )
-  // Only the aircraft's wind turns with a heading; an airport's runways stay north up.
-  // A switch in the graph's top-right corner: your heading at the top, the compass turning
-  // as you turn. Only for the aircraft (an airport's runways stay north up); over the graph,
-  // so showing it or not moves nothing.
-  const headingUpSwitch = aircraftSelected && (
+  // A switch in the graph's top-right corner: your heading at the top, the compass (or an
+  // airport's runways, as seen from the cockpit) turning as you turn. Over the graph, so it
+  // moves nothing.
+  const headingUpSwitch = (
     <Switch
       className={styles.headingUp}
       label="Heading up"

@@ -1,11 +1,15 @@
 import { useElementSize, useTheme } from '@nobs/ui'
 import { useRef } from 'react'
 import {
+  type ApproachLine,
   angleApart,
   arrowLabelSpots,
+  COMPASS_RING_R,
   compassLabel,
   compassPoint,
+  type RingMarker,
   type RunwayShape,
+  ringLabelLines,
   textWidthPx,
   type WindView,
 } from '~/pages/Info/domain'
@@ -17,7 +21,7 @@ const SIZE = 320
 const MAX_PX = 420
 const C = SIZE / 2
 /** The compass: a quiet disc the aircraft or the runways fill most of. */
-const RING_R = 92
+const RING_R = COMPASS_RING_R
 /** N / E / S / W and the degrees between, just outside the ring. */
 const LETTER_R = RING_R + 14
 /** The wind arrow, outside the ring: from near the edge to just short of the ring. */
@@ -86,6 +90,14 @@ const VIEW_H = C + ARROW_TAIL_R + FIGURE_H + 4
 /** An airport before its runways are loaded: a chart symbol. */
 const AIRPORT_R = 16
 
+/** The airport or aircraft on the ring: sizes, and its label (font px, line height). */
+const MARKER_AIRPORT_R = 6
+const MARKER_AIRCRAFT_SCALE = 0.75
+const MARKER_FONT = 11
+const MARKER_LINE_H = 13
+/** The marker's label starts this far outside the ring (past the marker itself). */
+const MARKER_LABEL_GAP = 12
+
 interface WindCompassProps {
   view: WindView
 }
@@ -96,7 +108,9 @@ interface WindCompassProps {
  * or the airport's runways (to scale, the one into the wind in green) in the middle, and
  * the wind: its side lit on the ring, and a bold arrow coming in from outside, as long as
  * the wind is strong, its direction and speed beside it. The aircraft's heading is a dotted
- * line to the ring; degrees every 30° around it.
+ * line to the ring; degrees every 30° around it. On the ring, the other one: the picked
+ * airport seen from the aircraft, or the aircraft (on its heading) seen from the airport,
+ * with the runway to land on's centreline extended toward the ring.
  */
 export function WindCompass(props: WindCompassProps) {
   const { view } = props
@@ -155,8 +169,11 @@ export function WindCompass(props: WindCompassProps) {
       {speed ? `${direction} ${speed}` : direction}
     </text>
   )
+  // Compass labels give way to the wind arrow and to the marker's label.
+  const clearOf = (deg: number, other: number | undefined) =>
+    other === undefined || angleApart(deg, other) > LABEL_CLEARANCE_DEG
   const labels = LABELS.filter(
-    (l) => view.arrowDeg === undefined || angleApart(l.deg, view.arrowDeg) > LABEL_CLEARANCE_DEG,
+    (l) => clearOf(l.deg, view.arrowDeg) && clearOf(l.deg, view.marker?.bearingDeg),
   ).map((l) => {
     const p = compassPoint(l.deg - up, LETTER_R)
     return { ...l, x: C + p.x, y: C + p.y + BASELINE }
@@ -179,11 +196,15 @@ export function WindCompass(props: WindCompassProps) {
   const hasRunways = view.runways.length > 0
   const runways = hasRunways && (
     <g transform={`translate(${C} ${C})`}>
+      {view.approaches.map((line) => (
+        <Approach key={line.key} line={line} />
+      ))}
       {view.runways.map((rw) => (
         <Runway key={rw.key} runway={rw} />
       ))}
     </g>
   )
+  const marker = view.marker && <Marker marker={view.marker} up={up} textScale={textScale} />
   const airportSymbol = view.center === 'airport' && !hasRunways && (
     <circle className={styles.airport} cx={C} cy={C} r={AIRPORT_R} />
   )
@@ -211,6 +232,7 @@ export function WindCompass(props: WindCompassProps) {
       {runways}
       {airportSymbol}
       {aircraft}
+      {marker}
       {arrow}
       {figures}
     </svg>
@@ -253,6 +275,71 @@ function Runway(props: RunwayProps) {
           textAnchor="middle"
         >
           {l.text}
+        </text>
+      ))}
+    </g>
+  )
+}
+
+interface ApproachProps {
+  /** Positions relative to the compass centre. */
+  line: ApproachLine
+}
+
+/** A runway end's extended centreline: dashed, green into the wind, yellow the plan's. */
+function Approach(props: ApproachProps) {
+  const { line } = props
+  const className = line.kind === 'best' ? styles.approachBest : styles.approachPlanned
+
+  return <line className={className} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+}
+
+interface MarkerProps {
+  marker: RingMarker
+  /** The bearing drawn at the top. */
+  up: number
+  textScale: number
+}
+
+/**
+ * The airport (a small chart circle) or the aircraft (on its heading) on the ring, where it
+ * is from the centre, its label just outside.
+ */
+function Marker(props: MarkerProps) {
+  const { marker, up, textScale } = props
+  const deg = marker.bearingDeg - up
+  const p = compassPoint(deg, RING_R)
+  const lines = ringLabelLines(
+    deg,
+    RING_R + MARKER_LABEL_GAP,
+    marker.lines,
+    MARKER_FONT * textScale,
+    MARKER_LINE_H * textScale,
+  )
+  const turnTo = marker.headingDeg === undefined ? 0 : marker.headingDeg - up
+  const symbol =
+    marker.kind === 'aircraft' ? (
+      <path
+        className={styles.markerAircraft}
+        d={AIRCRAFT}
+        transform={`translate(${C + p.x} ${C + p.y}) rotate(${turnTo}) scale(${MARKER_AIRCRAFT_SCALE})`}
+      />
+    ) : (
+      <circle className={styles.markerAirport} cx={C + p.x} cy={C + p.y} r={MARKER_AIRPORT_R} />
+    )
+
+  return (
+    <g>
+      {symbol}
+      {lines.map((line) => (
+        <text
+          key={line.text}
+          className={styles.markerLabel}
+          x={C + line.x}
+          y={C + line.y + BASELINE}
+          textAnchor="middle"
+        >
+          {line.text}
         </text>
       ))}
     </g>

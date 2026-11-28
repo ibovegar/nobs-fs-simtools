@@ -30,6 +30,19 @@ export {
 } from './flightPlanAirport'
 export { INHG_PER_HPA, type PressureReadouts, pressureReadouts } from './pressure'
 export {
+  type AircraftFix,
+  type ApproachLine,
+  aircraftMarker,
+  airportMarker,
+  approachLines,
+  bearingDeg,
+  distanceText,
+  type LatLon,
+  MARKER_MIN_NM,
+  type MarkedAirport,
+  type RingMarker,
+} from './ringMarkers'
+export {
   type RunwayEndLabel,
   type RunwayInput,
   type RunwayShape,
@@ -42,9 +55,11 @@ export {
   speedReadoutRows,
 } from './speedReadouts'
 export {
+  type AirportViewOptions,
   airportWindView,
   bearingText,
   CALM_KT,
+  COMPASS_RING_R,
   compassLabel,
   compassPoint,
   type MetarState,
@@ -61,5 +76,8 @@ export {
   arrowLabelSpots,
   type LabelSize,
   type LabelSpot,
+  type PlacedLine,
+  ringLabelLines,
+  ringLabelSpot,
   textWidthPx,
 } from './windLabels'

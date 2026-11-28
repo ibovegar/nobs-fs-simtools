@@ -142,3 +142,41 @@
   fill: var(--text-bright);
   font-size: calc(10px * var(--text-scale));
 }
+
+/* A runway end's extended centreline: where to line up. Green into the wind, yellow the
+   flight plan's. */
+.approachBest,
+.approachPlanned {
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: round;
+}
+
+.approachBest {
+  stroke: var(--green);
+}
+
+.approachPlanned {
+  stroke: var(--yellow);
+}
+
+/* On the ring: the aircraft (white, edged in the page colour to stand off the ring) or the
+   airport (a small chart circle), labelled outside. */
+.markerAircraft {
+  fill: var(--text-bright);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.markerAirport {
+  fill: var(--bg);
+  stroke: var(--text-bright);
+  stroke-width: 2.5;
+}
+
+.markerLabel {
+  fill: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: calc(11px * var(--text-scale));
+  font-weight: 700;
+}

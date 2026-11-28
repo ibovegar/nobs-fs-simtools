@@ -57,3 +57,36 @@ export function arrowLabelSpots(
     { x: p.x - nx * b, y: p.y - ny * b },
   ]
 }
+
+/**
+ * A label just outside the ring at `deg`: its centre pushed out until its box clears the
+ * radius `r` (wide text at the sides, tall text at the top and bottom).
+ */
+export function ringLabelSpot(deg: number, r: number, size: LabelSize): LabelSpot {
+  const rad = (deg * Math.PI) / 180
+  const reach = (Math.abs(Math.sin(rad)) * size.w) / 2 + (Math.abs(Math.cos(rad)) * size.h) / 2
+  return compassPoint(deg, r + reach)
+}
+
+export interface PlacedLine extends LabelSpot {
+  text: string
+}
+
+/**
+ * A ring marker's label lines, stacked and centred just outside the ring at `deg`:
+ * each line's centre, px from the compass centre (y down).
+ */
+export function ringLabelLines(
+  deg: number,
+  r: number,
+  lines: readonly string[],
+  fontPx: number,
+  lineH: number,
+): PlacedLine[] {
+  let widest = 0
+  for (const line of lines) widest = Math.max(widest, textWidthPx(line, fontPx))
+  const height = lineH * lines.length
+  const spot = ringLabelSpot(deg, r, { w: widest, h: height })
+  const top = spot.y - height / 2 + lineH / 2
+  return lines.map((text, i) => ({ text, x: spot.x, y: top + i * lineH }))
+}

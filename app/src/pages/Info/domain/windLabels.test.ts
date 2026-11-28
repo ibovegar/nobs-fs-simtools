@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { angleApart, arrowLabelSpots, textWidthPx } from './windLabels'
+import { angleApart, arrowLabelSpots, ringLabelLines, textWidthPx } from './windLabels'
 
 const SIZE = { w: 40, h: 14 }
 
@@ -35,5 +35,22 @@ describe('helpers', () => {
 
   it('estimates a text width', () => {
     expect(textWidthPx('250°', 10)).toBeCloseTo(24.8)
+  })
+})
+
+describe('ringLabelLines', () => {
+  it('stacks the lines just outside the ring, clear of it', () => {
+    const [first, second] = ringLabelLines(0, 100, ['ENBR', '20 nm'], 10, 12)
+    expect(first?.x).toBeCloseTo(0)
+    expect(second?.x).toBeCloseTo(0)
+    // At the top: the two lines (24 px) sit above r = 100.
+    expect(second?.y).toBeCloseTo(-106)
+    expect(first?.y).toBeCloseTo(-118)
+  })
+
+  it('pushes wide text out at the sides', () => {
+    const [line] = ringLabelLines(90, 100, ['20 nm'], 10, 12)
+    expect(line?.x).toBeCloseTo(100 + (5 * 10 * 0.62) / 2)
+    expect(line?.y).toBeCloseTo(0)
   })
 })

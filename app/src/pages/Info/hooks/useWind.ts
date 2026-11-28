@@ -1,4 +1,4 @@
-import { windView } from '~/pages/Info/domain'
+import { type RingMarker, windView } from '~/pages/Info/domain'
 import { useSimVars } from '~/sim'
 
 const WIND_SIM_VARS = {
@@ -8,10 +8,11 @@ const WIND_SIM_VARS = {
 }
 
 /**
- * The wind where the aircraft is and the aircraft's heading, for the wind compass. Polled
+ * The wind where the aircraft is and the aircraft's heading, for the wind compass (with the
+ * picked airport on its ring). Polled
  * at 2 Hz while shown (enough to follow a turn, cheap for the sim), not at all otherwise.
  */
-export function useWind(shown: boolean, headingUp: boolean) {
+export function useWind(shown: boolean, headingUp: boolean, airportMarker?: RingMarker) {
   const sim = useSimVars(WIND_SIM_VARS, shown ? 2 : 0)
-  return windView(sim.windFromDeg, sim.windKt, sim.headingDeg, headingUp)
+  return windView(sim.windFromDeg, sim.windKt, sim.headingDeg, headingUp, airportMarker)
 }

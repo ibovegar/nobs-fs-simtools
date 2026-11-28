@@ -1,4 +1,6 @@
 // Info's stateful hooks (persistence, sim data). Logic only — no JSX.
+
+export { useAircraftFix } from './useAircraftFix'
 export { useAircraftSpeeds } from './useAircraftSpeeds'
 export { useAirportRunways } from './useAirportRunways'
 export { useAirportSearch } from './useAirportSearch'

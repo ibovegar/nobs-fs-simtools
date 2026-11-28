@@ -104,6 +104,31 @@ describe('airportWindView', () => {
     const loading = airportWindView({ status: 'loading' }, [rw17])
     expect(loading.runways[0]?.labels.some((l) => l.best)).toBe(false)
   })
+
+  it("extends the landing runway's centreline and puts the aircraft on the ring", () => {
+    const airport = { ident: 'ENBR', lat: rw17.latitude, lon: rw17.longitude }
+    const aircraft = { lat: rw17.latitude + 0.3, lon: rw17.longitude, headingDeg: 172 }
+    const view = airportWindView({ status: 'ready', metar: metar() }, [rw17], undefined, {
+      airport,
+      aircraft,
+    })
+    expect(view.approaches.map((a) => a.kind)).toEqual(['best'])
+    expect(view.marker).toMatchObject({ kind: 'aircraft', headingDeg: 172 })
+    expect(view.marker?.bearingDeg).toBeCloseTo(0, 0)
+    expect(view.upDeg).toBe(0)
+  })
+
+  it('turns to the aircraft heading when heading up', () => {
+    const aircraft = { lat: 60, lon: 5, headingDeg: 172 }
+    const view = airportWindView({ status: 'loading' }, [rw17], undefined, {
+      aircraft,
+      headingUp: true,
+    })
+    expect(view.upDeg).toBe(172)
+    expect(
+      airportWindView({ status: 'loading' }, [rw17], undefined, { headingUp: true }).upDeg,
+    ).toBe(0)
+  })
 })
 
 describe('windStrength', () => {

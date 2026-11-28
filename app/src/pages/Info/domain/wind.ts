@@ -1,7 +1,16 @@
 // The wind card: the wind at the aircraft (with its heading) or at an airport (from its
-// METAR, with its runways), as a north-up graphic with the wind's figures at the arrow. Every bearing is true (the sim's wind and METARs are true).
-// Pure.
+// METAR, with its runways), as a north-up (or heading-up) graphic with the wind's figures
+// at the arrow, and the other one (airport or aircraft) on the ring. Every bearing is true
+// (the sim's wind and METARs are true). Pure.
 
+import {
+  type AircraftFix,
+  type ApproachLine,
+  aircraftMarker,
+  approachLines,
+  type MarkedAirport,
+  type RingMarker,
+} from './ringMarkers'
 import { type RunwayInput, type RunwayShape, runwayDiagram } from './runwayDiagram'
 
 /** Below this the wind is calm: no direction to show. */
@@ -9,6 +18,12 @@ export const CALM_KT = 1
 
 /** The runway diagram's radius in the graphic (px, unscaled): most of the compass ring. */
 export const RUNWAY_DIAGRAM_R = 66
+
+/** The compass ring's radius in the graphic (px, unscaled). */
+export const COMPASS_RING_R = 92
+
+/** A runway's extended centreline starts this far past its threshold: clear of its number. */
+const APPROACH_GAP_PX = 24
 
 /** The wind's figures, at the arrow's tail (or under the compass without an arrow). */
 export interface WindText {
@@ -35,6 +50,13 @@ export interface WindView {
    * compass and the wind turn with it, the aircraft points up).
    */
   upDeg: number
+  /**
+   * On the ring: the picked airport (seen from the aircraft), or the aircraft (seen from
+   * the airport); none when unknown or too close to point at.
+   */
+  marker: RingMarker | undefined
+  /** The extended centrelines of the runway ends to land on, out to the ring. */
+  approaches: readonly ApproachLine[]
 }
 
 /** The wind is drawn at full strength from this speed on. */
@@ -63,6 +85,8 @@ export function windView(
   headingDeg: number | undefined,
   /** Draw the aircraft's heading at the top instead of north (needs a heading). */
   headingUp = false,
+  /** The picked airport on the ring. */
+  marker?: RingMarker,
 ): WindView {
   const heading = known(headingDeg) ? headingDeg : undefined
   const still = {
@@ -70,6 +94,8 @@ export function windView(
     headingDeg: heading,
     upDeg: headingUp && heading !== undefined ? heading : 0,
     runways: [],
+    marker,
+    approaches: [],
     arrowDeg: undefined,
     strength: undefined,
   }
@@ -108,22 +134,41 @@ export function metarKnots(speed: number, units: number): number {
   return speed * (KT_PER_UNIT[units] ?? 1)
 }
 
+/** Where the aircraft is, for an airport's wind: on its ring, and heading up. */
+export interface AirportViewOptions {
+  /** The airport shown, with its position (for the aircraft marker). */
+  airport?: MarkedAirport | null
+  aircraft?: AircraftFix
+  /** The aircraft's heading at the top, as the runways look from the cockpit (else north up). */
+  headingUp?: boolean
+}
+
 /**
  * The wind at an airport, from its METAR, with its runways (the one to land on, with the
- * most headwind, marked).
+ * most headwind, marked, its centreline extended to the ring), and the aircraft on the
+ * ring on the side it is.
  */
 export function airportWindView(
   state: MetarState,
   runways: readonly RunwayInput[] = [],
   /** The flight plan's runway end at this airport ('19R'). */
   plannedRunway?: string,
+  options: AirportViewOptions = {},
 ): WindView {
+  const { airport = null, aircraft, headingUp = false } = options
+  const heading = aircraft && known(aircraft.headingDeg) ? aircraft.headingDeg : undefined
+  // As on a chart, north up; or heading up, as seen from the aircraft.
+  const upDeg = headingUp && heading !== undefined ? heading : 0
+  const diagram = (wind?: { fromDeg: number; kt: number }) => {
+    const shapes = runwayDiagram(runways, RUNWAY_DIAGRAM_R, wind, plannedRunway, upDeg)
+    return { runways: shapes, approaches: approachLines(shapes, APPROACH_GAP_PX, COMPASS_RING_R) }
+  }
   const still = {
     center: 'airport' as const,
     headingDeg: undefined,
-    // An airport's runways are drawn north up, as on a chart.
-    upDeg: 0,
-    runways: runwayDiagram(runways, RUNWAY_DIAGRAM_R, undefined, plannedRunway),
+    upDeg,
+    marker: aircraft ? aircraftMarker(aircraft, airport) : undefined,
+    ...diagram(),
     arrowDeg: undefined,
     strength: undefined,
   }
@@ -146,7 +191,7 @@ export function airportWindView(
     arrowDeg: direction,
     strength: windStrength(kt),
     windText: { direction: bearingText(direction), speed },
-    runways: runwayDiagram(runways, RUNWAY_DIAGRAM_R, { fromDeg: direction, kt }, plannedRunway),
+    ...diagram({ fromDeg: direction, kt }),
   }
 }
 

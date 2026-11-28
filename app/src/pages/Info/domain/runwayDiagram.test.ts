@@ -90,3 +90,14 @@ describe('runwayDiagram', () => {
     expect(runwayDiagram([], 40)).toEqual([])
   })
 })
+
+describe('runwayDiagram heading up', () => {
+  it('turns the runways so the given bearing points up', () => {
+    // Flying 172° toward Bergen's 17: runway 17 then lies straight up the screen.
+    const [rw] = runwayDiagram([ENBR_17], 40, undefined, undefined, 172)
+    if (!rw) throw new Error('no runway')
+    expect(rw.x1).toBeCloseTo(0)
+    expect(rw.y1).toBeCloseTo(40)
+    expect(rw.y2).toBeCloseTo(-40)
+  })
+})

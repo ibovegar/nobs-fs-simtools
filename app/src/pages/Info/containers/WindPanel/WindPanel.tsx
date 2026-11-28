@@ -3,10 +3,12 @@ import { WindCard } from '~/pages/Info/components'
 import {
   type AirportSuggestion,
   airportLabel,
+  airportMarker,
   airportQuery,
   airportWindView,
 } from '~/pages/Info/domain'
 import {
+  useAircraftFix,
   useAirportRunways,
   useAirportSearch,
   useAirportWind,
@@ -32,13 +34,22 @@ export function WindPanel() {
   const [query, setQuery] = useState('')
   const keyboardCapture = useSimKeyboardCapture()
 
-  const aircraftWind = useWind(source === 'aircraft', headingUp)
   const shownAirport = source === 'airport' ? airport : null
+  // Where the aircraft is: for the airport on the aircraft's ring, or the aircraft on the
+  // airport's (read only when there is an airport to point at).
+  const aircraft = useAircraftFix(airport !== null)
+  const aircraftWind = useWind(source === 'aircraft', headingUp, airportMarker(aircraft, airport))
   const metar = useAirportWind(shownAirport)
   const runways = useAirportRunways(shownAirport)
   const { suggestions, status } = useAirportSearch(picking, query, airport)
 
-  const view = shownAirport ? airportWindView(metar, runways, shownAirport.runway) : aircraftWind
+  const view = shownAirport
+    ? airportWindView(metar, runways, shownAirport.runway, {
+        airport: shownAirport,
+        aircraft,
+        headingUp,
+      })
+    : aircraftWind
   // The last airport stays in the field while the aircraft's wind is shown.
   const rememberedAirport = airport ? airportLabel(airport) : ''
 

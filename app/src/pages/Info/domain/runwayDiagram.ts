@@ -58,7 +58,7 @@ function endNames(runway: RunwayInput): [string, string] {
 
 /**
  * The runways, fitted into `radiusPx` around the compass centre: positions and lengths to
- * scale (north up), the layout centred. `wind` (where it blows from, knots) marks the
+ * scale (north up, or turned to upDeg), the layout centred. `wind` (where it blows from, knots) marks the
  * runway end with the most headwind; none when calm or unknown. `planned` marks the flight
  * plan's runway.
  */
@@ -68,6 +68,8 @@ export function runwayDiagram(
   wind?: { fromDeg: number; kt: number },
   /** The flight plan's runway end ('19R'), marked. */
   planned?: string,
+  /** The bearing drawn at the top: 0 north up, the aircraft's heading when heading up. */
+  upDeg = 0,
 ): RunwayShape[] {
   if (runways.length === 0) return []
   const lat0 = runways[0]?.latitude ?? 0
@@ -100,10 +102,14 @@ export function runwayDiagram(
     for (const p of [x.start, x.end]) extent = Math.max(extent, Math.hypot(p.e - midE, p.n - midN))
   }
   const scale = extent > 0 ? radiusPx / extent : 0
-  const px = (p: { e: number; n: number }) => ({
-    x: (p.e - midE) * scale,
-    y: -(p.n - midN) * scale,
-  })
+  // Turned so the bearing upDeg points up (labels are placed after, so text stays upright).
+  const cosUp = Math.cos(upDeg * RAD)
+  const sinUp = Math.sin(upDeg * RAD)
+  const px = (p: { e: number; n: number }) => {
+    const e = (p.e - midE) * scale
+    const n = (p.n - midN) * scale
+    return { x: e * cosUp - n * sinUp, y: -(n * cosUp + e * sinUp) }
+  }
 
   // The ends with the most headwind (parallel runways share it): landing on heading h, the
   // headwind is the wind's component along it.
