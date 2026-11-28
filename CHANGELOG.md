@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-28
+
+### Added
+
+- **Info › Wind**: the airport's runways can be shown heading up, turned as seen from the
+  cockpit, with your aircraft on the ring on the side it's approaching from and its
+  distance. The runway to land on has its centreline extended, to show where to line up.
+- **Info › Wind**: with the aircraft's wind shown, the picked airport is marked on the ring
+  with its distance, pointing the way to fly.
+
 ### Fixed
 
 - **Info › Wind**: picking an airport could leave the sim's controls captured by SimTools
