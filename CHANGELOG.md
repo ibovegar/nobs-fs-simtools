@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-28
+
 ### Added
 
 - **Info › Wind**: the distance to the picked airport under the graph, both over the
